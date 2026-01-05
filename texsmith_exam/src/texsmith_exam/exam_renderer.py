@@ -8,6 +8,7 @@ from bs4.element import NavigableString, Tag
 from slugify import slugify
 
 from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
+from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
 from texsmith.core.context import RenderContext
 from texsmith.core.rules import RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
@@ -119,6 +120,61 @@ def _solution_env(lines_value: str | None) -> tuple[str, str]:
         begin_env = "\\begin{solution}\n"
         end_env = "\\end{solution}\n"
     return begin_env, end_env
+
+
+@renders(
+    "ul",
+    phase=RenderPhase.INLINE,
+    priority=5,
+    name="exam_checkboxes",
+    after_children=True,
+    nestable=False,
+)
+def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
+    """Render task lists as exam.cls checkboxes."""
+    if element.name != "ul":
+        return
+
+    _prepare_rich_text_content(element, context)
+
+    items: list[tuple[bool, str]] = []
+    has_checkbox = False
+
+    for li in element.find_all("li", recursive=False):
+        if li.find(["ul", "ol"]):
+            return
+
+        checkbox_input = li.find("input", attrs={"type": "checkbox"})
+        if checkbox_input is not None:
+            is_checked = checkbox_input.has_attr("checked")
+            checkbox_input.extract()
+            text = li.get_text(strip=False).strip()
+            items.append((is_checked, text))
+            has_checkbox = True
+            continue
+
+        text = li.get_text(strip=False).strip()
+        if text.startswith("[ ]"):
+            items.append((False, text[3:].strip()))
+            has_checkbox = True
+        elif text.startswith("[x]") or text.startswith("[X]"):
+            items.append((True, text[3:].strip()))
+            has_checkbox = True
+        else:
+            items.append((False, text))
+
+    if not has_checkbox:
+        return
+
+    lines = ["\\begin{checkboxes}"]
+    for checked, text in items:
+        if checked:
+            lines.append(f"\\CorrectChoice {text}")
+        else:
+            lines.append(f"\\choice {text}")
+    lines.append("\\end{checkboxes}")
+
+    element.replace_with(mark_processed(NavigableString("\n".join(lines) + "\n")))
 
 
 @renders(
@@ -282,6 +338,7 @@ def register(renderer: object) -> None:
     """Entry point for texsmith.renderers to register exam handlers."""
     register_fn = getattr(renderer, "register", None)
     if callable(register_fn):
+        register_fn(render_exam_checkboxes)
         register_fn(render_solution_admonition)
         register_fn(render_exam_headings)
         register_fn(close_open_parts)

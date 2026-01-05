@@ -141,3 +141,28 @@ L'expression est vraie si les variables `x`, `x` et `y` sont strictement dans un
     ```c
     x > y && y > z
     ```
+
+## Choix multiples { points=2 }
+
+Pour chaque question, une seule des quatre réponses proposées est correcte. Indiquez la lettre correspondant à la bonne réponse.
+
+### _
+
+Quel est le résultat de l'expression C suivante si `i` vaut `5` et `j` vaut `2` ?
+
+```c
+i / j * 2 + i % j
+```
+
+- [x] 6
+- [ ] 7
+- [ ] 8
+- [ ] 9
+
+### _
+
+Combien de pattes a un mille-pattes ?
+
+- [ ] 1000
+- [ ] 5000
+- [x] Ça dépend des espèces
