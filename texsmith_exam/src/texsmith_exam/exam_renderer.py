@@ -9,6 +9,7 @@ from slugify import slugify
 
 from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
 from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
+from texsmith.adapters.handlers.code import _extract_language_hint
 from texsmith.core.context import RenderContext
 from texsmith.core.rules import RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
@@ -120,6 +121,74 @@ def _solution_env(lines_value: str | None) -> tuple[str, str]:
         begin_env = "\\begin{solution}\n"
         end_env = "\\end{solution}\n"
     return begin_env, end_env
+
+
+@renders(
+    "pre",
+    phase=RenderPhase.PRE,
+    priority=10,
+    name="exam_strip_fenced_code",
+    before=("preformatted_code", "pre_code_blocks"),
+)
+def strip_fenced_code_in_pre(element: Tag, _context: RenderContext) -> None:
+    """Strip ``` fences from preformatted code blocks when present."""
+    code_element = element.find("code")
+    if code_element is None:
+        return
+
+    code_text = code_element.get_text(strip=False)
+    if "```" not in code_text:
+        return
+
+    language, payload = _extract_language_hint(code_text)
+    if payload == code_text:
+        return
+
+    if language:
+        classes = code_element.get("class") or []
+        language_class = f"language-{language}"
+        if language_class not in classes:
+            classes.append(language_class)
+            code_element["class"] = classes
+
+    code_element.clear()
+    code_element.append(payload)
+
+
+@renders(
+    "div",
+    phase=RenderPhase.PRE,
+    priority=10,
+    name="exam_strip_fenced_code_blocks",
+    before=("code_blocks",),
+)
+def strip_fenced_code_in_blocks(element: Tag, _context: RenderContext) -> None:
+    """Strip ``` fences from highlighted code blocks before rendering."""
+    classes = element.get("class") or []
+    if "highlight" not in classes and "codehilite" not in classes:
+        return
+
+    code_element = element.find("code")
+    if code_element is None:
+        return
+
+    code_text = code_element.get_text(strip=False)
+    if "```" not in code_text:
+        return
+
+    language, payload = _extract_language_hint(code_text)
+    if payload == code_text:
+        return
+
+    if language:
+        code_classes = code_element.get("class") or []
+        language_class = f"language-{language}"
+        if language_class not in code_classes:
+            code_classes.append(language_class)
+            code_element["class"] = code_classes
+
+    code_element.clear()
+    code_element.append(payload)
 
 
 @renders(
@@ -338,6 +407,8 @@ def register(renderer: object) -> None:
     """Entry point for texsmith.renderers to register exam handlers."""
     register_fn = getattr(renderer, "register", None)
     if callable(register_fn):
+        register_fn(strip_fenced_code_in_blocks)
+        register_fn(strip_fenced_code_in_pre)
         register_fn(render_exam_checkboxes)
         register_fn(render_solution_admonition)
         register_fn(render_exam_headings)

@@ -102,6 +102,13 @@ normaliser = "markdown_list"
 sources = ["exam.rules", "rules"]
 description = "List of rules to display on the cover page."
 
+[latex.template.attributes.solution]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.solution", "solution"]
+description = "Enable answers/solutions mode (printanswers)."
+
 [latex.template.attributes.language]
 default = "french"
 type = "string"

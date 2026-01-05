@@ -4,6 +4,9 @@
 \BLOCK{ set author_value = author|default('')|trim }
 \BLOCK{ set date_value = date|default('')|trim }
 \documentclass[a4paper,twoside,addpoints]{exam}
+\BLOCK{ if solution }
+\printanswers
+\BLOCK{ endif }
 
 \usepackage[svgnames,dvipsnames,x11names]{xcolor}
 \VAR{extra_packages}
