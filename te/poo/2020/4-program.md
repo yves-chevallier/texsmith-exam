@@ -57,7 +57,7 @@ Implémentez les méthodes suivantes :
 
 Créer quelques capteurs et quelques systèmes de monitoring en montrant la manière dont ils peuvent être interconnectés.
 
-!!! solution
+!!! solution { lines=fill }
 
     Voici un exemple de programme principal `main.cpp` :
 
@@ -72,3 +72,13 @@ Créer quelques capteurs et quelques systèmes de monitoring en montrant la mani
     $ g++ -std=c++11 -Wall main.cpp -omain.o
     $ g++ -std=c++11 -Wall main.o simulator.o -osimulator
     ```
+
+/// latex
+\ifprintanswers
+\else
+\clearpage
+\fillwithdottedlines{\stretch{1}}
+\clearpage
+\fillwithdottedlines{\stretch{1}}
+\fi
+///
