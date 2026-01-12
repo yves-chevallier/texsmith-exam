@@ -1,0 +1,20 @@
+title: Travail Écrit
+subtitle: Programmation Orientée Objet
+author: Prof. Yves Chevallier
+date: 2020-01-12
+exam:
+  type: TE
+  department: TIN
+  school: HEIG-VD
+  course: ProgOO
+  rules:
+    - Écrire votre **nom** et votre **prénom** lisiblement sur chaque page.
+    - Écrire lisiblement, au stylo ou au crayon à papier gras.
+    - Répondre aux questions dans les zones appropriées.
+    - Relire toutes vos réponses avant de rendre votre travail.
+    - Vérifier que vous n'avez pas oublié de compléter une page de l'examen.
+    - Rendre toutes les feuilles, une feuille par problème.
+    - Rendre toutes les feuilles de brouillon ainsi que la page de couverture.
+    - Les réponses données sur les feuilles de brouillon ne sont ni acceptées ni corrigées.
+    - Aucun moyen de communication autorisé.
+    - Toutes les réponses concernent le langage C++ et son standard 2020.
