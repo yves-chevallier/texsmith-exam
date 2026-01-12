@@ -8,6 +8,7 @@ from bs4.element import NavigableString, Tag
 from slugify import slugify
 
 from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
+from texsmith.adapters.handlers.admonitions import gather_classes
 from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
 from texsmith.adapters.handlers.code import _is_ascii_art, _resolve_code_engine
 from texsmith.core.context import RenderContext
@@ -109,14 +110,27 @@ _EMPTY_TITLE_PATTERN = re.compile(r"^[_\-\u2010\u2011\u2012\u2013\u2014\u2212]+$
 _SOLUTION_PATTERN = re.compile(
     r"^\s*!!!\s+solution(?:\s*\\?\{(?P<attrs>[^}]*)\\?\})?\s*$", re.IGNORECASE
 )
-_LINES_PATTERN = re.compile(r"\blines\s*=\s*(\d+)\b")
+_LINES_PATTERN = re.compile(r"\blines\s*=\s*([^\s,}]+)\b")
+_GRID_PATTERN = re.compile(r"\bgrid\s*=\s*([^\s,}]+)\b")
+_ATTRS_BLOCK_PATTERN = re.compile(r"\{(?P<attrs>[^}]*)\}\s*$")
 
 
-def _solution_env(lines_value: str | None) -> tuple[str, str]:
+def _solution_env(
+    lines_value: str | None, grid_value: str | None
+) -> tuple[str, str]:
     if lines_value:
-        begin_env = (
-            f"\\begin{{solutionordottedlines}}[{lines_value}\\dottedlinefillheight]\n"
-        )
+        lines_value = lines_value.strip()
+    if grid_value:
+        grid_value = grid_value.strip()
+    if grid_value and grid_value.isdigit():
+        grid_value = f"{grid_value}\\linefillheight"
+    if lines_value and lines_value.isdigit():
+        lines_value = f"{lines_value}\\dottedlinefillheight"
+    if grid_value:
+        begin_env = f"\\begin{{solutionorgrid}}[{grid_value}]\n"
+        end_env = "\\end{solutionorgrid}\n"
+    elif lines_value:
+        begin_env = f"\\begin{{solutionordottedlines}}[{lines_value}]\n"
         end_env = "\\end{solutionordottedlines}\n"
     else:
         begin_env = "\\begin{solution}\n"
@@ -347,12 +361,16 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
 
     attrs = (match.group("attrs") or "").replace("\\", "")
     lines_value = None
+    grid_value = None
     if attrs:
         lines_match = _LINES_PATTERN.search(attrs)
         if lines_match:
             lines_value = lines_match.group(1)
+        grid_match = _GRID_PATTERN.search(attrs)
+        if grid_match:
+            grid_value = grid_match.group(1)
 
-    begin_env, end_env = _solution_env(lines_value)
+    begin_env, end_env = _solution_env(lines_value, grid_value)
 
     content_nodes: list[object] = []
     cursor = element.next_sibling
@@ -381,6 +399,58 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
         begin_node.insert_after(NavigableString(end_env))
     else:
         last_node.insert_after(NavigableString(end_env))
+
+
+@renders(
+    "texsmith-callout",
+    phase=RenderPhase.POST,
+    priority=130,
+    name="exam_solution_callouts",
+    after_children=True,
+    before=("finalize_callouts",),
+    nestable=False,
+    auto_mark=False,
+)
+def render_solution_callouts(element: Tag, context: RenderContext) -> None:
+    """Convert solution callouts into exam.cls solution environments."""
+    classes = gather_classes(element.get("class"))
+    title = element.attrs.pop("data-callout-title", "")
+    is_solution = "solution" in classes or title.strip().lower() == "solution"
+    if not is_solution:
+        return
+
+    element.attrs["data-callout-skip"] = "true"
+    attrs = None
+    if title:
+        attrs_match = _ATTRS_BLOCK_PATTERN.search(title)
+        if attrs_match:
+            attrs = attrs_match.group("attrs")
+            title = title[: attrs_match.start()].strip()
+
+    if attrs is None:
+        attrs = ""
+
+    attr_values: list[str] = []
+    for key in ("lines", "grid"):
+        if key in element.attrs:
+            attr_values.append(f"{key}={element.attrs[key]}")
+    if attr_values:
+        attrs = ",".join([attrs, *attr_values]).strip(",")
+
+    lines_value = None
+    grid_value = None
+    if attrs:
+        lines_match = _LINES_PATTERN.search(attrs)
+        if lines_match:
+            lines_value = lines_match.group(1)
+        grid_match = _GRID_PATTERN.search(attrs)
+        if grid_match:
+            grid_value = grid_match.group(1)
+
+    begin_env, end_env = _solution_env(lines_value, grid_value)
+    content = element.get_text(strip=False).strip()
+    payload = f"{begin_env}{content}\n{end_env}"
+    element.replace_with(mark_processed(NavigableString(payload)))
 
 
 @renders(
@@ -498,5 +568,6 @@ def register(renderer: object) -> None:
         register_fn(strip_fenced_code_in_pre)
         register_fn(render_exam_checkboxes)
         register_fn(render_solution_admonition)
+        register_fn(render_solution_callouts)
         register_fn(render_exam_headings)
         register_fn(close_open_parts)
