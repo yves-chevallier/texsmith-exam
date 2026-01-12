@@ -95,9 +95,18 @@
 \renewcommand{\questionshook}{%
   % Only reduce spacing after question labels, keep parts/subparts defaults.
   \setlength{\labelsep}{0.4em}%
-  \settowidth{\leftmargin}{0}%
+  \settowidth{\leftmargin}{10.\hskip\labelsep}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
   \setlength{\itemindent}{0pt}%
+}
+\renewcommand{\choiceshook}{%
+  % Reduce the extra 2.5em indent that exam.cls adds for choices.
+  \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
+  \labelwidth\leftmargin\advance\labelwidth-\labelsep
+}
+\renewcommand{\checkboxeshook}{%
+  \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
+  \labelwidth\leftmargin\advance\labelwidth-\labelsep
 }
 
 \newtcolorbox{examrules}[1][]{%
