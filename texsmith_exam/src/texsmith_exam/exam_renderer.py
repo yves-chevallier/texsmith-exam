@@ -74,9 +74,9 @@ def _is_empty_title(text: str) -> bool:
     normalized = text.strip()
     if not normalized:
         return True
-    if normalized in {"_", "\\_"}:
-        return True
-    return normalized.replace("\\", "") == "_"
+    cleaned = normalized.replace("\\", "").replace("\u00a0", "")
+    compact = "".join(ch for ch in cleaned if not ch.isspace())
+    return _EMPTY_TITLE_PATTERN.fullmatch(compact) is not None
 
 
 def _heading_latex(
@@ -105,6 +105,7 @@ def _heading_latex(
     raise ValueError(f"Unhandled heading level {level}")
 
 
+_EMPTY_TITLE_PATTERN = re.compile(r"^[_\-\u2010\u2011\u2012\u2013\u2014\u2212]+$")
 _SOLUTION_PATTERN = re.compile(
     r"^\s*!!!\s+solution(?:\s*\\?\{(?P<attrs>[^}]*)\\?\})?\s*$", re.IGNORECASE
 )
@@ -414,6 +415,11 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     )
     plain_text = element.get_text(strip=True)
     empty_title = _is_empty_title(plain_text)
+    if not empty_title:
+        rendered_clean = text.replace("\\", "").strip()
+        if _EMPTY_TITLE_PATTERN.fullmatch(rendered_clean) is not None:
+            empty_title = True
+            text = ""
 
     level = int(element.name[1:])
     base_level = context.runtime.get("base_level", 0)

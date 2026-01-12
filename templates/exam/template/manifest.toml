@@ -28,6 +28,7 @@ fragments = [
     "ts-typesetting",
     "ts-fonts",
     "ts-extra",
+    "ts-callouts",
     "ts-code",
 ]
 

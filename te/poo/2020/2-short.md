@@ -1,3 +1,7 @@
+/// latex
+\clearpage
+///
+
 ## Réponses courtes { points=10 }
 
 ### -

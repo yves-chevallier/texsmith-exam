@@ -44,6 +44,8 @@
 }
 \makeatother
 
+\qformat{\textbf{Probl\`eme \thequestion : \thequestiontitle}\hfill(\thepoints)}
+
 \newtcolorbox{examrules}[1][]{%
   enhanced jigsaw,
   sharp corners,
@@ -139,7 +141,7 @@
   \BLOCK{ endif }
 \end{coverpages}
 
-\BLOCK{ set has_questions = ("\\question" in mainmatter) or ("\\titledquestion" in mainmatter) }
+\BLOCK{ set has_questions = ("\\question" in mainmatter) or ("\\titledquestion" in mainmatter) or ("\\input" in mainmatter) }
 \BLOCK{ if has_questions }
 \begin{questions}
 \VAR{mainmatter}

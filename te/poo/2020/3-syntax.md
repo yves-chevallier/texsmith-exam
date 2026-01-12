@@ -1,3 +1,7 @@
+/// latex
+\clearpage
+///
+
 # Syntaxe { points=10 }
 
 Deux points par bonne réponse.

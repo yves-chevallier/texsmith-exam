@@ -1,3 +1,7 @@
+/// latex
+\clearpage
+///
+
 # Programmation { points=20 }
 
 L'objectif est de simuler un dispositif de sécurité pour un parking composés de capteurs et d'organes de lecture de ces capteurs. Le patron de conception observateur sera utilisé.
