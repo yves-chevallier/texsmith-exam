@@ -92,6 +92,13 @@
 \setlength{\gridsize}{5mm}
 
 \qformat{\vbox{\hbox to \hsize{\textbf{Probl\`eme \thequestion : \thequestiontitle}\hfill(\thepoints)}\vspace{0.8em}}}
+\renewcommand{\questionshook}{%
+  % Only reduce spacing after question labels, keep parts/subparts defaults.
+  \setlength{\labelsep}{0.4em}%
+  \settowidth{\leftmargin}{0}%
+  \labelwidth\leftmargin\advance\labelwidth-\labelsep
+  \setlength{\itemindent}{0pt}%
+}
 
 \newtcolorbox{examrules}[1][]{%
   enhanced jigsaw,
