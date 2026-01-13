@@ -195,7 +195,10 @@ def _solution_env(
         end_env = "\\leavevmode\n\\end{solutionorgrid}\n"
         return begin_env, end_env
     if not lines_value:
-        return "\\begin{solution}\n", "\\leavevmode\n\\end{solution}\n"
+        return (
+            "\\ifprintanswers\n\\begin{solution}\n",
+            "\\leavevmode\n\\end{solution}\n\\fi\n",
+        )
 
     if lines_value.lower() == "fill":
         if text_style == "lines":
@@ -524,6 +527,9 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
         if isinstance(cursor, Tag):
             if cursor.name and cursor.name.lower() in {"h1", "h2", "h3", "h4", "h5", "h6", "hr"}:
                 break
+            cursor_classes = gather_classes(cursor.get("class"))
+            if "latex-raw" in cursor_classes or cursor.get("data-texsmith-latex") == "true":
+                break
             if cursor.name == "p":
                 candidate = cursor.get_text(strip=True)
                 if _SOLUTION_PATTERN.match(candidate):
@@ -561,10 +567,15 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
     """Convert solution callouts into exam.cls solution environments."""
     classes = gather_classes(element.get("class"))
     title = element.attrs.pop("data-callout-title", "")
-    is_solution = "solution" in classes or title.strip().lower() == "solution"
+    is_solution = (
+        "solution" in classes
+        or "texsmith-solution" in classes
+        or title.strip().lower() == "solution"
+    )
     if not is_solution:
         return
 
+    element.name = "div"
     element.attrs["data-callout-skip"] = "true"
     attrs = None
     if title:
@@ -601,6 +612,9 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
     title_node = element.find("p", class_="admonition-title")
     if title_node is not None:
         title_node.decompose()
+    title_node = element.find("p", class_="texsmith-solution-title")
+    if title_node is not None:
+        title_node.decompose()
     content_nodes = list(body.contents) if body is not None else list(element.contents)
     begin_node = mark_processed(NavigableString(begin_env))
     end_node = mark_processed(NavigableString(end_env))
@@ -613,6 +627,22 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
     else:
         element.replace_with(begin_node)
         begin_node.insert_after(end_node)
+
+
+@renders(
+    "div",
+    phase=RenderPhase.POST,
+    priority=45,
+    name="exam_solution_div_admonitions",
+    nestable=True,
+    auto_mark=False,
+)
+def render_solution_div_admonitions(element: Tag, context: RenderContext) -> None:
+    """Convert solution divs before generic callout handling."""
+    classes = gather_classes(element.get("class"))
+    if "texsmith-solution" not in classes:
+        return
+    render_solution_callouts(element, context)
 
 
 @renders(
@@ -732,6 +762,7 @@ def register(renderer: object) -> None:
         register_fn(render_exam_image_paragraphs)
         register_fn(render_exam_images)
         register_fn(render_solution_admonition)
+        register_fn(render_solution_div_admonitions)
         register_fn(render_solution_callouts)
         register_fn(render_exam_headings)
         register_fn(close_open_parts)

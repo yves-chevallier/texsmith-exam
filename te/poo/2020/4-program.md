@@ -22,7 +22,7 @@ Chaque capteur possède un identifiant unique (int) définit à la construction.
 
 Écrire le diagramme de classe UML de ce système.
 
-!!! solution { grid=10cm }
+!!! solution
 
     Se compose de deux classes. Un capteur est une collection de moniteurs. Les moniteurs ne sont pas détruits lors de la destruction d'un capteur. Il s'agit donc d'une aggrégation.
 
@@ -57,7 +57,7 @@ Implémentez les méthodes suivantes :
 
 Créer quelques capteurs et quelques systèmes de monitoring en montrant la manière dont ils peuvent être interconnectés.
 
-!!! solution { lines=fill }
+!!! solution
 
     Voici un exemple de programme principal `main.cpp` :
 

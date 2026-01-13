@@ -21,6 +21,7 @@
 \usepackage[normalem]{ulem}
 \usepackage{lastpage}
 \usepackage{parskip}
+\setlength{\parskip}{1.2em}
 \usepackage{heiglogo}
 
 \makeatletter
@@ -100,12 +101,19 @@
   \settowidth{\leftmargin}{2.\hskip\labelsep}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
   \setlength{\itemindent}{0pt}%
+  \setlength{\parsep}{0.4em}%
+}
+\renewcommand{\partshook}{%
+  \setlength{\parsep}{0.4em}%
+}
+\renewcommand{\subpartshook}{%
+  \setlength{\parsep}{0.4em}%
 }
 \renewcommand{\choiceshook}{%
   % Reduce the extra 2.5em indent that exam.cls adds for choices.
   \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
-  \setlength{\topsep}{0.8em}%
+  \setlength{\topsep}{0.4em}%
   \setlength{\partopsep}{0pt}%
   \setlength{\itemsep}{0.2em}%
   \setlength{\parsep}{0pt}%
@@ -113,7 +121,7 @@
 \renewcommand{\checkboxeshook}{%
   \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
-  \setlength{\topsep}{0.8em}%
+  \setlength{\topsep}{0.4em}%
   \setlength{\partopsep}{0pt}%
   \setlength{\itemsep}{0.2em}%
   \setlength{\parsep}{0pt}%

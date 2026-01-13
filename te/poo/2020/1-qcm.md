@@ -48,6 +48,8 @@ class Foo {
 - [ ] `bar` existe obligatoirement dans le heap.
 - [ ] Le signe signifie que l'objet `bar` devra être détruit par la classe `Foo` (RAII).
 
+---
+
 ## -
 
 Quel lien y-a-t-il entre la classe `Foo` et la classe `Bar` ?
@@ -126,3 +128,5 @@ Qu'est-ce qu'un Singleton
 - [x] Une classe ne pouvant posséder qu'une seule instance.
 - [ ] Un type de polymorphisme dynamique.
 - [ ] Une structure de donnée de taille unitaire.
+
+---

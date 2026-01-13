@@ -75,8 +75,8 @@ class _SolutionBlockPreprocessor(Preprocessor):
                 attrs_block = f'{attrs_block} lines="{lines_value}"'
             if grid_value:
                 attrs_block = f'{attrs_block} grid="{grid_value}"'
-            output.append(f'<div class="admonition solution"{attrs_block}>')
-            output.append('<p class="admonition-title">Solution</p>')
+            output.append(f'<div class="texsmith-solution"{attrs_block}>')
+            output.append('<p class="texsmith-solution-title">Solution</p>')
             output.append("")
             output.extend(content)
             output.append("")
