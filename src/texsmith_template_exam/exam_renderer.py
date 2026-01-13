@@ -818,6 +818,7 @@ def register(renderer: object) -> None:
         register_fn(render_exam_image_paragraphs)
         register_fn(render_exam_images)
         register_fn(render_solution_admonition)
+        register_fn(promote_solution_admonitions)
         register_fn(render_solution_div_admonitions)
         register_fn(render_solution_callouts)
         register_fn(render_exam_headings)
