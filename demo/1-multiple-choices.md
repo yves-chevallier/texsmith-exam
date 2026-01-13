@@ -43,3 +43,5 @@ What is the correct way of counting the vowels on stdin in Perl?
 - [x] `perl -ne '$count += () = /[aeiou]/gi; END { print $count }'`
 - [ ] `perl -pe 's/[^aeiou]//gi; print length'`
 - [ ] `perl -e 'while (<>) { $count += length($_) } print $count'`
+
+---

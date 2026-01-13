@@ -741,8 +741,8 @@ wheels = [
 
 [[package]]
 name = "texsmith"
-version = "0.2.1"
-source = { registry = "https://pypi.org/simple" }
+version = "0.2.2.dev9"
+source = { git = "https://github.com/yves-chevallier/texsmith.git#b83b8ea7d2411487e57c7234dfabde43ab37a8d0" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "cairosvg" },
@@ -767,10 +767,6 @@ dependencies = [
     { name = "rich" },
     { name = "typer" },
     { name = "unicodeblocks" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/67/6f/fad85a8a2f8c3e5ba5fb8fb74ee589f5e0421ca2768e5b1c51813e72f774/texsmith-0.2.1.tar.gz", hash = "sha256:7c6ea99f548eca0854d2b3ba0e1c54cd6c440cc4cbb7e401c5670869ee0dfd65", size = 3395638, upload-time = "2025-12-28T19:26:32.724Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/b6/fea8c082035f20d4a6e845635585794e7d14dec40859e942cffd9c354450/texsmith-0.2.1-py3-none-any.whl", hash = "sha256:18fa4bd09153fb58c1e69ff5067260e7754c4ac96f505fd7dbe6aaa4485da947", size = 514049, upload-time = "2025-12-28T19:26:30.804Z" },
 ]
 
 [[package]]
@@ -797,12 +793,20 @@ dev = [
     { name = "texsmith-exam" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "texsmith" },
+]
+
 [package.metadata]
 requires-dist = [
-    { name = "texsmith", specifier = ">=0.2.1,<1.0" },
+    { name = "texsmith", git = "https://github.com/yves-chevallier/texsmith.git" },
     { name = "texsmith-exam", marker = "extra == 'dev'", editable = "texsmith_exam" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "texsmith", git = "https://github.com/yves-chevallier/texsmith.git" }]
 
 [[package]]
 name = "text-unidecode"

@@ -11,6 +11,7 @@
   \BLOCK{ set label_page_of = "Page \\thepage\\ sur \\pageref{LastPage}" }
   \BLOCK{ set label_end_exam = "Fin de l'examen" }
   \BLOCK{ set label_name = "Nom, Pr\\'enom" }
+  \BLOCK{ set label_duration = "Dur\\'ee" }
 \BLOCK{ elif lang in ['italian', 'it', 'italiano'] }
   \BLOCK{ set label_problem = "Problema" }
   \BLOCK{ set label_rules = "Istruzioni" }
@@ -18,6 +19,7 @@
   \BLOCK{ set label_page_of = "Pagina \\thepage\\ di \\pageref{LastPage}" }
   \BLOCK{ set label_end_exam = "Fine dell'esame" }
   \BLOCK{ set label_name = "Cognome, Nome" }
+  \BLOCK{ set label_duration = "Durata" }
 \BLOCK{ elif lang in ['german', 'de', 'deutsch'] }
   \BLOCK{ set label_problem = "Aufgabe" }
   \BLOCK{ set label_rules = "Hinweise" }
@@ -25,6 +27,7 @@
   \BLOCK{ set label_page_of = "Seite \\thepage\\ von \\pageref{LastPage}" }
   \BLOCK{ set label_end_exam = "Ende der Pr\\\"ufung" }
   \BLOCK{ set label_name = "Nachname, Vorname" }
+  \BLOCK{ set label_duration = "Dauer" }
 \BLOCK{ else }
   \BLOCK{ set label_problem = "Problem" }
   \BLOCK{ set label_rules = "Instructions" }
@@ -32,6 +35,7 @@
   \BLOCK{ set label_page_of = "Page \\thepage\\ of \\pageref{LastPage}" }
   \BLOCK{ set label_end_exam = "End of the exam" }
   \BLOCK{ set label_name = "Surname, First name" }
+  \BLOCK{ set label_duration = "Duration" }
 \BLOCK{ endif }
 \documentclass[a4paper,twoside,addpoints]{exam}
 \pointsinrightmargin
@@ -132,6 +136,7 @@
   \settowidth{\leftmargin}{2.\hskip\labelsep}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
   \setlength{\itemindent}{0pt}%
+  \setlength{\itemsep}{1em plus 0.5em minus 0.5em}%
   \setlength{\parsep}{0.4em}%
 }
 \renewcommand{\partshook}{%
@@ -182,7 +187,11 @@
   \BLOCK{ endif }
 \BLOCK{ elif author_payload is mapping }
   \BLOCK{ set author_name = author_payload.get('name')|default('')|trim }
-  \BLOCK{ set author_aff = author_payload.get('affiliation')|default('')|trim }
+  \BLOCK{ set author_aff = author_payload.get('affiliation')|default('')|string|trim }
+  \BLOCK{ set author_aff_lower = author_aff|lower }
+  \BLOCK{ if author_aff_lower in ['none', 'null'] }
+    \BLOCK{ set author_aff = '' }
+  \BLOCK{ endif }
   \BLOCK{ if author_name }
     \BLOCK{ set author_ns.lines = [author_name|latex_escape] }
     \BLOCK{ if author_aff }
@@ -196,7 +205,11 @@
       \BLOCK{ set entry_aff = '' }
     \BLOCK{ elif entry is mapping }
       \BLOCK{ set entry_name = entry.get('name')|default('')|trim }
-      \BLOCK{ set entry_aff = entry.get('affiliation')|default('')|trim }
+      \BLOCK{ set entry_aff = entry.get('affiliation')|default('')|string|trim }
+      \BLOCK{ set entry_aff_lower = entry_aff|lower }
+      \BLOCK{ if entry_aff_lower in ['none', 'null'] }
+        \BLOCK{ set entry_aff = '' }
+      \BLOCK{ endif }
     \BLOCK{ else }
       \BLOCK{ set entry_name = '' }
       \BLOCK{ set entry_aff = '' }
@@ -282,7 +295,7 @@
   \thispagestyle{empty}
 
   \begin{center}
-    \noindent Durée : \duration~minutes
+    \noindent \VAR{label_duration} : \duration~minutes
     \vfil
   \end{center}
 
