@@ -138,6 +138,11 @@
   \ifnum#1>1
     \global\WI@broketrue
     \PackageWarning{columen}{A list item broke across #1 lines}%
+  \else
+    \ifnum\badness>\@M\relax
+      \global\WI@broketrue
+      \PackageWarning{columen}{A list item overfull in a column; reducing columns}%
+    \fi
   \fi
   \WI@pendingfalse
 }

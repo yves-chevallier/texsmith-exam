@@ -28,3 +28,14 @@ Enable solution mode when rendering to build the answer key:
 ```bash
 texsmith render --template exam -a solution=true exam.md
 ```
+
+## Title page
+
+By default the template generates a dedicated cover page with the duration,
+grade table, and rules. To render a minimal inline title instead, set
+`exam.titlepage` to `minimal` in the front matter:
+
+```yaml
+exam:
+  titlepage: minimal
+```

@@ -56,6 +56,13 @@ allow_empty = true
 sources = ["date"]
 description = "Exam date (ISO or free-form)."
 
+[latex.template.attributes.titlepage]
+default = "cover"
+type = "string"
+allow_empty = true
+sources = ["exam.titlepage", "titlepage"]
+description = "Title layout ('cover' or 'minimal')."
+
 [latex.template.attributes.type]
 default = "exam"
 type = "string"

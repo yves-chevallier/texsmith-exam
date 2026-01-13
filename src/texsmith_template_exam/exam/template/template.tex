@@ -3,6 +3,8 @@
 \BLOCK{ set title_value = title|default('')|trim }
 \BLOCK{ set author_value = author|default('')|trim }
 \BLOCK{ set date_value = date|default('')|trim }
+\BLOCK{ set titlepage_raw = titlepage|default('cover')|string|lower }
+\BLOCK{ set titlepage_minimal = titlepage_raw == 'minimal' }
 \BLOCK{ set lang = language|default('english')|lower }
 \BLOCK{ if lang in ['french', 'fr', 'francais'] }
   \BLOCK{ set label_problem = "Probl\\`eme" }
@@ -43,7 +45,17 @@
 \printanswers
 \BLOCK{ endif }
 
-\usepackage[a4paper,margin=2.5cm,includeheadfoot]{geometry}
+\usepackage[
+  a4paper,
+  top=10mm,
+  left=2.5cm,
+  right=2.5cm,
+  bottom=2.5cm,
+  headheight=0pt,
+  headsep=0pt,
+  includeheadfoot,
+  showframe
+]{geometry}
 \usepackage[svgnames,dvipsnames,x11names]{xcolor}
 \VAR{extra_packages}
 \usepackage[defaults=exam]{columen}
@@ -130,6 +142,9 @@
 \setlength{\gridsize}{5mm}
 
 \qformat{\vbox{\hbox to \hsize{\textbf{\VAR{label_problem} \thequestion : \thequestiontitle}\hfill(\thepoints)}\vspace{0.8em}}}
+\renewcommand{\partlabel}{\textbf{(\thepartno)}}
+\renewcommand{\subpartlabel}{\textbf{\thesubpart.}}
+\renewcommand{\subsubpartlabel}{\textbf{\thesubsubpart)}}
 \renewcommand{\questionshook}{%
   % Only reduce spacing after question labels, keep parts/subparts defaults.
   \setlength{\labelsep}{0.4em}%
@@ -226,6 +241,9 @@
   \BLOCK{ endfor }
 \BLOCK{ endif }
 \BLOCK{ set author_rendered = author_ns.lines|join('\\\\') }
+\BLOCK{ set author_trim = author_rendered|trim }
+\BLOCK{ set date_trim = date_value|default('')|trim }
+\BLOCK{ set course_trim = course|default('')|trim }
 
 \title{\VAR{display_title}}
 \author{\VAR{author_rendered}}
@@ -239,9 +257,50 @@
 \def\duration{\VAR{duration|default('')}}
 
 \makeatletter
+\BLOCK{ if titlepage_minimal }
+\def\@maketitle{%
+  \logo[top=10mm,height=1.26cm]
+  \begingroup
+  \centering
+  {\LARGE \@title \par}%
+  \ifprintanswers
+    \vskip .1em%
+    \large \textbf{\textcolor{red}{Solution}}%
+  \fi
+  \vskip .15em%
+  {\itshape\subtitle\par}%
+  \vskip .5em%
+  \BLOCK{ if author_trim }
+  {%
+    \lineskip .2em%
+    \begin{tabular}[t]{c}%
+      \@author
+    \end{tabular}\par
+  }%
+  \vskip 0.4em%
+  \BLOCK{ endif }
+  \BLOCK{ if course_trim }
+  {\large \course\par}%
+  \vskip 0.2em%
+  \BLOCK{ endif }
+  \BLOCK{ if date_trim }
+  {\large \thedate\par}%
+  \BLOCK{ endif }
+  \BLOCK{ set school_trim = school|default('')|trim }
+  \BLOCK{ set department_trim = department|default('')|trim }
+  \BLOCK{ if school_trim or department_trim }
+  \vskip 0.3em%
+  {\itshape\school~--~\department\par}%
+  \BLOCK{ endif }
+  \endgroup
+  \vskip 0.6em%
+  \hrule
+  \vskip 1em%
+}
+\BLOCK{ else }
 \def\@maketitle{%
   \newpage
-  \heiglogo[color=black]
+  \logo[top=10mm,height=1.26cm]
   \AddToShipoutPictureFG*{%
     \AtPageUpperLeft{%
       \put(1cm,-2.5cm){%
@@ -266,6 +325,7 @@
     \vskip .6em%
     {\itshape\school~--~\department\par}%
     \vskip 2.5em%
+    \BLOCK{ if author_trim }
     {%
       \lineskip .2em%
       \begin{minipage}{0.8 \textwidth}%
@@ -277,11 +337,19 @@
       \end{minipage}%
     }%
     \vskip 1em%
+    \BLOCK{ endif }
+    \BLOCK{ if course_trim }
+    {\large \course\par}%
+    \vskip 0.4em%
+    \BLOCK{ endif }
+    \BLOCK{ if date_trim }
     {\large \thedate}%
+    \BLOCK{ endif }
   \end{center}%
   \par
   \vskip 1.5em%
 }
+\BLOCK{ endif }
 
 \firstpageheader{\school~/~\ifprintanswers \textcolor{red}{Solution} \fi \VAR{title_value}}{}{\VAR{label_problem} \thequestion}
 \runningheader{\school~/~\ifprintanswers \textcolor{red}{Solution} \fi \VAR{title_value}}{}{\VAR{label_problem} \thequestion}
@@ -290,6 +358,9 @@
 \makeatother
 
 \begin{document}
+\BLOCK{ if titlepage_minimal }
+  \maketitle
+\BLOCK{ else }
 \begin{coverpages}
   \maketitle
   \thispagestyle{empty}
@@ -318,6 +389,7 @@
   \end{center}
   \BLOCK{ endif }
 \end{coverpages}
+\BLOCK{ endif }
 
 \BLOCK{ set has_questions = ("\\question" in mainmatter) or ("\\titledquestion" in mainmatter) or ("\\input" in mainmatter) }
 \BLOCK{ if has_questions }
