@@ -661,6 +661,32 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
 @renders(
     "div",
     phase=RenderPhase.POST,
+    priority=40,
+    name="exam_solution_admonitions",
+    nestable=True,
+    auto_mark=False,
+)
+def promote_solution_admonitions(element: Tag, context: RenderContext) -> None:
+    """Convert solution admonitions into exam solutions before callout handling."""
+    classes = gather_classes(element.get("class"))
+    if "admonition" not in classes:
+        return
+
+    title_node = element.find("p", class_="admonition-title")
+    title = title_node.get_text(strip=True) if title_node else ""
+    is_solution = "solution" in classes or title.strip().lower().startswith("solution")
+    if not is_solution:
+        return
+
+    new_classes = [cls for cls in classes if cls not in {"admonition", "solution"}]
+    if "texsmith-solution" not in new_classes:
+        new_classes.append("texsmith-solution")
+    element["class"] = new_classes
+
+
+@renders(
+    "div",
+    phase=RenderPhase.POST,
     priority=45,
     name="exam_solution_div_admonitions",
     nestable=True,
