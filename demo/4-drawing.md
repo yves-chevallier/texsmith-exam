@@ -1,7 +1,9 @@
-# Drawing
+# Drawing { points=5 }
 
 Draw a sheep in the box:
 
-!!! solution { box=100x100 }
+!!! solution { box=50 }
 
     ![Sheep](assets/sheep.svg)
+
+---

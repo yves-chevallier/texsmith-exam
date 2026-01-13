@@ -146,6 +146,7 @@ _SOLUTION_PATTERN = re.compile(
 )
 _LINES_PATTERN = re.compile(r"\blines\s*=\s*([^\s,}]+)\b")
 _GRID_PATTERN = re.compile(r"\bgrid\s*=\s*([^\s,}]+)\b")
+_BOX_PATTERN = re.compile(r"\bbox\s*=\s*([^\s,}]+)\b")
 _ATTRS_BLOCK_PATTERN = re.compile(r"\{(?P<attrs>[^}]*)\}\s*$")
 
 
@@ -273,13 +274,61 @@ def _expand_lines_value(value: str, *, unit_macro: str) -> str:
     return trimmed
 
 
+def _normalize_box_dim(value: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        return normalized
+    if re.fullmatch(r"\d+(?:\.\d+)?", normalized):
+        return f"{normalized}mm"
+    return normalized
+
+
+def _parse_box_value(value: str) -> tuple[str, str] | None:
+    raw = value.strip()
+    if not raw:
+        return None
+    if "x" in raw:
+        width_raw, height_raw = raw.split("x", 1)
+        width = _normalize_box_dim(width_raw)
+        height = _normalize_box_dim(height_raw)
+        if width and height:
+            return (width, height)
+        return None
+    return (_normalize_box_dim(raw), "")
+
+
 def _solution_env(
-    lines_value: str | None, grid_value: str | None, text_style: str
+    lines_value: str | None,
+    grid_value: str | None,
+    box_value: str | None,
+    text_style: str,
 ) -> tuple[str, str]:
     if lines_value:
         lines_value = lines_value.strip()
     if grid_value:
         grid_value = grid_value.strip()
+    if box_value:
+        box_value = box_value.strip()
+        parsed = _parse_box_value(box_value)
+        if parsed:
+            width, height = parsed
+            if height:
+                center_box = width == height
+                box_prefix = "\\noindent\\hfill" if center_box else "\\noindent"
+                box_suffix = "\\hfill" if center_box else ""
+                begin_env = "\\ifprintanswers\n\\begin{solution}\n"
+                end_env = (
+                    "\\leavevmode\n\\end{solution}\n\\else\n"
+                    "\\par\n\\penalty 0\n\\vspace{1em}%\n"
+                    f"{box_prefix}\\fbox{{\\parbox[c][{height}][c]{{{width}}}{{\\rule{{0pt}}{{{height}}}}}}}{box_suffix}%\n"
+                    "\\vspace{1em}%\n\\fi\n"
+                )
+                return begin_env, end_env
+            if width:
+                begin_env = f"\\begin{{solutionorbox}}[{width}]\n"
+                end_env = "\\leavevmode\n\\end{solutionorbox}\n"
+                return begin_env, end_env
+
     if grid_value and grid_value.isdigit():
         grid_value = f"{grid_value}\\linefillheight"
     if grid_value:
@@ -704,6 +753,7 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
     attrs = (match.group("attrs") or "").replace("\\", "")
     lines_value = None
     grid_value = None
+    box_value = None
     if attrs:
         lines_match = _LINES_PATTERN.search(attrs)
         if lines_match:
@@ -711,8 +761,11 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
         grid_match = _GRID_PATTERN.search(attrs)
         if grid_match:
             grid_value = grid_match.group(1)
+        box_match = _BOX_PATTERN.search(attrs)
+        if box_match:
+            box_value = box_match.group(1)
 
-    begin_env, end_env = _solution_env(lines_value, grid_value, _text_style(context))
+    begin_env, end_env = _solution_env(lines_value, grid_value, box_value, _text_style(context))
 
     content_nodes: list[object] = []
     cursor = element.next_sibling
@@ -783,7 +836,7 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
         attrs = ""
 
     attr_values: list[str] = []
-    for key in ("lines", "grid"):
+    for key in ("lines", "grid", "box"):
         if key in element.attrs:
             attr_values.append(f"{key}={element.attrs[key]}")
     if attr_values:
@@ -791,6 +844,7 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
 
     lines_value = None
     grid_value = None
+    box_value = None
     if attrs:
         lines_match = _LINES_PATTERN.search(attrs)
         if lines_match:
@@ -798,11 +852,14 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
         grid_match = _GRID_PATTERN.search(attrs)
         if grid_match:
             grid_value = grid_match.group(1)
+        box_match = _BOX_PATTERN.search(attrs)
+        if box_match:
+            box_value = box_match.group(1)
 
     for img in list(element.find_all("img")):
         _render_images(img, context)
 
-    begin_env, end_env = _solution_env(lines_value, grid_value, _text_style(context))
+    begin_env, end_env = _solution_env(lines_value, grid_value, box_value, _text_style(context))
     body = element.find("div", class_="texsmith-solution")
     title_node = element.find("p", class_="admonition-title")
     if title_node is not None:

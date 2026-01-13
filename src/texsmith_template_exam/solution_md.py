@@ -14,6 +14,7 @@ _SOLUTION_PATTERN = re.compile(
 )
 _LINES_PATTERN = re.compile(r"\blines\s*=\s*(\d+)\b")
 _GRID_PATTERN = re.compile(r"\bgrid\s*=\s*([^\s,}]+)\b")
+_BOX_PATTERN = re.compile(r"\bbox\s*=\s*([^\s,}]+)\b")
 
 
 class _SolutionBlockPreprocessor(Preprocessor):
@@ -35,6 +36,7 @@ class _SolutionBlockPreprocessor(Preprocessor):
             attrs = match.group("attrs") or ""
             lines_value = None
             grid_value = None
+            box_value = None
             if attrs:
                 lines_match = _LINES_PATTERN.search(attrs)
                 if lines_match:
@@ -42,6 +44,9 @@ class _SolutionBlockPreprocessor(Preprocessor):
                 grid_match = _GRID_PATTERN.search(attrs)
                 if grid_match:
                     grid_value = grid_match.group(1)
+                box_match = _BOX_PATTERN.search(attrs)
+                if box_match:
+                    box_value = box_match.group(1)
 
             content: list[str] = []
             index += 1
@@ -75,6 +80,8 @@ class _SolutionBlockPreprocessor(Preprocessor):
                 attrs_block = f'{attrs_block} lines="{lines_value}"'
             if grid_value:
                 attrs_block = f'{attrs_block} grid="{grid_value}"'
+            if box_value:
+                attrs_block = f'{attrs_block} box="{box_value}"'
             output.append(f'<div class="texsmith-solution"{attrs_block}>')
             output.append('<p class="texsmith-solution-title">Solution</p>')
             output.append("")
