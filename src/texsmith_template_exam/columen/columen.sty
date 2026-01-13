@@ -1,6 +1,10 @@
 \ProvidesPackage{columen}[2025/03/12 Minimal column wrapper]
 \RequirePackage{multicol}
 
+% Accept and ignore any package options (e.g., defaults=exam).
+\DeclareOption*{}
+\ProcessOptions\relax
+
 % Simple wrapper for multi-column layouts used by the exam template.
 \newenvironment{columen}[1][1]{%
   \begin{multicols}{#1}%

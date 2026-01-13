@@ -785,6 +785,7 @@ def register(renderer: object) -> None:
     """Entry point for texsmith.renderers to register exam handlers."""
     register_fn = getattr(renderer, "register", None)
     if callable(register_fn):
+        register_fn(set_exam_callouts)
         register_fn(strip_fenced_code_in_blocks)
         register_fn(strip_fenced_code_in_pre)
         register_fn(render_exam_checkboxes)
