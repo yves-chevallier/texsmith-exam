@@ -43,7 +43,6 @@ description = "Exam title (from metadata or promoted heading)."
 [latex.template.attributes.author]
 default = ""
 type = "any"
-normaliser = "author_names"
 allow_empty = true
 sources = ["author", "authors"]
 description = "Author or instructor name."
@@ -99,7 +98,6 @@ description = "Exam duration in minutes."
 [latex.template.attributes.rules]
 default = []
 type = "list"
-normaliser = "markdown_list"
 sources = ["exam.rules", "rules"]
 description = "List of rules to display on the cover page."
 

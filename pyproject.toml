@@ -10,4 +10,5 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+texsmith = { git = "https://github.com/yves-chevallier/texsmith.git" }
 texsmith-exam = { path = "texsmith_exam" }

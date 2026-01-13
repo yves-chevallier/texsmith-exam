@@ -59,7 +59,7 @@ class Bar : public Foo { };
 
 - [ ] `Foo` hérite de `Bar`
 - [x] `Bar` est un `Foo`
-- [ ] `Bar` et `Foo` sont fusionnés en une seule classe `Foobar`
+- [ ] `Bar` et `Foo` sont fusionnés en `Foobar`
 - [ ] `Foo` est un `Bar`
 - [ ] `Bar` est associé à `Foo`
 - [ ] `Foo` est ami de `Bar`

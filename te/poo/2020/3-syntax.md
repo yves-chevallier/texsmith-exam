@@ -28,7 +28,7 @@ int main() {
 }
 ```
 
-!!! solution { lines=1 }
+!!! solution { lines=2 }
 
     ```cpp
     return foo::bar::burried();
@@ -36,7 +36,7 @@ int main() {
 
 ## -
 
-Écrire la classe suivante ainsi que son implémentation. Une classe `Square` représente un carré de côté `edge`. Ce côté est initialisé au constructeur. La somme de deux carrés est un carré dont la surface est la somme des surfaces de ces deux carrés. La méthode `area` retourne la surface d'un carré.
+Écrire la classe suivante ainsi que son implémentation: une classe `Square` représente un carré de côté `edge`. Ce côté est initialisé au constructeur. La somme de deux carrés est un carré dont la surface est la somme des surfaces de ces deux carrés. La méthode `area` retourne la surface d'un carré.
 
 ```cpp
 Square a{10};
@@ -45,7 +45,7 @@ Square c = a + b; // Permettre l'addition de deux carrés !
 assert(c.area() == 125)
 ```
 
-!!! solution { lines=10 }
+!!! solution { lines=12 }
 
     ```cpp
     struct Square {
@@ -59,11 +59,13 @@ assert(c.area() == 125)
     };
     ```
 
+---
+
 ## -
 
 Une classe définissant un point dans un espace à deux dimensions peut être construit en donnant deux paramètres à son constructeur, la coordonnée `x`, puis la coordonnée `y`. Les coordonnées ne peuvent plus être changées une fois le point construit. La classe est générique et il doit être possible de créer un point sur n'importe quel type numérique (`int`, `double`...). Implémentez cette description.
 
-!!! solution { lines=5 }
+!!! solution { lines=8 }
 
     ```cpp
     template <typename T>
@@ -77,12 +79,12 @@ Une classe définissant un point dans un espace à deux dimensions peut être co
 
 Une fonction `divideOrFail` retourne la division de deux nombres flottants. Dans le cas ou le diviseur est nul, cette fonction lève une exception de type `std::runtime_error` qui hérite de `std::exception`. Une instance de ce type est constuite avec un paramètre : le message d'erreur. Écrire la fonction `divideOrFail`.
 
-!!! solution { lines=5 }
+!!! solution { lines=8 }
 
     ```cpp
     double divideOrFail(double a, double b) {
         if (b == 0)
-            throw std:runtime_error("Error");
+            throw std::runtime_error("Error");
         return a / b;
     }
     ```
@@ -91,7 +93,7 @@ Une fonction `divideOrFail` retourne la division de deux nombres flottants. Dans
 
 Déclarez un *smart pointer* qui ne peut contenir qu'une seule référence, avec une instance de `Foo`. Cette classe dispose d'un constructeur par défaut sans paramètres.
 
-!!! solution { lines=1 }
+!!! solution { lines=3 }
 
     ```cpp
     std::unique_ptr<Foo> p = std::make_unique<Foo>();

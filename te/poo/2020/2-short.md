@@ -1,7 +1,3 @@
-/// latex
-\clearpage
-///
-
 ## Réponses courtes { points=10 }
 
 ### -
@@ -50,6 +46,8 @@ int main() {
     ```plaintext
     01
     ```
+
+---
 
 ### -
 
@@ -105,11 +103,13 @@ L'utilisation de méthodes virtuelles a un impact sur les performances d'exécut
 
     Les méthodes virtuelles sont implémentées via une table de pointeurs de fonctions (vtable). L'appel d'une méthode virtuelle nécessite une indirection supplémentaire pour accéder à cette table, ce qui ajoute une surcharge en temps d'exécution par rapport à un appel de méthode non virtuelle direct.
 
+---
+
 ### -
 
 Pouvez-vous citer trois types différents de diagrammes décrits par le standard UML ?
 
-!!! solution { lines=3 }
+!!! solution { lines=4 }
 
     Diagrammes de classe, d'activités, de composants, de paquets, de cas d'utilisations, d'états...
 
@@ -117,7 +117,7 @@ Pouvez-vous citer trois types différents de diagrammes décrits par le standard
 
 Dans un diagramme de classe UML, pouvez-vous visuellement montrer trois types de relations différentes entre classes et expliquer la nature de ces relations ?
 
-!!! solution { lines=3 }
+!!! solution { lines=4 }
 
     Notons les relations : composition, aggrégation et héritage sur la figure suivante.
 
@@ -129,7 +129,7 @@ Dans un diagramme de classe UML, pouvez-vous visuellement montrer trois types de
 
 ### -
 
-Pouvez-vous citer 2 noms de *design pattern* utilisés en programmation orientée objets ?
+Pouvez-vous citer 3 noms de *design pattern* utilisés en programmation orientée objets ?
 
 !!! solution { lines=2 }
 
@@ -139,6 +139,6 @@ Pouvez-vous citer 2 noms de *design pattern* utilisés en programmation orienté
 
 Pouvez vous expliquer brièvement la différence entre un objet et un attribut ?
 
-!!! solution { lines=3 }
+!!! solution { lines=4 }
 
     Un objet est une instance d'une classe qui encapsule des données et des comportements. Un attribut est une variable membre d'une classe qui stocke des données spécifiques à l'objet.

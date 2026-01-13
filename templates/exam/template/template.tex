@@ -9,6 +9,7 @@
 \printanswers
 \BLOCK{ endif }
 
+\usepackage[a4paper,margin=2.5cm,includeheadfoot]{geometry}
 \usepackage[svgnames,dvipsnames,x11names]{xcolor}
 \VAR{extra_packages}
 \usepackage[defaults=exam]{columen}
@@ -104,10 +105,18 @@
   % Reduce the extra 2.5em indent that exam.cls adds for choices.
   \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
+  \setlength{\topsep}{0.8em}%
+  \setlength{\partopsep}{0pt}%
+  \setlength{\itemsep}{0.2em}%
+  \setlength{\parsep}{0pt}%
 }
 \renewcommand{\checkboxeshook}{%
   \settowidth{\leftmargin}{W.\hskip\labelsep\hskip 1em}%
   \labelwidth\leftmargin\advance\labelwidth-\labelsep
+  \setlength{\topsep}{0.8em}%
+  \setlength{\partopsep}{0pt}%
+  \setlength{\itemsep}{0.2em}%
+  \setlength{\parsep}{0pt}%
 }
 
 \newtcolorbox{examrules}[1][]{%
@@ -132,6 +141,7 @@
 \def\thedate{\VAR{date_value if date_value else "\\\\today"}}
 \def\department{\VAR{department}}
 \def\school{\VAR{school}}
+\def\subtitle{\VAR{subtitle}}
 \def\documentType{\VAR{document_type_label}}
 \def\course{\VAR{course}}
 \def\duration{\VAR{duration|default('')}}
@@ -147,10 +157,10 @@
     \ifprintanswers
       \large \textbf{\textcolor{red}{Solution}}%
     \fi
-    \vskip 1.0em%
-    {\itshape\department\par}%
     \vskip .2em%
-    {\itshape\school\par}%
+    {\itshape\subtitle\par}%
+    \vskip .6em%
+    {\itshape\school~--~\department\par}%
     \vskip 2.5em%
     {%
       \lineskip .2em%

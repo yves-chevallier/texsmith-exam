@@ -197,6 +197,18 @@ def _solution_env(
     if not lines_value:
         return "\\begin{solution}\n", "\\leavevmode\n\\end{solution}\n"
 
+    if lines_value.lower() == "fill":
+        if text_style == "lines":
+            filler = "\\fillwithlines{\\stretch{1}}"
+        elif text_style == "box":
+            filler = "\\makeemptybox{\\stretch{1}}"
+        else:
+            filler = "\\fillwithdottedlines{\\stretch{1}}"
+        return (
+            "\\ifprintanswers\n\\begin{solution}\n",
+            f"\\leavevmode\n\\end{{solution}}\n\\else\n{filler}\n\\fi\n",
+        )
+
     if text_style == "lines":
         height = _expand_lines_value(lines_value, unit_macro="linefillheight")
         return (
@@ -411,9 +423,9 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
 
     choice_style = _choice_style(context)
     if choice_style == "checkbox":
-        lines = ["\\begin{columen}[5]", "\\begin{checkboxes}"]
+        lines = ["\\begin{samepage}", "\\begin{columen}[5]", "\\begin{checkboxes}"]
     else:
-        lines = ["\\begin{columen}[5]", "\\begin{choices}"]
+        lines = ["\\begin{samepage}", "\\begin{columen}[5]", "\\begin{choices}"]
     correct_labels: list[str] = []
     for index, (checked, text) in enumerate(items):
         if checked:
@@ -424,6 +436,7 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
     if choice_style == "checkbox":
         lines.append("\\end{checkboxes}")
         lines.append("\\end{columen}")
+        lines.append("\\end{samepage}")
     else:
         lines.append("\\end{choices}")
         lines.append("\\end{columen}")
@@ -431,6 +444,7 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
             lines.append(f"\\answerline[{', '.join(correct_labels)}]")
         else:
             lines.append("\\answerline")
+        lines.append("\\end{samepage}")
 
     element.replace_with(mark_processed(NavigableString("\n".join(lines) + "\n")))
 
@@ -508,7 +522,7 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
     cursor = element.next_sibling
     while cursor is not None:
         if isinstance(cursor, Tag):
-            if cursor.name and cursor.name.lower() in {"h1", "h2", "h3", "h4", "h5", "h6"}:
+            if cursor.name and cursor.name.lower() in {"h1", "h2", "h3", "h4", "h5", "h6", "hr"}:
                 break
             if cursor.name == "p":
                 candidate = cursor.get_text(strip=True)
