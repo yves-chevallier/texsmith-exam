@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "TeXSmith exam template."
 requires-python = ">=3.13"
 dependencies = [
-    "texsmith>=0.6,<1.0",
+    "texsmith>=0.2.1,<1.0",
 ]
 
 [project.entry-points."texsmith.templates"]
