@@ -10,8 +10,9 @@ from markdown import Extension, Markdown
 from markdown.inlinepatterns import InlineProcessor
 from markdown.util import AtomicString
 
-_FILLIN_PATTERN = r"\[([^\]\n]+)\]\{([^}\n]+)\}"
+_FILLIN_PATTERN = r"\[([^\]\n]+)\](?!\()(?:\{([^}\n]+)\})?"
 _FILLIN_WIDTH_PATTERN = re.compile(r"\b(?:w|width)\s*=\s*([^\s,}]+)")
+_FILLIN_SCALE_PATTERN = re.compile(r"\bchar-width-scale\s*=\s*([^\s,}]+)")
 
 
 class _FillInInlineProcessor(InlineProcessor):
@@ -23,16 +24,20 @@ class _FillInInlineProcessor(InlineProcessor):
         data: str,
     ) -> tuple[ElementTree.Element, int, int]:
         answer = match.group(1)
-        attrs = match.group(2)
+        attrs = match.group(2) or ""
         width_value = ""
         width_match = _FILLIN_WIDTH_PATTERN.search(attrs)
         if width_match:
             width_value = width_match.group(1)
+        scale_match = _FILLIN_SCALE_PATTERN.search(attrs)
+        scale_value = scale_match.group(1) if scale_match else ""
 
         element = ElementTree.Element("span")
         element.set("class", "texsmith-fillin")
         if width_value:
             element.set("data-width", width_value)
+        if scale_value:
+            element.set("data-scale", scale_value)
         element.text = AtomicString(answer)
         return element, match.start(0), match.end(0)
 

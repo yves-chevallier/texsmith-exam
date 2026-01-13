@@ -17,8 +17,9 @@ from texsmith.core.context import RenderContext
 from texsmith.core.rules import DOCUMENT_NODE, RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
 
-_FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\]\{([^}\n]+)\}")
+_FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\](?!\()(?:\{([^}\n]+)\})?")
 _FILLIN_WIDTH_PATTERN = re.compile(r"\b(?:w|width)\s*=\s*([^\s,}]+)")
+_FILLIN_SCALE_PATTERN = re.compile(r"\bchar-width-scale\s*=\s*([^\s,}]+)")
 
 
 def _flag(context: RenderContext, key: str) -> bool:
@@ -209,6 +210,49 @@ def _extract_fillin_width(attrs: str) -> str:
     if not match:
         return ""
     return match.group(1)
+
+
+def _extract_fillin_scale(attrs: str) -> str:
+    match = _FILLIN_SCALE_PATTERN.search(attrs)
+    if not match:
+        return ""
+    return match.group(1)
+
+
+def _coerce_fillin_scale(value: object, *, default: float) -> float:
+    try:
+        scale = float(str(value).strip())
+    except (TypeError, ValueError):
+        return default
+    return scale if scale > 0 else default
+
+
+def _fillin_scale_from_context(context: RenderContext) -> float:
+    overrides = context.runtime.get("template_overrides")
+    default_scale = 2.5
+    if not isinstance(overrides, dict):
+        return default_scale
+    for key in ("char-width-scale", "fillin_char_width_scale"):
+        if key in overrides:
+            return _coerce_fillin_scale(overrides.get(key), default=default_scale)
+    style = overrides.get("style")
+    if isinstance(style, dict) and "char-width-scale" in style:
+        return _coerce_fillin_scale(style.get("char-width-scale"), default=default_scale)
+    fillin = overrides.get("fillin")
+    if isinstance(fillin, dict) and "char-width-scale" in fillin:
+        return _coerce_fillin_scale(fillin.get("char-width-scale"), default=default_scale)
+    return default_scale
+
+
+def _auto_fillin_width(answer_raw: str, scale: float) -> str:
+    visible = re.sub(r"\s+", "", answer_raw or "")
+    length = max(1, len(visible))
+    width_mm = length * scale
+    if width_mm.is_integer():
+        width_value = f"{int(width_mm)}mm"
+    else:
+        width_value = f"{width_mm:.2f}".rstrip("0").rstrip(".") + "mm"
+    return width_value
 
 
 def _choice_label(index: int) -> str:
@@ -413,7 +457,7 @@ def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
             if match.start() > cursor:
                 segments.append(NavigableString(text[cursor: match.start()]))
             answer_raw = match.group(1)
-            attrs = match.group(2)
+            attrs = match.group(2) or ""
             answer = render_moving_text(
                 answer_raw,
                 context,
@@ -421,10 +465,14 @@ def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
                 escape="\\" not in answer_raw,
             )
             width_value = _normalize_fillin_width(_extract_fillin_width(attrs))
-            if width_value:
-                latex = f"\\fillin[{answer}][{width_value}]"
-            else:
-                latex = f"\\fillin[{answer}]"
+            if not width_value:
+                scale_raw = _extract_fillin_scale(attrs)
+                scale = _coerce_fillin_scale(
+                scale_raw if scale_raw else _fillin_scale_from_context(context),
+                default=2.5,
+            )
+                width_value = _auto_fillin_width(answer_raw, scale)
+            latex = f"\\fillin[{answer}][{width_value}]"
             segments.append(mark_processed(NavigableString(latex)))
             cursor = match.end()
         if cursor < len(text):
@@ -586,10 +634,14 @@ def render_exam_fillin(element: Tag, context: RenderContext) -> None:
         escape="\\" not in raw_text,
     )
     width_value = _normalize_fillin_width(element.get("data-width", ""))
-    if width_value:
-        latex = f"\\fillin[{answer}][{width_value}]"
-    else:
-        latex = f"\\fillin[{answer}]"
+    if not width_value:
+        scale_raw = element.get("data-scale", "")
+        scale = _coerce_fillin_scale(
+            scale_raw if scale_raw else _fillin_scale_from_context(context),
+            default=2.5,
+        )
+        width_value = _auto_fillin_width(raw_text, scale)
+    latex = f"\\fillin[{answer}][{width_value}]"
     element.replace_with(mark_processed(NavigableString(latex)))
 
 
