@@ -46,6 +46,18 @@ Text for subpart 1 of part 2
     The `-` label resembles a list marker and keeps Markdown headings
     non-empty, so they still parse correctly.
 
+If you need plain LaTeX sectioning (instead of exam questions/parts), mark a
+heading with `{heading=true}`. The marked heading and its subheadings are
+rendered with TeXSmith's standard `\section`, `\subsection`, etc.
+
+```md
+## Context {heading=true}
+
+### Model
+
+### Variables
+```
+
 ## Multiple choice
 
 Markdown (and TeXSmith) supports task lists like `- [ ]`. With this template,

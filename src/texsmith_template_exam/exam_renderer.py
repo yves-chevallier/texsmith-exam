@@ -102,6 +102,15 @@ def _normalize_points(points: str | None) -> str | None:
     return trimmed or None
 
 
+def _is_truthy_attribute(value: str | None) -> bool:
+    if value is None:
+        return False
+    if value == "":
+        return True
+    normalized = value.strip().lower()
+    return normalized in {"1", "true", "yes", "on", "y", "t"}
+
+
 def _is_empty_title(text: str) -> bool:
     normalized = text.strip()
     if not normalized:
@@ -964,6 +973,17 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
             text = ""
 
     level = int(element.name[1:])
+    heading_attr = _is_truthy_attribute(
+        coerce_attribute(element.get("heading"))
+        or coerce_attribute(element.get("data-heading"))
+    )
+    heading_mode_level = context.runtime.get("heading_mode_level")
+    if heading_attr:
+        context.runtime["heading_mode_level"] = level
+        heading_mode_level = level
+    elif isinstance(heading_mode_level, int) and level <= heading_mode_level:
+        context.runtime["heading_mode_level"] = None
+        heading_mode_level = None
     base_level = context.runtime.get("base_level", 0)
     rendered_level = level + base_level - 1
 
@@ -975,7 +995,26 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         slug = slugify(plain_text, separator="-")
         ref = slug or None
 
+    use_vanilla_heading = heading_attr or (
+        isinstance(heading_mode_level, int) and level > heading_mode_level
+    )
     lines: list[str] = []
+    if use_vanilla_heading:
+        _close_parts(context, lines)
+        lines.append(r"\ExamQuestionsEnd")
+        latex = context.formatter.heading(
+            text=text,
+            level=rendered_level,
+            ref=ref,
+            numbered=context.runtime.get("numbered", True),
+        )
+        if lines:
+            latex = "\n".join(lines + [latex])
+        element.replace_with(mark_processed(NavigableString(latex)))
+        context.state.add_heading(level=rendered_level, text=plain_text, ref=ref)
+        return
+
+    lines.append(r"\ExamQuestionsBegin")
     if rendered_level == 1:
         _close_parts(context, lines)
     elif rendered_level == 2:

@@ -66,6 +66,21 @@
 \BLOCK{ endif }
 \usepackage{heiglogo}
 
+\newif\ifexamquestionsopen
+\examquestionsopenfalse
+\newcommand{\ExamQuestionsBegin}{%
+  \ifexamquestionsopen\else
+    \begin{questions}%
+    \examquestionsopentrue
+  \fi
+}
+\newcommand{\ExamQuestionsEnd}{%
+  \ifexamquestionsopen
+    \end{questions}%
+    \examquestionsopenfalse
+  \fi
+}
+
 \makeatletter
 \unframedsolutions
 \renewcommand{\solutiontitle}{}
@@ -388,9 +403,8 @@
 
 \BLOCK{ set has_questions = ("\\question" in mainmatter) or ("\\titledquestion" in mainmatter) or ("\\input" in mainmatter) }
 \BLOCK{ if has_questions }
-\begin{questions}
 \VAR{mainmatter}
-\end{questions}
+\ExamQuestionsEnd
 \BLOCK{ else }
 \PackageWarning{texsmith}{No questions found; exam.cls may fail to compile.}
 \VAR{mainmatter}
