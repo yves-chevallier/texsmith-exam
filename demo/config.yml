@@ -7,7 +7,7 @@ fonts:
 typesetting:
   paragraph:
     indent: none
-    spacing: 1.1em
+    #spacing: 1.1em
   leading: onehalf
 press:
   paper:

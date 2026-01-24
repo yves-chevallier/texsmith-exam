@@ -7,7 +7,7 @@ import re
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from slugify import slugify
-from texsmith.adapters.markdown import DEFAULT_MARKDOWN_EXTENSIONS, render_markdown
+from texsmith.adapters.markdown import render_markdown
 from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
 from texsmith.adapters.handlers.admonitions import gather_classes
 from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
@@ -17,6 +17,8 @@ from texsmith.core.callouts import DEFAULT_CALLOUTS, merge_callouts, normalise_c
 from texsmith.core.context import RenderContext
 from texsmith.core.rules import DOCUMENT_NODE, RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
+
+from texsmith_template_exam.markdown import exam_markdown_extensions
 
 
 _FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\](?!\()(?:\{([^}\n]+)\})?")
@@ -819,7 +821,7 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
         pre = candidate if candidate.name == "pre" else candidate.find("pre")
         if pre is not None:
             code_text = pre.get_text()
-            html = render_markdown(code_text, DEFAULT_MARKDOWN_EXTENSIONS).html
+            html = render_markdown(code_text, exam_markdown_extensions()).html
             soup = BeautifulSoup(html, "html.parser")
             replacement_nodes = list(soup.body.contents) if soup.body else list(soup.contents)
             for new_node in replacement_nodes:

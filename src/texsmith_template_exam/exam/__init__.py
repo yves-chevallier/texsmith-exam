@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import Any
 
 from texsmith.adapters.latex.renderer import LaTeXRenderer
-from texsmith.adapters.markdown import DEFAULT_MARKDOWN_EXTENSIONS, render_markdown
+from texsmith.adapters.markdown import render_markdown
 from texsmith.core.templates.base import WrappableTemplate
 
+from texsmith_template_exam.markdown import exam_markdown_extensions
 
 _RENDERER: LaTeXRenderer | None = None
 
@@ -22,7 +23,7 @@ def _markdown_to_latex(value: Any) -> str:
     text = str(value)
     if not text.strip():
         return text
-    html = render_markdown(text, DEFAULT_MARKDOWN_EXTENSIONS).html
+    html = render_markdown(text, exam_markdown_extensions()).html
     global _RENDERER
     if _RENDERER is None:
         _RENDERER = LaTeXRenderer(copy_assets=False, convert_assets=False)
