@@ -91,13 +91,12 @@
     \leftskip=0pt
     \rightskip=0pt
     \begingroup
-    \color{red}%
-    \tcbset{colframe=red,coltitle=red}%
-    \tcbset{code/.append style={colframe=red,coltitle=red}}%
     \def\PY##1##2{##2}%
+    \begin{examanswerbar}%
     \ignorespaces
   }%
   {%
+    \end{examanswerbar}%
     \unskip
     \endgroup
   }%
@@ -105,6 +104,20 @@
 \@ifpackageloaded{tcolorbox}{}{%
   \PassOptionsToPackage{most,skins,breakable}{tcolorbox}%
   \usepackage{tcolorbox}%
+}
+\newtcolorbox{examanswerbar}[1][]{%
+  enhanced,
+  breakable,
+  colback=white,
+  boxrule=0pt,
+  frame hidden,
+  borderline west={2pt}{0pt}{black},
+  left=6pt,
+  right=0pt,
+  top=0pt,
+  bottom=0pt,
+  boxsep=0pt,
+  #1
 }
 \renewenvironment{solutionorgrid}[1][0pt]%
   {%
@@ -128,6 +141,88 @@
         \penalty 0
         \vspace{1em}%
         \fillwithgrid{#1}%
+        \vspace{1em}%
+      \fi
+      \setbox\z@\vbox\bgroup
+    \fi
+  }{%
+    \ifprintanswers
+      \end{TheSolution}%
+      \endgroup
+    \else
+      \egroup
+    \fi
+    \@ifundefined{ifsolutionsreseteqcounter}{}{%
+      \ifsolutionsreseteqcounter
+        \setcounter{equation}{\value{exam@saved@eqnum}}%
+      \fi
+    }%
+  }%
+\makeatother
+
+\makeatletter
+\renewenvironment{solutionorlines}[1][0pt]%
+  {%
+    \@insolutiontrue
+    \@addpointsfalse
+    \@ifundefined{ifsolutionsreseteqcounter}{}{%
+      \ifsolutionsreseteqcounter
+        \setcounter{exam@saved@eqnum}{\value{equation}}%
+        \setcounter{equation}{0}%
+      \fi
+    }%
+    \ifprintanswers
+      \begingroup
+      \Solution@Emphasis
+      \begin{TheSolution}%
+    \else
+      \ifcancelspace
+        % Do nothing
+      \else
+        \par
+        \penalty 0
+        \vspace{1em}%
+        \fillwithlines{#1}%
+        \vspace{1em}%
+      \fi
+      \setbox\z@\vbox\bgroup
+    \fi
+  }{%
+    \ifprintanswers
+      \end{TheSolution}%
+      \endgroup
+    \else
+      \egroup
+    \fi
+    \@ifundefined{ifsolutionsreseteqcounter}{}{%
+      \ifsolutionsreseteqcounter
+        \setcounter{equation}{\value{exam@saved@eqnum}}%
+      \fi
+    }%
+  }%
+
+\renewenvironment{solutionordottedlines}[1][0pt]%
+  {%
+    \@insolutiontrue
+    \@addpointsfalse
+    \@ifundefined{ifsolutionsreseteqcounter}{}{%
+      \ifsolutionsreseteqcounter
+        \setcounter{exam@saved@eqnum}{\value{equation}}%
+        \setcounter{equation}{0}%
+      \fi
+    }%
+    \ifprintanswers
+      \begingroup
+      \Solution@Emphasis
+      \begin{TheSolution}%
+    \else
+      \ifcancelspace
+        % Do nothing
+      \else
+        \par
+        \penalty 0
+        \vspace{1em}%
+        \fillwithdottedlines{#1}%
         \vspace{1em}%
       \fi
       \setbox\z@\vbox\bgroup
@@ -349,6 +444,10 @@
     {\itshape\subtitle\par}%
     {\itshape\department\par}%
     \vfil
+    \ifprintanswers
+      {\large \textbf{\textcolor{red}{SOLUTION}}}\par
+      \vskip 0.4em%
+    \fi
     {\large \thedate}%
     \vskip 1em%
     \BLOCK{ if author_trim }
@@ -370,8 +469,8 @@
 }
 \BLOCK{ endif }
 
-\firstpageheader{\school~/~\ifprintanswers \textcolor{red}{Solution} \fi \VAR{title_value}}{}{\VAR{label_problem} \thequestion}
-\runningheader{\school~/~\ifprintanswers \textcolor{red}{Solution} \fi \VAR{title_value}}{}{\VAR{label_problem} \thequestion}
+\firstpageheader{\school~/~\VAR{title_value}}{}{\VAR{label_problem} \thequestion}
+\runningheader{\school~/~\VAR{title_value}}{}{\VAR{label_problem} \thequestion}
 \footer{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{\VAR{label_page_of}}{\course}
 \pagestyle{headandfoot}
 \setlength{\headsep}{1.5em}

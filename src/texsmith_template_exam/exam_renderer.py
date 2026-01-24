@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import re
 
+from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from slugify import slugify
+from texsmith.adapters.markdown import DEFAULT_MARKDOWN_EXTENSIONS, render_markdown
 from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
 from texsmith.adapters.handlers.admonitions import gather_classes
 from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
@@ -183,9 +185,13 @@ def _in_solution_mode(context: RenderContext) -> bool:
         value = overrides.get("solution")
         if isinstance(value, bool):
             return value
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
     value = context.runtime.get("solution")
     if isinstance(value, bool):
         return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
     return False
 
 
@@ -658,12 +664,20 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
     if choice_style == "checkbox":
         lines.append("\\end{checkboxes}")
         lines.append("\\end{columen}")
+        if correct_labels:
+            lines.append(
+                f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
+            )
+        else:
+            lines.append("\\answerline")
         lines.append("\\end{samepage}")
     else:
         lines.append("\\end{choices}")
         lines.append("\\end{columen}")
-        if _in_solution_mode(context) and correct_labels:
-            lines.append(f"\\answerline[{', '.join(correct_labels)}]")
+        if correct_labels:
+            lines.append(
+                f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
+            )
         else:
             lines.append("\\answerline")
         lines.append("\\end{samepage}")
@@ -792,6 +806,30 @@ def render_solution_admonition(element: Tag, context: RenderContext) -> None:
                     break
         content_nodes.append(cursor)
         cursor = cursor.next_sibling
+
+    candidate: Tag | None = None
+    for node in content_nodes:
+        if isinstance(node, NavigableString) and not node.strip():
+            continue
+        if isinstance(node, Tag):
+            candidate = node
+        break
+
+    if candidate is not None:
+        pre = candidate if candidate.name == "pre" else candidate.find("pre")
+        if pre is not None:
+            code_text = pre.get_text()
+            html = render_markdown(code_text, DEFAULT_MARKDOWN_EXTENSIONS).html
+            soup = BeautifulSoup(html, "html.parser")
+            replacement_nodes = list(soup.body.contents) if soup.body else list(soup.contents)
+            for new_node in replacement_nodes:
+                candidate.insert_before(new_node)
+            candidate.decompose()
+            content_nodes = [
+                node
+                for node in replacement_nodes
+                if not (isinstance(node, NavigableString) and not node.strip())
+            ]
 
     begin_node = mark_processed(NavigableString(begin_env))
     element.replace_with(begin_node)
