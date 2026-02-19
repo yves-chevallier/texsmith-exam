@@ -59,6 +59,7 @@
 \usepackage{caption}
 \usepackage{ifthen}
 \usepackage{eso-pic}
+\usepackage{etoolbox}
 \usepackage[\VAR{language|default('english')}]{babel}
 \usepackage[normalem]{ulem}
 \usepackage{lastpage}
@@ -160,6 +161,10 @@
   boxsep=0pt,
   #1
 }
+
+% Ensure code blocks respect the current list indentation in exam/parts/subparts.
+\BeforeBeginEnvironment{code}{\par\noindent\begin{minipage}[t]{\linewidth}\vspace{-1em}}
+\AfterEndEnvironment{code}{\end{minipage}\par}
 \renewenvironment{solutionorgrid}[1][0pt]%
   {%
     \@insolutiontrue
