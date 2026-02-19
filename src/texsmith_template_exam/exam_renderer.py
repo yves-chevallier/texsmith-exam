@@ -21,7 +21,7 @@ from texsmith.fonts.scripts import render_moving_text
 from texsmith_template_exam.markdown import exam_markdown_extensions
 
 
-_FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\](?!\()(?:\{([^}\n]+)\})?")
+_FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\](?!\()(?:\\?\{([^}\n]+)\\?\})?")
 _FILLIN_WIDTH_PATTERN = re.compile(r"\b(?:w|width)\s*=\s*([^\s,}]+)")
 _FILLIN_SCALE_PATTERN = re.compile(r"\bchar-width-scale\s*=\s*([^\s,}]+)")
 
@@ -216,7 +216,7 @@ def _text_style(context: RenderContext) -> str:
 
 
 def _normalize_fillin_width(value: str) -> str:
-    normalized = value.strip()
+    normalized = value.strip().rstrip("\\")
     if not normalized:
         return normalized
     if re.fullmatch(r"\d+(?:\.\d+)?", normalized):
@@ -487,21 +487,20 @@ def _render_fenced_segments(
     return "\n\n".join(parts) + ("\n" if parts else "")
 
 
-@renders(
-    DOCUMENT_NODE,
-    phase=RenderPhase.PRE,
-    priority=-5,
-    name="exam_fillin_placeholders",
-    before=("escape_plain_text",),
-)
-def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
+def _replace_fillin_placeholders(
+    root: Tag,
+    context: RenderContext,
+    *,
+    allow_latex_raw: bool = False,
+    pattern: re.Pattern[str] = _FILLIN_PATTERN,
+) -> None:
     """Replace [answer]{w=50} placeholders with exam.cls fill-ins."""
     legacy_accents = getattr(context.config, "legacy_latex_accents", False)
     for node in list(root.find_all(string=True)):
-        if getattr(node, "processed", False):
+        if getattr(node, "processed", False) and not allow_latex_raw:
             continue
         text = str(node)
-        if not text or _FILLIN_PATTERN.search(text) is None:
+        if not text or pattern.search(text) is None:
             continue
 
         parent = node.parent
@@ -511,7 +510,9 @@ def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
                 skip = True
                 break
             classes = gather_classes(getattr(parent, "get", lambda *_: None)("class"))
-            if "latex-raw" in classes or parent.get("data-texsmith-latex") == "true":
+            if (not allow_latex_raw) and (
+                "latex-raw" in classes or parent.get("data-texsmith-latex") == "true"
+            ):
                 skip = True
                 break
             parent = getattr(parent, "parent", None)
@@ -520,7 +521,7 @@ def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
 
         segments: list[NavigableString] = []
         cursor = 0
-        for match in _FILLIN_PATTERN.finditer(text):
+        for match in pattern.finditer(text):
             if match.start() > cursor:
                 segments.append(NavigableString(text[cursor : match.start()]))
             answer_raw = match.group(1)
@@ -553,6 +554,64 @@ def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
         for segment in segments[1:]:
             cursor_node.insert_after(segment)
             cursor_node = segment
+
+
+@renders(
+    DOCUMENT_NODE,
+    phase=RenderPhase.PRE,
+    priority=-5,
+    name="exam_fillin_placeholders",
+    before=("escape_plain_text",),
+)
+def render_fillin_placeholders(root: Tag, context: RenderContext) -> None:
+    """Replace [answer]{w=50} placeholders with exam.cls fill-ins."""
+    _replace_fillin_placeholders(
+        root,
+        context,
+        allow_latex_raw=False,
+        pattern=_FILLIN_PATTERN,
+    )
+
+
+@renders(
+    "td",
+    "th",
+    phase=RenderPhase.PRE,
+    priority=-10,
+    name="exam_table_fillin_cells",
+    auto_mark=False,
+)
+def render_table_fillin_cells(element: Tag, context: RenderContext) -> None:
+    """Handle placeholders in table cells even when inline code split the node."""
+    raw = element.get_text(strip=False).strip()
+    if not raw:
+        return
+    match = _FILLIN_PATTERN.fullmatch(raw)
+    if not match:
+        return
+
+    attrs = match.group(2) or ""
+    if not attrs:
+        return
+
+    answer_raw = match.group(1)
+    answer = render_moving_text(
+        answer_raw,
+        context,
+        legacy_accents=getattr(context.config, "legacy_latex_accents", False),
+        escape=True,
+    )
+    width_value = _normalize_fillin_width(_extract_fillin_width(attrs))
+    if not width_value:
+        scale_raw = _extract_fillin_scale(attrs)
+        scale = _coerce_fillin_scale(
+            scale_raw if scale_raw else _fillin_scale_from_context(context),
+            default=2.5,
+        )
+        width_value = _auto_fillin_width(answer_raw, scale)
+    latex = f"\\fillin[{answer}][{width_value}]"
+    element.clear()
+    element.append(mark_processed(NavigableString(latex)))
 
 
 @renders(
@@ -1115,6 +1174,7 @@ def register(renderer: object) -> None:
     if callable(register_fn):
         register_fn(set_exam_callouts)
         register_fn(render_fillin_placeholders)
+        register_fn(render_table_fillin_cells)
         register_fn(strip_fenced_code_in_blocks)
         register_fn(strip_fenced_code_in_pre)
         register_fn(render_exam_checkboxes)

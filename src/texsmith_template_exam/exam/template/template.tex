@@ -1,6 +1,7 @@
 \BLOCK{ set exam_type_raw = type|default('exam')|string }
 \BLOCK{ set exam_type = exam_type_raw|lower }
 \BLOCK{ set title_value = title|default('')|trim }
+\BLOCK{ set subtitle_value = subtitle|default('')|trim }
 \BLOCK{ set author_value = author|default('')|trim }
 \BLOCK{ set date_value = date|default('')|trim }
 \BLOCK{ set titlepage_raw = titlepage|default('cover')|string|lower }
@@ -66,6 +67,46 @@
 \setlength{\parindent}{0pt}
 \BLOCK{ endif }
 \usepackage{heiglogo}
+\usepackage{xparse}
+
+% Increase table row height only when a row contains at least one \fillin.
+\newcount\texsmithtabledepth
+\texsmithtabledepth=0
+\newcommand{\texsmithtablefillinrowheight}{3.4ex}
+\newcommand{\texsmithtablefillinstrut}{\rule{0pt}{\texsmithtablefillinrowheight}}
+\newcommand{\texsmithtabledepthinc}{\global\advance\texsmithtabledepth by 1\relax}
+\newcommand{\texsmithtabledepthdec}{%
+  \ifnum\texsmithtabledepth>0
+    \global\advance\texsmithtabledepth by -1\relax
+  \fi
+}
+\AddToHook{env/tabular/begin}{\texsmithtabledepthinc}
+\AddToHook{env/tabular/end}{\texsmithtabledepthdec}
+\AddToHook{env/tabularx/begin}{\texsmithtabledepthinc}
+\AddToHook{env/tabularx/end}{\texsmithtabledepthdec}
+\AddToHook{env/longtable/begin}{\texsmithtabledepthinc}
+\AddToHook{env/longtable/end}{\texsmithtabledepthdec}
+\makeatletter
+\let\texsmith@origfillin\fillin
+\RenewDocumentCommand{\fillin}{o o}{%
+  \IfNoValueTF{#1}{%
+    \IfNoValueTF{#2}{%
+      \texsmith@origfillin
+    }{%
+      \texsmith@origfillin[][#2]%
+    }%
+  }{%
+    \IfNoValueTF{#2}{%
+      \texsmith@origfillin[#1]%
+    }{%
+      \texsmith@origfillin[#1][#2]%
+    }%
+  }%
+  \ifnum\texsmithtabledepth>0\relax
+    \texsmithtablefillinstrut
+  \fi
+}
+\makeatother
 
 \newif\ifexamquestionsopen
 \examquestionsopenfalse
@@ -364,8 +405,26 @@
 \BLOCK{ set author_trim = author_rendered|trim }
 \BLOCK{ set date_formatted = date_value|exam_date(lang) }
 \BLOCK{ set date_trim = date_formatted|default('')|trim }
+\BLOCK{ set school_trim = school|default('')|trim }
 \BLOCK{ set course_trim = course|default('')|trim }
 \BLOCK{ set duration_trim = duration|default('')|string|trim }
+\BLOCK{ set header_left_parts = [] }
+\BLOCK{ if titlepage_minimal }
+  \BLOCK{ if title_value }
+    \BLOCK{ set header_left_parts = header_left_parts + [title_value] }
+  \BLOCK{ endif }
+  \BLOCK{ if subtitle_value }
+    \BLOCK{ set header_left_parts = header_left_parts + [subtitle_value] }
+  \BLOCK{ endif }
+\BLOCK{ else }
+  \BLOCK{ if school_trim }
+    \BLOCK{ set header_left_parts = header_left_parts + [school_trim] }
+  \BLOCK{ endif }
+  \BLOCK{ if title_value }
+    \BLOCK{ set header_left_parts = header_left_parts + [title_value] }
+  \BLOCK{ endif }
+\BLOCK{ endif }
+\BLOCK{ set header_left_text = header_left_parts|join(' / ') }
 
 \title{\VAR{display_title}}
 \author{\VAR{author_rendered}}
@@ -409,7 +468,6 @@
   \BLOCK{ if date_trim }
   {\large \thedate\par}%
   \BLOCK{ endif }
-  \BLOCK{ set school_trim = school|default('')|trim }
   \BLOCK{ set department_trim = department|default('')|trim }
   \BLOCK{ if school_trim or department_trim }
   \vskip 0.3em%
@@ -470,8 +528,8 @@
 }
 \BLOCK{ endif }
 
-\firstpageheader{\school~/~\VAR{title_value}}{}{\VAR{label_problem} \thequestion}
-\runningheader{\school~/~\VAR{title_value}}{}{\VAR{label_problem} \thequestion}
+\firstpageheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
+\runningheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
 \footer{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{\VAR{label_page_of}}{\course}
 \pagestyle{headandfoot}
 \setlength{\headsep}{1.5em}

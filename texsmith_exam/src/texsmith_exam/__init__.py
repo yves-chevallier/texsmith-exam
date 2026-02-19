@@ -11,7 +11,7 @@ from markdown.inlinepatterns import InlineProcessor
 from markdown.util import AtomicString
 
 
-_FILLIN_PATTERN = r"\[([^\]\n]+)\](?!\()(?:\{([^}\n]+)\})?"
+_FILLIN_PATTERN = r"\[([^\]\n]+)\](?!\()(?:\\?\{([^}\n]+)\\?\})?"
 _FILLIN_WIDTH_PATTERN = re.compile(r"\b(?:w|width)\s*=\s*([^\s,}]+)")
 _FILLIN_SCALE_PATTERN = re.compile(r"\bchar-width-scale\s*=\s*([^\s,}]+)")
 
@@ -48,7 +48,9 @@ class TexsmithExamExtension(Extension):
 
     def extendMarkdown(self, md: Markdown) -> None:  # type: ignore[override]  # noqa: N802
         processor = _FillInInlineProcessor(_FILLIN_PATTERN, md)
-        md.inlinePatterns.register(processor, "texsmith_exam_fillin", 85)
+        # Must run before the backtick/code processor so patterns like
+        # [`"42\n"`]{width=5cm} are captured as fill-ins.
+        md.inlinePatterns.register(processor, "texsmith_exam_fillin", 210)
 
 
 def makeExtension(**kwargs: object) -> TexsmithExamExtension:  # noqa: N802
