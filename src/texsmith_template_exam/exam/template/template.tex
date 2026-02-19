@@ -12,7 +12,7 @@
   \BLOCK{ set label_rules = "Consignes" }
   \BLOCK{ set label_next_page = "Allez \\`a la page suivante..." }
   \BLOCK{ set label_page_of = "Page \\thepage\\ sur \\pageref{LastPage}" }
-  \BLOCK{ set label_end_exam = "Fin de l'examen" }
+  \BLOCK{ set label_end_exam = "" }
   \BLOCK{ set label_name = "Nom, Pr\\'enom" }
   \BLOCK{ set label_duration = "Dur\\'ee" }
 \BLOCK{ elif lang in ['italian', 'it', 'italiano'] }
@@ -20,7 +20,7 @@
   \BLOCK{ set label_rules = "Istruzioni" }
   \BLOCK{ set label_next_page = "Vai alla pagina successiva..." }
   \BLOCK{ set label_page_of = "Pagina \\thepage\\ di \\pageref{LastPage}" }
-  \BLOCK{ set label_end_exam = "Fine dell'esame" }
+  \BLOCK{ set label_end_exam = "" }
   \BLOCK{ set label_name = "Cognome, Nome" }
   \BLOCK{ set label_duration = "Durata" }
 \BLOCK{ elif lang in ['german', 'de', 'deutsch'] }
@@ -28,7 +28,7 @@
   \BLOCK{ set label_rules = "Hinweise" }
   \BLOCK{ set label_next_page = "Bitte zur n\\\"achsten Seite..." }
   \BLOCK{ set label_page_of = "Seite \\thepage\\ von \\pageref{LastPage}" }
-  \BLOCK{ set label_end_exam = "Ende der Pr\\\"ufung" }
+  \BLOCK{ set label_end_exam = "" }
   \BLOCK{ set label_name = "Nachname, Vorname" }
   \BLOCK{ set label_duration = "Dauer" }
 \BLOCK{ else }
@@ -36,10 +36,11 @@
   \BLOCK{ set label_rules = "Instructions" }
   \BLOCK{ set label_next_page = "Go to the next page..." }
   \BLOCK{ set label_page_of = "Page \\thepage\\ of \\pageref{LastPage}" }
-  \BLOCK{ set label_end_exam = "End of the exam" }
+  \BLOCK{ set label_end_exam = "" }
   \BLOCK{ set label_name = "Surname, First name" }
   \BLOCK{ set label_duration = "Duration" }
 \BLOCK{ endif }
+\BLOCK{ set next_page_advice = next_page_advice|default(true) }
 \BLOCK{ set base_docclass_options = documentclass_options|default('', true) }
 \BLOCK{ set combined_docclass_options = base_docclass_options[1:-1] if base_docclass_options else '' }
 \BLOCK{ set option_parts = [] }
@@ -60,6 +61,7 @@
 \usepackage{ifthen}
 \usepackage{eso-pic}
 \usepackage{etoolbox}
+\usepackage{afterpage}
 \usepackage[\VAR{language|default('english')}]{babel}
 \usepackage[normalem]{ulem}
 \usepackage{lastpage}
@@ -445,10 +447,10 @@
 \makeatletter
 \BLOCK{ if titlepage_minimal }
 \def\@maketitle{%
-  \logo[top=10mm,height=1.26cm]
+  \logo[top=10mm,left=24mm,height=1.45cm]
   \begingroup
   \centering
-  \vskip 1cm%
+  \vskip \dimexpr0pt-\headheight-\headsep-\topskip-3mm\relax%
   {\LARGE \@title \par}%
   \ifprintanswers
     \vskip .1em%
@@ -535,14 +537,16 @@
 
 \firstpageheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
 \runningheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
-\footer{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{\VAR{label_page_of}}{\course}
+\footer{\ifthenelse{\equal{\VAR{next_page_advice|lower}}{true}}{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{}}{\VAR{label_page_of}}{\course}
 \pagestyle{headandfoot}
+\setlength{\headheight}{14pt}
 \setlength{\headsep}{1.5em}
 \makeatother
 
 \begin{document}
 \BLOCK{ if titlepage_minimal }
   \maketitle
+  \thispagestyle{foot}
 \BLOCK{ else }
 \begin{coverpages}
   \maketitle
