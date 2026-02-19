@@ -468,13 +468,8 @@
   }%
   \vskip 0.4em%
   \BLOCK{ endif }
-  \BLOCK{ if course_trim }
-  {\large \course\par}%
+  {\large \noindent\makebox[\linewidth]{\course\hfill\thedate}\par}%
   \vskip 0.2em%
-  \BLOCK{ endif }
-  \BLOCK{ if date_trim }
-  {\large \thedate\par}%
-  \BLOCK{ endif }
   \BLOCK{ set department_trim = department|default('')|trim }
   \BLOCK{ if school_trim or department_trim }
   \vskip 0.3em%
