@@ -111,6 +111,13 @@ allow_empty = false
 sources = ["exam.fillin-style", "exam.fillin_style", "fillin-style", "fillin_style"]
 description = "Style for \\fillin placeholders: 'line' (default) or 'dotted'."
 
+[latex.template.attributes.compact]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.compact", "compact"]
+description = "Enable compact rendering mode for the exam renderer."
+
 [latex.template.attributes.duration]
 default = ""
 type = "any"
