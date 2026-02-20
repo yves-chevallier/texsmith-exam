@@ -197,6 +197,22 @@ def _in_solution_mode(context: RenderContext) -> bool:
     return False
 
 
+def _in_compact_mode(context: RenderContext) -> bool:
+    overrides = context.runtime.get("template_overrides")
+    if isinstance(overrides, dict):
+        value = overrides.get("compact")
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+    value = context.runtime.get("compact")
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return False
+
+
 def _choice_style(context: RenderContext) -> str:
     style = _exam_style(context)
     return _normalize_style_choice(
@@ -715,6 +731,7 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
         lines = ["\\begin{samepage}", "\\begin{columen}[5]", "\\begin{checkboxes}"]
     else:
         lines = ["\\begin{samepage}", "\\begin{columen}[5]", "\\begin{choices}"]
+    show_answerline = not _in_compact_mode(context)
     correct_labels: list[str] = []
     for index, (checked, text) in enumerate(items):
         if checked:
@@ -725,22 +742,24 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
     if choice_style == "checkbox":
         lines.append("\\end{checkboxes}")
         lines.append("\\end{columen}")
-        if correct_labels:
-            lines.append(
-                f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
-            )
-        else:
-            lines.append("\\answerline")
+        if show_answerline:
+            if correct_labels:
+                lines.append(
+                    f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
+                )
+            else:
+                lines.append("\\answerline")
         lines.append("\\end{samepage}")
     else:
         lines.append("\\end{choices}")
         lines.append("\\end{columen}")
-        if correct_labels:
-            lines.append(
-                f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
-            )
-        else:
-            lines.append("\\answerline")
+        if show_answerline:
+            if correct_labels:
+                lines.append(
+                    f"\\ifprintanswers\\answerline[{', '.join(correct_labels)}]\\else\\answerline\\fi"
+                )
+            else:
+                lines.append("\\answerline")
         lines.append("\\end{samepage}")
 
     element.replace_with(mark_processed(NavigableString("\n".join(lines) + "\n")))
