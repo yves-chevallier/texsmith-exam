@@ -8,7 +8,7 @@
 \BLOCK{ set titlepage_minimal = titlepage_raw == 'minimal' }
 \BLOCK{ set lang = language|default('english')|lower }
 \BLOCK{ if lang in ['french', 'fr', 'francais'] }
-  \BLOCK{ set label_problem = "Probl\\`eme" }
+  \BLOCK{ set label_problem_default = "Probl\\`eme" }
   \BLOCK{ set label_rules = "Consignes" }
   \BLOCK{ set label_next_page = "Allez \\`a la page suivante..." }
   \BLOCK{ set label_page_of = "Page \\thepage\\ sur \\pageref{LastPage}" }
@@ -16,7 +16,7 @@
   \BLOCK{ set label_name = "Nom, Pr\\'enom" }
   \BLOCK{ set label_duration = "Dur\\'ee" }
 \BLOCK{ elif lang in ['italian', 'it', 'italiano'] }
-  \BLOCK{ set label_problem = "Problema" }
+  \BLOCK{ set label_problem_default = "Problema" }
   \BLOCK{ set label_rules = "Istruzioni" }
   \BLOCK{ set label_next_page = "Vai alla pagina successiva..." }
   \BLOCK{ set label_page_of = "Pagina \\thepage\\ di \\pageref{LastPage}" }
@@ -24,7 +24,7 @@
   \BLOCK{ set label_name = "Cognome, Nome" }
   \BLOCK{ set label_duration = "Durata" }
 \BLOCK{ elif lang in ['german', 'de', 'deutsch'] }
-  \BLOCK{ set label_problem = "Aufgabe" }
+  \BLOCK{ set label_problem_default = "Aufgabe" }
   \BLOCK{ set label_rules = "Hinweise" }
   \BLOCK{ set label_next_page = "Bitte zur n\\\"achsten Seite..." }
   \BLOCK{ set label_page_of = "Seite \\thepage\\ von \\pageref{LastPage}" }
@@ -32,7 +32,7 @@
   \BLOCK{ set label_name = "Nachname, Vorname" }
   \BLOCK{ set label_duration = "Dauer" }
 \BLOCK{ else }
-  \BLOCK{ set label_problem = "Problem" }
+  \BLOCK{ set label_problem_default = "Problem" }
   \BLOCK{ set label_rules = "Instructions" }
   \BLOCK{ set label_next_page = "Go to the next page..." }
   \BLOCK{ set label_page_of = "Page \\thepage\\ of \\pageref{LastPage}" }
@@ -40,6 +40,14 @@
   \BLOCK{ set label_name = "Surname, First name" }
   \BLOCK{ set label_duration = "Duration" }
 \BLOCK{ endif }
+\BLOCK{ set label_problem_override = '' }
+\BLOCK{ if exam is defined and exam }
+  \BLOCK{ set label_problem_override = exam.get('problem-label', exam.get('problem_label', ''))|string|trim }
+\BLOCK{ endif }
+\BLOCK{ if not label_problem_override }
+  \BLOCK{ set label_problem_override = problem_label|default('', true)|string|trim }
+\BLOCK{ endif }
+\BLOCK{ set label_problem = label_problem_override|default(label_problem_default, true)|trim }
 \BLOCK{ set next_page_advice = next_page_advice|default(true) }
 \BLOCK{ set base_docclass_options = documentclass_options|default('', true) }
 \BLOCK{ set combined_docclass_options = base_docclass_options[1:-1] if base_docclass_options else '' }

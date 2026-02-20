@@ -96,6 +96,14 @@ allow_empty = true
 sources = ["exam.course", "course"]
 description = "Course name or code."
 
+[latex.template.attributes.problem_label]
+default = ""
+type = "string"
+escape = "latex"
+allow_empty = true
+sources = ["exam.problem-label", "exam.problem_label", "problem-label", "problem_label"]
+description = "Label for each question block (defaults to language-specific 'Problem')."
+
 [latex.template.attributes.duration]
 default = ""
 type = "any"
