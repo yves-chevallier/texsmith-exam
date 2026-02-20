@@ -461,7 +461,17 @@
   \logo[top=10mm,left=24mm,height=1.45cm]
   \begingroup
   \vskip \dimexpr0pt-\headheight-\headsep-\topskip-3mm\relax%
-  {\LARGE \noindent\makebox[\linewidth]{\@title\hfill\ifprintanswers\textbf{\textcolor{red}{Solution}}\fi}\par}%
+  \noindent%
+  \ifprintanswers
+    \rlap{%
+      \begin{minipage}[t]{\linewidth}%
+        \raggedleft\large\textbf{\textcolor{red}{Solution}}%
+      \end{minipage}%
+    }%
+  \fi
+  \begin{minipage}[t]{\linewidth}%
+    \centering{\LARGE \@title\par}%
+  \end{minipage}\par
   \centering
   \vskip .15em%
   {\itshape\subtitle\par}%
