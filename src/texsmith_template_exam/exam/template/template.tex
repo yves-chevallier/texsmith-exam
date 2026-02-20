@@ -462,11 +462,12 @@
   \begingroup
   \centering
   \vskip \dimexpr0pt-\headheight-\headsep-\topskip-3mm\relax%
-  {\LARGE \@title \par}%
-  \ifprintanswers
-    \vskip .1em%
-    \large \textbf{\textcolor{red}{Solution}}%
-  \fi
+  \noindent\makebox[\linewidth]{%
+    \ifprintanswers
+      \makebox[0pt][l]{\hspace*{\linewidth}\large\textbf{\textcolor{red}{Solution}}}%
+    \fi
+    {\LARGE \@title}%
+  }\par
   \vskip .15em%
   {\itshape\subtitle\par}%
   \vskip .5em%
