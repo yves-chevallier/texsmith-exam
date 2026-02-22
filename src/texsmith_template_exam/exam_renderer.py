@@ -106,6 +106,78 @@ def _normalize_points(points: str | None) -> str | None:
     return trimmed or None
 
 
+def _normalize_answer_text(answer: str | None) -> str | None:
+    if answer is None:
+        return None
+    text = answer.strip()
+    if len(text) >= 2:
+        quote_pairs = {
+            ("`", "`"),
+            ('"', '"'),
+            ("'", "'"),
+            ("«", "»"),
+            ("“", "”"),
+        }
+        if (text[0], text[-1]) in quote_pairs:
+            text = text[1:-1].strip()
+    return text or None
+
+
+def _answerline_latex(answer_text: str, context: RenderContext) -> str:
+    answer_latex = render_moving_text(
+        answer_text,
+        context,
+        legacy_accents=getattr(context.config, "legacy_latex_accents", False),
+        escape="\\" not in answer_text,
+        wrap_scripts=True,
+    )
+    return f"\\ifprintanswers\\answerline[{answer_latex}]\\else\\answerline\\fi"
+
+
+def _iter_non_empty_siblings(element: Tag):
+    for sibling in element.next_siblings:
+        if isinstance(sibling, NavigableString):
+            if sibling.strip():
+                yield sibling
+            continue
+        yield sibling
+
+
+def _is_code_only_paragraph(element: Tag) -> bool:
+    if element.name != "p":
+        return False
+    content_nodes = [
+        node
+        for node in element.contents
+        if not (isinstance(node, NavigableString) and not node.strip())
+    ]
+    if not content_nodes:
+        return False
+    return all(isinstance(node, Tag) and node.name == "code" for node in content_nodes)
+
+
+def _attach_answerline_after_question(
+    heading_element: Tag,
+    answerline: str,
+) -> None:
+    for sibling in _iter_non_empty_siblings(heading_element):
+        if isinstance(sibling, Tag):
+            if sibling.name == "p" and _is_code_only_paragraph(sibling):
+                sibling.insert_after(mark_processed(NavigableString("\n" + answerline + "\n")))
+                return
+            if sibling.name and sibling.name.lower() in {"h1", "h2", "h3", "h4", "h5", "h6"}:
+                break
+        else:
+            sibling.insert_after(mark_processed(NavigableString("\n" + answerline + "\n")))
+            return
+    heading_element.insert_after(mark_processed(NavigableString("\n" + answerline + "\n")))
+
+
+def _should_defer_answerline_for_heading_text(text: str) -> bool:
+    normalized = text.strip()
+    return normalized in {"-", "–", "—"}
+
+
 def _is_truthy_attribute(value: str | None) -> bool:
     if value is None:
         return False
@@ -157,7 +229,46 @@ _SOLUTION_PATTERN = re.compile(
 _LINES_PATTERN = re.compile(r"\blines\s*=\s*([^\s,}]+)\b")
 _GRID_PATTERN = re.compile(r"\bgrid\s*=\s*([^\s,}]+)\b")
 _BOX_PATTERN = re.compile(r"\bbox\s*=\s*([^\s,}]+)\b")
-_ATTRS_BLOCK_PATTERN = re.compile(r"\{(?P<attrs>[^}]*)\}\s*$")
+_ATTRS_BLOCK_PATTERN = re.compile(r"\\?\{(?P<attrs>[^}]*)\\?\}\s*$")
+_HEADING_ATTR_PATTERN = re.compile(
+    r'(?P<key>[A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(?P<value>"[^"]*"|\'[^\']*\'|«[^»]*»|“[^”]*”|[^,\s]+)'
+)
+_HEADING_DASH_ATTRS_PATTERN = re.compile(r"^\s*-\s*\\?\{(?P<attrs>.*)\\?\}\s*$")
+
+
+def _extract_dash_attrs_prefix(text: str) -> tuple[str, str] | None:
+    stripped = text.strip()
+    if not stripped.startswith("-"):
+        return None
+    cursor = stripped[1:].lstrip()
+    if not cursor:
+        return None
+
+    open_idx = None
+    if cursor.startswith("\\{"):
+        open_idx = 1
+    elif cursor.startswith("{"):
+        open_idx = 0
+    if open_idx is None:
+        return None
+
+    depth = 0
+    end_idx = None
+    for idx in range(open_idx, len(cursor)):
+        ch = cursor[idx]
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                end_idx = idx
+                break
+    if end_idx is None or depth != 0:
+        return None
+
+    attrs = cursor[open_idx + 1 : end_idx]
+    tail = cursor[end_idx + 1 :].strip()
+    return attrs, tail
 
 
 def _normalize_style_choice(value: object | None, *, default: str, aliases: dict[str, str]) -> str:
@@ -171,6 +282,22 @@ def _normalize_style_choice(value: object | None, *, default: str, aliases: dict
         if candidate in aliases or candidate in aliases.values()
         else default
     )
+
+
+def _parse_heading_attrs(attrs: str) -> dict[str, str]:
+    parsed: dict[str, str] = {}
+    for match in _HEADING_ATTR_PATTERN.finditer(attrs):
+        key = match.group("key").strip().lower().replace("-", "_")
+        value = match.group("value").strip()
+        if len(value) >= 2 and (
+            (value[0] == '"' and value[-1] == '"')
+            or (value[0] == "'" and value[-1] == "'")
+            or (value[0] == "«" and value[-1] == "»")
+            or (value[0] == "“" and value[-1] == "”")
+        ):
+            value = value[1:-1]
+        parsed[key] = value
+    return parsed
 
 
 def _exam_style(context: RenderContext) -> dict[str, object]:
@@ -849,6 +976,24 @@ def render_exam_images(element: Tag, context: RenderContext) -> None:
 @renders(
     "p",
     phase=RenderPhase.POST,
+    priority=75,
+    name="exam_pending_answerline_paragraph",
+    nestable=True,
+    auto_mark=False,
+)
+def render_pending_answerline_paragraph(element: Tag, context: RenderContext) -> None:
+    pending = context.runtime.get("pending_question_answerline")
+    if not pending:
+        return
+    if not element.get_text(strip=True):
+        return
+    element.insert_after(mark_processed(NavigableString("\n" + pending + "\n")))
+    context.runtime["pending_question_answerline"] = None
+
+
+@renders(
+    "p",
+    phase=RenderPhase.POST,
     priority=80,
     name="exam_image_paragraphs",
     nestable=True,
@@ -1111,6 +1256,29 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         return
 
     raw_text = element.get_text(strip=False)
+    heading_attrs: dict[str, str] = {}
+    stripped_heading = raw_text.strip()
+    attrs_match = _ATTRS_BLOCK_PATTERN.search(stripped_heading)
+    if attrs_match:
+        parsed_attrs = _parse_heading_attrs(attrs_match.group("attrs"))
+        if parsed_attrs:
+            heading_attrs = parsed_attrs
+            raw_text = stripped_heading[: attrs_match.start()].rstrip()
+    if not heading_attrs:
+        dash_attrs = _extract_dash_attrs_prefix(stripped_heading)
+        if dash_attrs:
+            attrs_text, tail_text = dash_attrs
+            parsed_attrs = _parse_heading_attrs(attrs_text)
+            if parsed_attrs:
+                heading_attrs = parsed_attrs
+                raw_text = tail_text or "-"
+    if not heading_attrs:
+        dash_attrs_match = _HEADING_DASH_ATTRS_PATTERN.match(stripped_heading)
+        if dash_attrs_match:
+            parsed_attrs = _parse_heading_attrs(dash_attrs_match.group("attrs"))
+            if parsed_attrs:
+                heading_attrs = parsed_attrs
+                raw_text = "-"
     text = render_moving_text(
         raw_text,
         context,
@@ -1118,7 +1286,7 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         escape="\\" not in raw_text,
         wrap_scripts=True,
     )
-    plain_text = element.get_text(strip=True)
+    plain_text = BeautifulSoup(raw_text, "html.parser").get_text(strip=True)
     empty_title = _is_empty_title(plain_text)
     if not empty_title:
         rendered_clean = text.replace("\\", "").strip()
@@ -1130,6 +1298,7 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     heading_attr = _is_truthy_attribute(
         coerce_attribute(element.get("heading"))
         or coerce_attribute(element.get("data-heading"))
+        or heading_attrs.get("heading")
     )
     heading_mode_level = context.runtime.get("heading_mode_level")
     if heading_attr:
@@ -1143,8 +1312,21 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
 
     ref = coerce_attribute(element.get("id"))
     points = _normalize_points(
-        coerce_attribute(element.get("points")) or coerce_attribute(element.get("data-points"))
+        coerce_attribute(element.get("points"))
+        or coerce_attribute(element.get("data-points"))
+        or heading_attrs.get("points")
     )
+    answer_text = _normalize_answer_text(
+        coerce_attribute(element.get("answer"))
+        or coerce_attribute(element.get("data-answer"))
+        or heading_attrs.get("answer")
+    )
+    answerline = (
+        _answerline_latex(answer_text, context)
+        if (answer_text and not _in_compact_mode(context))
+        else None
+    )
+    defer_answerline = bool(answerline and _should_defer_answerline_for_heading_text(raw_text))
     if not ref:
         slug = slugify(plain_text, separator="-")
         ref = slug or None
@@ -1164,6 +1346,10 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         )
         if lines:
             latex = "\n".join(lines + [latex])
+        if answerline and not defer_answerline:
+            _attach_answerline_after_question(element, answerline)
+        elif answerline and defer_answerline:
+            context.runtime["pending_question_answerline"] = answerline
         element.replace_with(mark_processed(NavigableString(latex)))
         context.state.add_heading(level=rendered_level, text=plain_text, ref=ref)
         return
@@ -1202,6 +1388,10 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     )
 
     latex = "\n".join(lines)
+    if answerline and not defer_answerline:
+        _attach_answerline_after_question(element, answerline)
+    elif answerline and defer_answerline:
+        context.runtime["pending_question_answerline"] = answerline
     element.replace_with(mark_processed(NavigableString(latex)))
     context.state.add_heading(level=rendered_level, text=plain_text, ref=ref)
 
@@ -1234,6 +1424,7 @@ def register(renderer: object) -> None:
         register_fn(strip_fenced_code_in_pre)
         register_fn(render_exam_checkboxes)
         register_fn(render_exam_fillin)
+        register_fn(render_pending_answerline_paragraph)
         register_fn(render_exam_image_paragraphs)
         register_fn(render_exam_images)
         register_fn(render_solution_admonition)
