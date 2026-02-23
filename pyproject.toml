@@ -1,6 +1,6 @@
 [project]
 name = "texsmith-exam"
-version = "0.1.0"
+dynamic = ["version"]
 description = "TeXSmith exam template."
 requires-python = ">=3.13"
 dependencies = [
@@ -17,7 +17,7 @@ exam = "texsmith_template_exam:template"
 exam = "texsmith_template_exam.exam_renderer:register"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -40,9 +40,8 @@ docs = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/texsmith_template_exam"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"src/texsmith_template_exam/exam" = "texsmith_template_exam/exam"
-"src/texsmith_template_exam/columen" = "texsmith_template_exam/columen"
+[tool.hatch.version]
+source = "vcs"
 
 [tool.ruff]
 line-length = 100
