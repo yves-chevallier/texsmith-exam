@@ -1233,7 +1233,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "texsmith-template-exam"
+name = "texsmith-exam"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

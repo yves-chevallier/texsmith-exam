@@ -1,5 +1,5 @@
 [project]
-name = "texsmith-template-exam"
+name = "texsmith-exam"
 version = "0.1.0"
 description = "TeXSmith exam template."
 requires-python = ">=3.13"

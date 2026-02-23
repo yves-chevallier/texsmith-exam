@@ -1,11 +1,11 @@
-# TeXSmith Template Exam
+# TeXSmith Exam
 
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/)
 [![Build system](https://img.shields.io/badge/build-hatchling-4B8BBE.svg)](https://hatch.pypa.io/latest/)
 [![Package manager](https://img.shields.io/badge/deps-uv-6A5ACD.svg)](https://docs.astral.sh/uv/)
 [![Docs](https://img.shields.io/badge/docs-mkdocs%20material-2E8555.svg)](https://squidfunk.github.io/mkdocs-material/)
 
-`texsmith-template-exam` is an exam-focused template for [TeXSmith](https://github.com/yves-chevallier/texsmith).  
+`texsmith-exam` is an exam-focused template for [TeXSmith](https://github.com/yves-chevallier/texsmith).  
 It provides:
 
 - An exam LaTeX template and renderer integration.
