@@ -27,6 +27,20 @@ def test_in_compact_mode_from_overrides_and_path_fallback() -> None:
     assert not mode.in_compact_mode(_DummyContext())
 
 
+def test_in_solution_mode_reads_source_config_file(tmp_path) -> None:
+    source_dir = tmp_path / "series"
+    source_dir.mkdir()
+    (source_dir / "common.yml").write_text("exam:\n  solution: true\n", encoding="utf-8")
+    assert mode.in_solution_mode(_DummyContext({"source_dir": str(source_dir)}))
+
+
+def test_in_compact_mode_reads_source_config_file(tmp_path) -> None:
+    source_dir = tmp_path / "series"
+    source_dir.mkdir()
+    (source_dir / "config.yml").write_text("exam:\n  compact: true\n", encoding="utf-8")
+    assert mode.in_compact_mode(_DummyContext({"source_dir": str(source_dir)}))
+
+
 def test_points_enabled_precedence_runtime_over_config_and_front_matter(tmp_path) -> None:
     doc = tmp_path / "doc.md"
     doc.write_text("---\nexam:\n  points: false\n---\n# Title\n", encoding="utf-8")
@@ -69,3 +83,10 @@ def test_points_enabled_reads_attribute_style_config() -> None:
         exam = {"points": False}
 
     assert mode.points_enabled(_DummyContext(config=_Config())) is False
+
+
+def test_points_enabled_reads_source_config_file(tmp_path) -> None:
+    source_dir = tmp_path / "series"
+    source_dir.mkdir()
+    (source_dir / "config.yml").write_text("exam:\n  points: false\n", encoding="utf-8")
+    assert mode.points_enabled(_DummyContext(runtime={"source_dir": str(source_dir)})) is False

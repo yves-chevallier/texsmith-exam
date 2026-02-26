@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from texsmith.core.context import RenderContext
 
+from texsmith_template_exam.exam.mode import resolve_value
 from texsmith_template_exam.exam.utils import normalize_style_choice
 
 
 def exam_style(context: RenderContext) -> dict[str, object]:
-    overrides = context.runtime.get("template_overrides")
-    if not isinstance(overrides, dict):
-        return {}
-    style = overrides.get("style")
+    style = resolve_value(context, ("style", "exam.style"), include_runtime=True, include_front_matter=True)
     return style if isinstance(style, dict) else {}
 
 

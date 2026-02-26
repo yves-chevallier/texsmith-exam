@@ -6,6 +6,7 @@ import re
 
 from texsmith.core.context import RenderContext
 
+from texsmith_template_exam.exam.mode import resolve_value
 from texsmith_template_exam.exam.utils import normalize_fillin_width
 
 
@@ -36,18 +37,17 @@ def coerce_fillin_scale(value: object, *, default: float) -> float:
 
 
 def fillin_scale_from_context(context: RenderContext, *, default_scale: float = 2.5) -> float:
-    overrides = context.runtime.get("template_overrides")
-    if not isinstance(overrides, dict):
-        return default_scale
-    for key in ("char-width-scale", "fillin_char_width_scale"):
-        if key in overrides:
-            return coerce_fillin_scale(overrides.get(key), default=default_scale)
-    style = overrides.get("style")
-    if isinstance(style, dict) and "char-width-scale" in style:
-        return coerce_fillin_scale(style.get("char-width-scale"), default=default_scale)
-    fillin = overrides.get("fillin")
-    if isinstance(fillin, dict) and "char-width-scale" in fillin:
-        return coerce_fillin_scale(fillin.get("char-width-scale"), default=default_scale)
+    for key in (
+        "char-width-scale",
+        "fillin_char_width_scale",
+        "style.char-width-scale",
+        "fillin.char-width-scale",
+        "exam.char-width-scale",
+        "exam.fillin.char-width-scale",
+    ):
+        value = resolve_value(context, (key,), include_runtime=True, include_front_matter=True)
+        if value is not None:
+            return coerce_fillin_scale(value, default=default_scale)
     return default_scale
 
 

@@ -67,6 +67,72 @@ def _config_value(context: RenderContext, keys: tuple[str, ...]) -> object | Non
     return None
 
 
+def _source_config_value(context: RenderContext, keys: tuple[str, ...]) -> object | None:
+    payload = _source_config_payload(context)
+    if payload is None:
+        return None
+    for key in keys:
+        value = _nested_lookup(payload, key)
+        if value is not None:
+            return value
+    return None
+
+
+def _merge_mappings(base: object, incoming: object) -> object:
+    if not isinstance(base, Mapping) or not isinstance(incoming, Mapping):
+        return incoming
+    merged: dict[object, object] = dict(base)
+    for key, value in incoming.items():
+        if key in merged:
+            merged[key] = _merge_mappings(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _source_config_payload(context: RenderContext) -> Mapping[str, object] | None:
+    cache_key = "_texsmith_source_config"
+    cached = context.runtime.get(cache_key)
+    if cached is not None:
+        return cached if isinstance(cached, Mapping) else None
+
+    source_dir = context.runtime.get("source_dir")
+    if not source_dir:
+        context.runtime[cache_key] = False
+        return None
+    root = Path(str(source_dir))
+    candidates = [
+        root / "common.yaml",
+        root / "common.yml",
+        root / "config.yaml",
+        root / "config.yml",
+    ]
+    existing = [path for path in candidates if path.exists() and path.is_file()]
+    if not existing:
+        context.runtime[cache_key] = False
+        return None
+    try:
+        import yaml
+    except Exception:
+        context.runtime[cache_key] = False
+        return None
+
+    merged: object = {}
+    for path in existing:
+        try:
+            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if isinstance(payload, Mapping):
+            merged = _merge_mappings(merged, payload)
+
+    if not isinstance(merged, Mapping):
+        context.runtime[cache_key] = False
+        return None
+    context.runtime[cache_key] = merged
+    return merged
+
+
 def front_matter_flag(context: RenderContext, keys: tuple[str, ...]) -> object:
     cache_key = "_texsmith_front_matter"
     cached = context.runtime.get(cache_key)
@@ -101,21 +167,47 @@ def front_matter_flag(context: RenderContext, keys: tuple[str, ...]) -> object:
     return None
 
 
-def in_solution_mode(context: RenderContext) -> bool:
-    overrides = context.runtime.get("template_overrides")
-    if isinstance(overrides, dict):
-        value = overrides.get("solution")
-        if _is_truthy(value):
-            return True
-        press = overrides.get("press")
-        if isinstance(press, dict) and _is_truthy(press.get("solution")):
-            return True
-    value = context.runtime.get("solution")
-    if _is_truthy(value):
-        return True
+def resolve_value(
+    context: RenderContext,
+    keys: tuple[str, ...],
+    *,
+    include_runtime: bool = True,
+    include_front_matter: bool = True,
+) -> object | None:
+    override_value = _runtime_override_value(context, keys)
+    if override_value is not None:
+        return override_value
 
-    front_matter_value = front_matter_flag(context, ("solution", "exam.solution", "press.solution"))
-    if _is_truthy(front_matter_value):
+    config_value = _config_value(context, keys)
+    if config_value is not None:
+        return config_value
+
+    source_value = _source_config_value(context, keys)
+    if source_value is not None:
+        return source_value
+
+    if include_runtime:
+        for key in keys:
+            if "." in key:
+                continue
+            if key in context.runtime:
+                value = context.runtime.get(key)
+                if value is not None:
+                    return value
+
+    if include_front_matter:
+        return front_matter_flag(context, keys)
+    return None
+
+
+def in_solution_mode(context: RenderContext) -> bool:
+    value = resolve_value(
+        context,
+        ("solution", "exam.solution", "press.solution"),
+        include_runtime=True,
+        include_front_matter=True,
+    )
+    if _is_truthy(value):
         return True
 
     # Fallback for project solution builds when overrides are not propagated.
@@ -128,20 +220,13 @@ def in_solution_mode(context: RenderContext) -> bool:
 
 
 def in_compact_mode(context: RenderContext) -> bool:
-    overrides = context.runtime.get("template_overrides")
-    if isinstance(overrides, dict):
-        value = overrides.get("compact")
-        if _is_truthy(value):
-            return True
-        press = overrides.get("press")
-        if isinstance(press, dict) and _is_truthy(press.get("compact")):
-            return True
-    value = context.runtime.get("compact")
+    value = resolve_value(
+        context,
+        ("compact", "exam.compact", "press.compact"),
+        include_runtime=True,
+        include_front_matter=True,
+    )
     if _is_truthy(value):
-        return True
-
-    front_matter_value = front_matter_flag(context, ("compact", "exam.compact", "press.compact"))
-    if _is_truthy(front_matter_value):
         return True
 
     # Fallback for project light builds where compact mode is generated in a
@@ -155,18 +240,19 @@ def in_compact_mode(context: RenderContext) -> bool:
 
 
 def points_enabled(context: RenderContext) -> bool:
-    override_value = _runtime_override_value(context, ("points", "exam.points"))
-    if override_value is not None:
-        return _coerce_bool(override_value, default=True)
-
-    config_value = _config_value(context, ("points", "exam.points"))
-    if config_value is not None:
-        return _coerce_bool(config_value, default=True)
-
-    if "points" in context.runtime:
-        return _coerce_bool(context.runtime.get("points"), default=True)
-
-    return _coerce_bool(front_matter_flag(context, ("points", "exam.points")), default=True)
+    value = resolve_value(
+        context,
+        ("points", "exam.points"),
+        include_runtime=True,
+        include_front_matter=True,
+    )
+    return _coerce_bool(value, default=True)
 
 
-__all__ = ["front_matter_flag", "in_compact_mode", "in_solution_mode", "points_enabled"]
+__all__ = [
+    "front_matter_flag",
+    "in_compact_mode",
+    "in_solution_mode",
+    "points_enabled",
+    "resolve_value",
+]
