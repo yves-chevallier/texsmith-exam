@@ -41,8 +41,7 @@ jobs:
 
       - name: Build examples
         run: |
-          make -C demo/exam
-          make -C demo/quiz
+          make demo
 
       - name: Build documentation
         run: uv run mkdocs build --strict
