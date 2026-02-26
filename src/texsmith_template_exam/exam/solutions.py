@@ -6,10 +6,13 @@ import re
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
-from texsmith.adapters.handlers.admonitions import gather_classes
-from texsmith.adapters.handlers.inline import _payload_is_block_environment
-from texsmith.adapters.handlers.media import render_images as _render_images
+from texsmith_template_exam.exam.texsmith_compat import (
+    coerce_attribute,
+    gather_classes,
+    mark_processed,
+    payload_is_block_environment,
+    render_images,
+)
 from texsmith.adapters.markdown import render_markdown
 from texsmith.core.context import RenderContext
 from texsmith.fonts.scripts import render_moving_text
@@ -169,7 +172,7 @@ def render_solution_math_scripts(element: Tag, _context: RenderContext) -> None:
     if not payload:
         node = NavigableString("")
     elif is_display:
-        if _payload_is_block_environment(payload):
+        if payload_is_block_environment(payload):
             node = NavigableString(f"\n{payload}\n")
         else:
             node = NavigableString(f"\n$$\n{payload}\n$$\n")
@@ -195,7 +198,7 @@ def render_solution_math_paragraphs(element: Tag, _context: RenderContext) -> No
 
 def render_exam_images(element: Tag, context: RenderContext) -> None:
     """Ensure images inside solution/admonition blocks render in LaTeX."""
-    _render_images(element, context)
+    render_images(element, context)
 
 
 def render_solution_admonition(element: Tag, context: RenderContext) -> None:
@@ -346,7 +349,7 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
             box_value = box_match.group(1)
 
     for img in list(element.find_all("img")):
-        _render_images(img, context)
+        render_images(img, context)
 
     begin_env, end_env = _solution_env(
         lines_value,

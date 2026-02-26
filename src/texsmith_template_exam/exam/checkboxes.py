@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from bs4.element import NavigableString, Tag
-from texsmith.adapters.handlers.admonitions import gather_classes
-from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
-from texsmith.adapters.handlers._helpers import mark_processed
+from texsmith_template_exam.exam.texsmith_compat import (
+    gather_classes,
+    mark_processed,
+    prepare_rich_text_content,
+)
 from texsmith.core.context import RenderContext
 
 from texsmith_template_exam.exam.mode import in_compact_mode
@@ -18,7 +20,7 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
     if element.name != "ul":
         return
 
-    _prepare_rich_text_content(element, context)
+    prepare_rich_text_content(element, context)
 
     items: list[tuple[bool, str]] = []
     has_checkbox = False

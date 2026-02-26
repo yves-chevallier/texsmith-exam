@@ -32,8 +32,8 @@
 - [x] Vérifier la compatibilité avec les usages existants.
 
 ## Phase 6 — Couche de compatibilité texsmith
-- [ ] Créer `src/texsmith_template_exam/exam/texsmith_compat.py` pour isoler les appels aux helpers internes.
-- [ ] Remplacer les imports directs dans les handlers.
+- [x] Créer `src/texsmith_template_exam/exam/texsmith_compat.py` pour isoler les appels aux helpers internes.
+- [x] Remplacer les imports directs dans les handlers.
 
 ## Phase 7 — Tests et validation
 - [ ] Ajouter des tests unitaires ciblés pour les nouveaux modules.

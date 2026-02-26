@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from bs4.element import NavigableString, Tag
-from texsmith.adapters.handlers.code import _is_ascii_art, _resolve_code_engine
-from texsmith.adapters.handlers._helpers import mark_processed
+from texsmith_template_exam.exam.texsmith_compat import (
+    is_ascii_art,
+    mark_processed,
+    resolve_code_engine,
+)
 from texsmith.core.context import RenderContext
 from texsmith.fonts.scripts import render_moving_text
 
@@ -65,7 +68,7 @@ def _render_fenced_segments(
 ) -> str:
     parts: list[str] = []
     legacy_accents = getattr(context.config, "legacy_latex_accents", False)
-    engine = _resolve_code_engine(context)
+    engine = resolve_code_engine(context)
 
     for kind, lang, payload in segments:
         if kind == "text":
@@ -85,7 +88,7 @@ def _render_fenced_segments(
             continue
         language = (lang or "text").strip() or "text"
         code_text = payload if payload.endswith("\n") else payload + "\n"
-        baselinestretch = 0.5 if _is_ascii_art(code_text) else None
+        baselinestretch = 0.5 if is_ascii_art(code_text) else None
         context.state.requires_shell_escape = (
             context.state.requires_shell_escape or engine == "minted"
         )

@@ -8,12 +8,16 @@ import re
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from slugify import slugify
-from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
-from texsmith.adapters.handlers.admonitions import gather_classes
-from texsmith.adapters.handlers.blocks import _prepare_rich_text_content
-from texsmith.adapters.handlers.code import _is_ascii_art, _resolve_code_engine
-from texsmith.adapters.handlers.inline import _payload_is_block_environment
-from texsmith.adapters.handlers.media import render_images as _render_images
+from texsmith_template_exam.exam.texsmith_compat import (
+    coerce_attribute,
+    gather_classes,
+    mark_processed,
+    payload_is_block_environment,
+    render_images,
+    resolve_code_engine,
+    is_ascii_art,
+    prepare_rich_text_content,
+)
 from texsmith.adapters.markdown import render_markdown
 from texsmith.core.callouts import DEFAULT_CALLOUTS, merge_callouts, normalise_callouts
 from texsmith.core.context import RenderContext
@@ -67,6 +71,7 @@ _parse_heading_attrs = parse_heading_attrs
 _choice_label = choice_label
 _in_solution_mode = in_solution_mode
 _in_compact_mode = in_compact_mode
+_prepare_rich_text_content = prepare_rich_text_content
 
 
 def _flag(context: RenderContext, key: str) -> bool:
@@ -375,7 +380,7 @@ def _convert_math_scripts(container: Tag) -> None:
         if not payload:
             node = NavigableString("")
         elif is_display:
-            if _payload_is_block_environment(payload):
+            if payload_is_block_environment(payload):
                 node = NavigableString(f"\n{payload}\n")
             else:
                 node = NavigableString(f"\n$$\n{payload}\n$$\n")
@@ -479,7 +484,7 @@ def _render_fenced_segments(
 ) -> str:
     parts: list[str] = []
     legacy_accents = getattr(context.config, "legacy_latex_accents", False)
-    engine = _resolve_code_engine(context)
+    engine = resolve_code_engine(context)
 
     for kind, lang, payload in segments:
         if kind == "text":
@@ -499,7 +504,7 @@ def _render_fenced_segments(
             continue
         language = (lang or "text").strip() or "text"
         code_text = payload if payload.endswith("\n") else payload + "\n"
-        baselinestretch = 0.5 if _is_ascii_art(code_text) else None
+        baselinestretch = 0.5 if is_ascii_art(code_text) else None
         context.state.requires_shell_escape = (
             context.state.requires_shell_escape or engine == "minted"
         )
@@ -769,7 +774,7 @@ def render_exam_image_paragraphs(element: Tag, context: RenderContext) -> None:
     if not all(isinstance(node, Tag) and node.name == "img" for node in content_nodes):
         return
     for img in list(element.find_all("img", recursive=False)):
-        _render_images(img, context)
+        render_images(img, context)
     element.unwrap()
     context.mark_processed(element, phase=RenderPhase.POST)
 

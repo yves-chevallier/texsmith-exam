@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-from texsmith.adapters.handlers._helpers import coerce_attribute, mark_processed
+from texsmith_template_exam.exam.texsmith_compat import coerce_attribute, mark_processed
 from texsmith.core.context import RenderContext
 from texsmith.fonts.scripts import render_moving_text
 
