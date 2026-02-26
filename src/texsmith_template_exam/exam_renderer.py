@@ -20,12 +20,30 @@ from texsmith.core.context import RenderContext
 from texsmith.core.rules import DOCUMENT_NODE, RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
 
+from texsmith_template_exam.exam.fillin import build_fillin_latex, compute_fillin_width
 from texsmith_template_exam.markdown import exam_markdown_extensions
+from texsmith_template_exam.exam.utils import (
+    choice_label,
+    expand_lines_value,
+    extract_dash_attrs_prefix,
+    is_empty_title,
+    is_truthy_attribute,
+    matches_empty_title_pattern,
+    normalize_answer_text,
+    normalize_box_dim,
+    normalize_points,
+    normalize_style_choice,
+    parse_heading_attrs,
+)
 
 
 _FILLIN_PATTERN = re.compile(r"\[([^\]\n]+)\](?!\()(?:\\?\{([^}\n]+)\\?\})?")
-_FILLIN_WIDTH_PATTERN = re.compile(r"\b(?:w|width)\s*=\s*([^\s,}]+)")
-_FILLIN_SCALE_PATTERN = re.compile(r"\bchar-width-scale\s*=\s*([^\s,}]+)")
+
+# Backwards-compatible aliases for tests and external callers.
+_normalize_answer_text = normalize_answer_text
+_extract_dash_attrs_prefix = extract_dash_attrs_prefix
+_parse_heading_attrs = parse_heading_attrs
+_choice_label = choice_label
 
 
 def _flag(context: RenderContext, key: str) -> bool:
@@ -101,30 +119,6 @@ def _ensure_subsubparts(context: RenderContext, lines: list[str]) -> None:
         _set_flag(context, "exam_subsubparts_open", True)
 
 
-def _normalize_points(points: str | None) -> str | None:
-    if points is None:
-        return None
-    trimmed = points.strip()
-    return trimmed or None
-
-
-def _normalize_answer_text(answer: str | None) -> str | None:
-    if answer is None:
-        return None
-    text = answer.strip()
-    if len(text) >= 2:
-        quote_pairs = {
-            ("`", "`"),
-            ('"', '"'),
-            ("'", "'"),
-            ("«", "»"),
-            ("“", "”"),
-        }
-        if (text[0], text[-1]) in quote_pairs:
-            text = text[1:-1].strip()
-    return text or None
-
-
 def _answerline_latex(answer_text: str, context: RenderContext) -> str:
     answer_latex = render_moving_text(
         answer_text,
@@ -180,24 +174,6 @@ def _should_defer_answerline_for_heading_text(text: str) -> bool:
     return normalized in {"-", "–", "—"}
 
 
-def _is_truthy_attribute(value: str | None) -> bool:
-    if value is None:
-        return False
-    if value == "":
-        return True
-    normalized = value.strip().lower()
-    return normalized in {"1", "true", "yes", "on", "y", "t"}
-
-
-def _is_empty_title(text: str) -> bool:
-    normalized = text.strip()
-    if not normalized:
-        return True
-    cleaned = normalized.replace("\\", "").replace("\u00a0", "")
-    compact = "".join(ch for ch in cleaned if not ch.isspace())
-    return _EMPTY_TITLE_PATTERN.fullmatch(compact) is not None
-
-
 def _heading_latex(
     *,
     level: int,
@@ -224,7 +200,6 @@ def _heading_latex(
     raise ValueError(f"Unhandled heading level {level}")
 
 
-_EMPTY_TITLE_PATTERN = re.compile(r"^[_\-\u2010\u2011\u2012\u2013\u2014\u2212]+$")
 _SOLUTION_PATTERN = re.compile(
     r"^\s*!!!\s+solution(?:\s*\\?\{(?P<attrs>[^}]*)\\?\})?\s*$", re.IGNORECASE
 )
@@ -232,74 +207,7 @@ _LINES_PATTERN = re.compile(r"\blines\s*=\s*([^\s,}]+)\b")
 _GRID_PATTERN = re.compile(r"\bgrid\s*=\s*([^\s,}]+)\b")
 _BOX_PATTERN = re.compile(r"\bbox\s*=\s*([^\s,}]+)\b")
 _ATTRS_BLOCK_PATTERN = re.compile(r"\\?\{(?P<attrs>[^}]*)\\?\}\s*$")
-_HEADING_ATTR_PATTERN = re.compile(
-    r'(?P<key>[A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(?P<value>"[^"]*"|\'[^\']*\'|«[^»]*»|“[^”]*”|[^,\s]+)'
-)
 _HEADING_DASH_ATTRS_PATTERN = re.compile(r"^\s*-\s*\\?\{(?P<attrs>.*)\\?\}\s*$")
-
-
-def _extract_dash_attrs_prefix(text: str) -> tuple[str, str] | None:
-    stripped = text.strip()
-    if not stripped.startswith("-"):
-        return None
-    cursor = stripped[1:].lstrip()
-    if not cursor:
-        return None
-
-    open_idx = None
-    if cursor.startswith("\\{"):
-        open_idx = 1
-    elif cursor.startswith("{"):
-        open_idx = 0
-    if open_idx is None:
-        return None
-
-    depth = 0
-    end_idx = None
-    for idx in range(open_idx, len(cursor)):
-        ch = cursor[idx]
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                end_idx = idx
-                break
-    if end_idx is None or depth != 0:
-        return None
-
-    attrs = cursor[open_idx + 1 : end_idx]
-    tail = cursor[end_idx + 1 :].strip()
-    return attrs, tail
-
-
-def _normalize_style_choice(value: object | None, *, default: str, aliases: dict[str, str]) -> str:
-    if value is None:
-        return default
-    candidate = str(value).strip().lower()
-    if not candidate:
-        return default
-    return (
-        aliases.get(candidate, candidate)
-        if candidate in aliases or candidate in aliases.values()
-        else default
-    )
-
-
-def _parse_heading_attrs(attrs: str) -> dict[str, str]:
-    parsed: dict[str, str] = {}
-    for match in _HEADING_ATTR_PATTERN.finditer(attrs):
-        key = match.group("key").strip().lower().replace("-", "_")
-        value = match.group("value").strip()
-        if len(value) >= 2 and (
-            (value[0] == '"' and value[-1] == '"')
-            or (value[0] == "'" and value[-1] == "'")
-            or (value[0] == "«" and value[-1] == "»")
-            or (value[0] == "“" and value[-1] == "”")
-        ):
-            value = value[1:-1]
-        parsed[key] = value
-    return parsed
 
 
 def _exam_style(context: RenderContext) -> dict[str, object]:
@@ -413,7 +321,7 @@ def _front_matter_flag(context: RenderContext, keys: tuple[str, ...]) -> object:
 
 def _choice_style(context: RenderContext) -> str:
     style = _exam_style(context)
-    return _normalize_style_choice(
+    return normalize_style_choice(
         style.get("choices"),
         default="alpha",
         aliases={"checkboxes": "checkbox", "check": "checkbox"},
@@ -422,97 +330,11 @@ def _choice_style(context: RenderContext) -> str:
 
 def _text_style(context: RenderContext) -> str:
     style = _exam_style(context)
-    return _normalize_style_choice(
+    return normalize_style_choice(
         style.get("text"),
         default="dotted",
         aliases={"dots": "dotted", "dottedlines": "dotted", "line": "lines"},
     )
-
-
-def _normalize_fillin_width(value: str) -> str:
-    normalized = value.strip().rstrip("\\")
-    if not normalized:
-        return normalized
-    if re.fullmatch(r"\d+(?:\.\d+)?", normalized):
-        return f"{normalized}mm"
-    return normalized
-
-
-def _extract_fillin_width(attrs: str) -> str:
-    match = _FILLIN_WIDTH_PATTERN.search(attrs)
-    if not match:
-        return ""
-    return match.group(1)
-
-
-def _extract_fillin_scale(attrs: str) -> str:
-    match = _FILLIN_SCALE_PATTERN.search(attrs)
-    if not match:
-        return ""
-    return match.group(1)
-
-
-def _coerce_fillin_scale(value: object, *, default: float) -> float:
-    try:
-        scale = float(str(value).strip())
-    except (TypeError, ValueError):
-        return default
-    return scale if scale > 0 else default
-
-
-def _fillin_scale_from_context(context: RenderContext) -> float:
-    overrides = context.runtime.get("template_overrides")
-    default_scale = 2.5
-    if not isinstance(overrides, dict):
-        return default_scale
-    for key in ("char-width-scale", "fillin_char_width_scale"):
-        if key in overrides:
-            return _coerce_fillin_scale(overrides.get(key), default=default_scale)
-    style = overrides.get("style")
-    if isinstance(style, dict) and "char-width-scale" in style:
-        return _coerce_fillin_scale(style.get("char-width-scale"), default=default_scale)
-    fillin = overrides.get("fillin")
-    if isinstance(fillin, dict) and "char-width-scale" in fillin:
-        return _coerce_fillin_scale(fillin.get("char-width-scale"), default=default_scale)
-    return default_scale
-
-
-def _auto_fillin_width(answer_raw: str, scale: float) -> str:
-    visible = re.sub(r"\s+", "", answer_raw or "")
-    length = max(1, len(visible))
-    width_mm = length * scale
-    if width_mm.is_integer():
-        width_value = f"{int(width_mm)}mm"
-    else:
-        width_value = f"{width_mm:.2f}".rstrip("0").rstrip(".") + "mm"
-    return width_value
-
-
-def _choice_label(index: int) -> str:
-    """Return A, B, ..., Z, AA, AB, ... for 0-based index."""
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    label = ""
-    value = index + 1
-    while value:
-        value, rem = divmod(value - 1, 26)
-        label = alphabet[rem] + label
-    return label
-
-
-def _expand_lines_value(value: str, *, unit_macro: str) -> str:
-    trimmed = value.strip()
-    if trimmed.isdigit():
-        return f"{trimmed}\\{unit_macro}"
-    return trimmed
-
-
-def _normalize_box_dim(value: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        return normalized
-    if re.fullmatch(r"\d+(?:\.\d+)?", normalized):
-        return f"{normalized}mm"
-    return normalized
 
 
 def _parse_box_value(value: str) -> tuple[str, str] | None:
@@ -521,12 +343,12 @@ def _parse_box_value(value: str) -> tuple[str, str] | None:
         return None
     if "x" in raw:
         width_raw, height_raw = raw.split("x", 1)
-        width = _normalize_box_dim(width_raw)
-        height = _normalize_box_dim(height_raw)
+        width = normalize_box_dim(width_raw)
+        height = normalize_box_dim(height_raw)
         if width and height:
             return (width, height)
         return None
-    return (_normalize_box_dim(raw), "")
+    return (normalize_box_dim(raw), "")
 
 
 def _solution_env(
@@ -598,17 +420,17 @@ def _solution_env(
         return _wrap_solution_spacing(begin_env, end_env)
 
     if text_style == "lines":
-        height = _expand_lines_value(lines_value, unit_macro="linefillheight")
+        height = expand_lines_value(lines_value, unit_macro="linefillheight")
         begin_env = f"\\begin{{solutionorlines}}[{height}]\n"
         end_env = "\\leavevmode\n\\end{solutionorlines}\n"
         return _wrap_solution_spacing(begin_env, end_env)
     if text_style == "box":
-        height = _expand_lines_value(lines_value, unit_macro="linefillheight")
+        height = expand_lines_value(lines_value, unit_macro="linefillheight")
         begin_env = f"\\begin{{solutionorbox}}[{height}]\n"
         end_env = "\\leavevmode\n\\end{solutionorbox}\n"
         return _wrap_solution_spacing(begin_env, end_env)
 
-    height = _expand_lines_value(lines_value, unit_macro="dottedlinefillheight")
+    height = expand_lines_value(lines_value, unit_macro="dottedlinefillheight")
     begin_env = f"\\begin{{solutionordottedlines}}[{height}]\n"
     end_env = "\\leavevmode\n\\end{solutionordottedlines}\n"
     return _wrap_solution_spacing(begin_env, end_env)
@@ -844,18 +666,13 @@ def _replace_fillin_placeholders(
                 legacy_accents=legacy_accents,
                 escape="\\" not in answer_raw,
             )
-            width_value = _normalize_fillin_width(_extract_fillin_width(attrs))
-            if not width_value:
-                scale_raw = _extract_fillin_scale(attrs)
-                scale = _coerce_fillin_scale(
-                    scale_raw if scale_raw else _fillin_scale_from_context(context),
-                    default=2.5,
-                )
-                width_value = _auto_fillin_width(answer_raw, scale)
-            if _in_solution_mode(context):
-                latex = f"\\fillin[{answer}]"
-            else:
-                latex = f"\\fillin[{answer}][{width_value}]"
+            latex = build_fillin_latex(
+                answer_raw=answer_raw,
+                answer_latex=answer,
+                attrs=attrs,
+                context=context,
+                solution_mode=_in_solution_mode(context),
+            )
             segments.append(mark_processed(NavigableString(latex)))
             cursor = match.end()
         if cursor < len(text):
@@ -916,18 +733,13 @@ def render_table_fillin_cells(element: Tag, context: RenderContext) -> None:
         legacy_accents=getattr(context.config, "legacy_latex_accents", False),
         escape=True,
     )
-    width_value = _normalize_fillin_width(_extract_fillin_width(attrs))
-    if not width_value:
-        scale_raw = _extract_fillin_scale(attrs)
-        scale = _coerce_fillin_scale(
-            scale_raw if scale_raw else _fillin_scale_from_context(context),
-            default=2.5,
-        )
-        width_value = _auto_fillin_width(answer_raw, scale)
-    if _in_solution_mode(context):
-        latex = f"\\fillin[{answer}]"
-    else:
-        latex = f"\\fillin[{answer}][{width_value}]"
+    latex = build_fillin_latex(
+        answer_raw=answer_raw,
+        answer_latex=answer,
+        attrs=attrs,
+        context=context,
+        solution_mode=_in_solution_mode(context),
+    )
     element.clear()
     element.append(mark_processed(NavigableString(latex)))
 
@@ -1038,7 +850,7 @@ def render_exam_checkboxes(element: Tag, context: RenderContext) -> None:
     for index, (checked, text) in enumerate(items):
         if checked:
             lines.append(f"\\CorrectChoice {text}")
-            correct_labels.append(_choice_label(index))
+            correct_labels.append(choice_label(index))
         else:
             lines.append(f"\\choice {text}")
     if choice_style == "checkbox":
@@ -1088,14 +900,16 @@ def render_exam_fillin(element: Tag, context: RenderContext) -> None:
         legacy_accents=getattr(context.config, "legacy_latex_accents", False),
         escape="\\" not in raw_text,
     )
-    width_value = _normalize_fillin_width(element.get("data-width", ""))
-    if not width_value:
-        scale_raw = element.get("data-scale", "")
-        scale = _coerce_fillin_scale(
-            scale_raw if scale_raw else _fillin_scale_from_context(context),
-            default=2.5,
-        )
-        width_value = _auto_fillin_width(raw_text, scale)
+    attrs = ""
+    if element.get("data-width"):
+        attrs = f"width={element.get('data-width')}"
+    elif element.get("data-scale"):
+        attrs = f"char-width-scale={element.get('data-scale')}"
+    width_value = compute_fillin_width(
+        answer_raw=raw_text,
+        attrs=attrs,
+        context=context,
+    )
     if _in_solution_mode(context):
         latex = f"\\fillin[{answer}]"
     else:
@@ -1427,22 +1241,22 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     stripped_heading = raw_text.strip()
     attrs_match = _ATTRS_BLOCK_PATTERN.search(stripped_heading)
     if attrs_match:
-        parsed_attrs = _parse_heading_attrs(attrs_match.group("attrs"))
+        parsed_attrs = parse_heading_attrs(attrs_match.group("attrs"))
         if parsed_attrs:
             heading_attrs = parsed_attrs
             raw_text = stripped_heading[: attrs_match.start()].rstrip()
     if not heading_attrs:
-        dash_attrs = _extract_dash_attrs_prefix(stripped_heading)
+        dash_attrs = extract_dash_attrs_prefix(stripped_heading)
         if dash_attrs:
             attrs_text, tail_text = dash_attrs
-            parsed_attrs = _parse_heading_attrs(attrs_text)
+            parsed_attrs = parse_heading_attrs(attrs_text)
             if parsed_attrs:
                 heading_attrs = parsed_attrs
                 raw_text = tail_text or "-"
     if not heading_attrs:
         dash_attrs_match = _HEADING_DASH_ATTRS_PATTERN.match(stripped_heading)
         if dash_attrs_match:
-            parsed_attrs = _parse_heading_attrs(dash_attrs_match.group("attrs"))
+            parsed_attrs = parse_heading_attrs(dash_attrs_match.group("attrs"))
             if parsed_attrs:
                 heading_attrs = parsed_attrs
                 raw_text = "-"
@@ -1454,15 +1268,15 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         wrap_scripts=True,
     )
     plain_text = BeautifulSoup(raw_text, "html.parser").get_text(strip=True)
-    empty_title = _is_empty_title(plain_text)
+    empty_title = is_empty_title(plain_text)
     if not empty_title:
         rendered_clean = text.replace("\\", "").strip()
-        if _EMPTY_TITLE_PATTERN.fullmatch(rendered_clean) is not None:
+        if matches_empty_title_pattern(rendered_clean):
             empty_title = True
             text = ""
 
     level = int(element.name[1:])
-    heading_attr = _is_truthy_attribute(
+    heading_attr = is_truthy_attribute(
         coerce_attribute(element.get("heading"))
         or coerce_attribute(element.get("data-heading"))
         or heading_attrs.get("heading")
@@ -1478,12 +1292,12 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     rendered_level = level + base_level - 1
 
     ref = coerce_attribute(element.get("id"))
-    points = _normalize_points(
+    points = normalize_points(
         coerce_attribute(element.get("points"))
         or coerce_attribute(element.get("data-points"))
         or heading_attrs.get("points")
     )
-    answer_text = _normalize_answer_text(
+    answer_text = normalize_answer_text(
         coerce_attribute(element.get("answer"))
         or coerce_attribute(element.get("data-answer"))
         or heading_attrs.get("answer")

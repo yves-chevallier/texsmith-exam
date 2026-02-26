@@ -16,10 +16,15 @@ from texsmith.core.templates.base import WrappableTemplate
 
 from texsmith_template_exam.markdown import exam_markdown_extensions
 
+import sys as _sys
+
 
 _RENDERER: LaTeXRenderer | None = None
 _GIT_VERSION: str | None = None
 _GIT_VERSION_READY = False
+
+# Allow `from texsmith_template_exam.exam import __init__ as exam_mod` in tests.
+__init__ = _sys.modules[__name__]
 
 
 def _markdown_to_latex(value: Any) -> str:
