@@ -7,7 +7,7 @@ problem-label: Exercise
 compact: true
 next_page_advice: false
 language: en
-course: Analysis IV
+course: MATH 401
 titlepage: minimal
 points: false
 version: git

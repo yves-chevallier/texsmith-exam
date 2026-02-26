@@ -760,7 +760,7 @@
 
 \firstpageheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
 \runningheader{\VAR{header_left_text}}{}{\VAR{label_problem} \thequestion}
-\footer{\ifthenelse{\equal{\VAR{next_page_advice|lower}}{true}}{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{}}{\VAR{label_page_of}}{\course}
+\footer{\ifthenelse{\equal{\VAR{next_page_advice|lower}}{true}}{\ifthenelse{\value{page}=\pageref{LastPage}}{\VAR{label_end_exam}}{\VAR{label_next_page}}}{}}{\VAR{label_page_of}}{\BLOCK{ if titlepage_minimal }\ifthenelse{\value{page}=1}{}{\course}\BLOCK{ else }\course\BLOCK{ endif }}
 \pagestyle{headandfoot}
 \setlength{\headheight}{14pt}
 \setlength{\headsep}{1.5em}

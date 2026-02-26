@@ -1,6 +1,6 @@
 .PHONY: all exam solution clean
 
-PROJECT_ROOT := ..
+PROJECT_ROOT := ../..
 TEXSMITH := uv --project $(PROJECT_ROOT) run texsmith
 BUILD_DIR := build
 SOURCES := $(wildcard *.md)

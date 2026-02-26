@@ -7,7 +7,7 @@ from bs4.element import NavigableString, Tag
 from texsmith.core.context import RenderContext
 from texsmith.fonts.scripts import render_moving_text
 
-from texsmith_template_exam.exam.mode import in_compact_mode
+from texsmith_template_exam.exam.mode import in_compact_mode, points_enabled
 from texsmith_template_exam.exam.texsmith_compat import coerce_attribute, mark_processed
 from texsmith_template_exam.exam.utils import (
     extract_dash_attrs_prefix,
@@ -231,6 +231,8 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
         or coerce_attribute(element.get("data-points"))
         or heading_attrs.get("points")
     )
+    if not points_enabled(context):
+        points = None
     answer_text = normalize_answer_text(
         coerce_attribute(element.get("answer"))
         or coerce_attribute(element.get("data-answer"))
