@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Any
 
 from texsmith.core.context import RenderContext
 
@@ -104,8 +103,8 @@ def build_fillin_latex(
 __all__ = [
     "auto_fillin_width",
     "build_fillin_latex",
-    "compute_fillin_width",
     "coerce_fillin_scale",
+    "compute_fillin_width",
     "extract_fillin_scale",
     "extract_fillin_width",
     "fillin_scale_from_context",

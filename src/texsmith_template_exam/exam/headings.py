@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-from texsmith_template_exam.exam.texsmith_compat import coerce_attribute, mark_processed
 from texsmith.core.context import RenderContext
 from texsmith.fonts.scripts import render_moving_text
 
 from texsmith_template_exam.exam.mode import in_compact_mode
+from texsmith_template_exam.exam.texsmith_compat import coerce_attribute, mark_processed
 from texsmith_template_exam.exam.utils import (
     extract_dash_attrs_prefix,
     is_empty_title,
@@ -125,7 +125,7 @@ def _attach_answerline_after_question(
 
 def _should_defer_answerline_for_heading_text(text: str) -> bool:
     normalized = text.strip()
-    return normalized in {"-", "–", "—"}
+    return normalized in {"-", "\N{EN DASH}", "\N{EM DASH}"}
 
 
 def _heading_latex(
@@ -169,10 +169,7 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
     raw_text = element.get_text(strip=False)
     heading_attrs: dict[str, str] = {}
     stripped_heading = raw_text.strip()
-    if _ATTRS_BLOCK_PATTERN is None:
-        attrs_block_pattern = None
-    else:
-        attrs_block_pattern = _ATTRS_BLOCK_PATTERN
+    attrs_block_pattern = None if _ATTRS_BLOCK_PATTERN is None else _ATTRS_BLOCK_PATTERN
     if attrs_block_pattern is not None:
         attrs_match = attrs_block_pattern.search(stripped_heading)
     else:
@@ -269,7 +266,7 @@ def render_exam_headings(element: Tag, context: RenderContext) -> None:
             numbered=context.runtime.get("numbered", True),
         )
         if lines:
-            latex = "\n".join(lines + [latex])
+            latex = "\n".join([*lines, latex])
         if answerline and not defer_answerline:
             _attach_answerline_after_question(element, answerline)
         elif answerline and defer_answerline:

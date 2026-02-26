@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from bs4.element import NavigableString, Tag
+from texsmith.core.context import RenderContext
+from texsmith.fonts.scripts import render_moving_text
+
 from texsmith_template_exam.exam.texsmith_compat import (
     is_ascii_art,
     mark_processed,
     resolve_code_engine,
 )
-from texsmith.core.context import RenderContext
-from texsmith.fonts.scripts import render_moving_text
 
 
 def _split_fenced_segments(code_text: str) -> list[tuple[str, str | None, str]]:

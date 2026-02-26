@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 from bs4.element import NavigableString, Tag
-from texsmith_template_exam.exam.texsmith_compat import (
-    gather_classes,
-    mark_processed,
-    prepare_rich_text_content,
-)
 from texsmith.core.context import RenderContext
 
 from texsmith_template_exam.exam.mode import in_compact_mode
 from texsmith_template_exam.exam.styles import choice_style
+from texsmith_template_exam.exam.texsmith_compat import (
+    mark_processed,
+    prepare_rich_text_content,
+)
 from texsmith_template_exam.exam.utils import choice_label
 
 

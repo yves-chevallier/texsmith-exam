@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-import sys as _sys
 import re
+import sys as _sys
 from typing import Any
 
 from texsmith.adapters.latex.renderer import LaTeXRenderer
@@ -53,7 +53,7 @@ def _format_exam_date(value: Any, lang: str = "fr") -> str:
         dt = datetime.fromisoformat(candidate)
     except ValueError:
         try:
-            dt = datetime.strptime(candidate, "%Y-%m-%d")
+            dt = datetime.strptime(candidate, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except ValueError:
             return text
 

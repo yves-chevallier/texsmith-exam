@@ -6,6 +6,11 @@ import re
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
+from texsmith.adapters.markdown import render_markdown
+from texsmith.core.context import RenderContext
+
+from texsmith_template_exam.exam.mode import in_compact_mode, in_solution_mode
+from texsmith_template_exam.exam.styles import text_style
 from texsmith_template_exam.exam.texsmith_compat import (
     coerce_attribute,
     gather_classes,
@@ -13,12 +18,6 @@ from texsmith_template_exam.exam.texsmith_compat import (
     payload_is_block_environment,
     render_images,
 )
-from texsmith.adapters.markdown import render_markdown
-from texsmith.core.context import RenderContext
-from texsmith.fonts.scripts import render_moving_text
-
-from texsmith_template_exam.exam.mode import in_compact_mode, in_solution_mode
-from texsmith_template_exam.exam.styles import text_style
 from texsmith_template_exam.exam.utils import expand_lines_value, normalize_box_dim
 from texsmith_template_exam.markdown import exam_markdown_extensions
 
@@ -142,7 +141,7 @@ def _convert_math_scripts(container: Tag) -> None:
         if not payload:
             node = NavigableString("")
         elif is_display:
-            if _payload_is_block_environment(payload):
+            if payload_is_block_environment(payload):
                 node = NavigableString(f"\n{payload}\n")
             else:
                 node = NavigableString(f"\n$$\n{payload}\n$$\n")
@@ -406,6 +405,7 @@ def render_solution_div_admonitions(element: Tag, context: RenderContext) -> Non
 
 
 __all__ = [
+    "promote_solution_admonitions",
     "render_exam_images",
     "render_solution_admonition",
     "render_solution_callouts",
@@ -413,5 +413,4 @@ __all__ = [
     "render_solution_math_blocks",
     "render_solution_math_paragraphs",
     "render_solution_math_scripts",
-    "promote_solution_admonitions",
 ]

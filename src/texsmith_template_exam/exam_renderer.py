@@ -2,34 +2,20 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
 
-from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-from slugify import slugify
-from texsmith_template_exam.exam.texsmith_compat import (
-    coerce_attribute,
-    gather_classes,
-    mark_processed,
-    payload_is_block_environment,
-    render_images,
-    resolve_code_engine,
-    is_ascii_art,
-    prepare_rich_text_content,
-)
-from texsmith.adapters.markdown import render_markdown
 from texsmith.core.callouts import DEFAULT_CALLOUTS, merge_callouts, normalise_callouts
 from texsmith.core.context import RenderContext
 from texsmith.core.rules import DOCUMENT_NODE, RenderPhase, renders
 from texsmith.fonts.scripts import render_moving_text
 
 from texsmith_template_exam.exam.checkboxes import render_exam_checkboxes as _render_exam_checkboxes
-from texsmith_template_exam.exam.fillin import build_fillin_latex, compute_fillin_width
 from texsmith_template_exam.exam.fenced_code import (
     strip_fenced_code_in_blocks as _strip_fenced_code_in_blocks,
     strip_fenced_code_in_pre as _strip_fenced_code_in_pre,
 )
+from texsmith_template_exam.exam.fillin import build_fillin_latex, compute_fillin_width
 from texsmith_template_exam.exam.headings import (
     close_open_parts as _close_open_parts,
     configure_heading_patterns as _configure_heading_patterns,
@@ -46,17 +32,22 @@ from texsmith_template_exam.exam.solutions import (
     render_solution_math_paragraphs as _render_solution_math_paragraphs,
     render_solution_math_scripts as _render_solution_math_scripts,
 )
-from texsmith_template_exam.markdown import exam_markdown_extensions
+from texsmith_template_exam.exam.texsmith_compat import (
+    coerce_attribute,
+    gather_classes,
+    is_ascii_art,
+    mark_processed,
+    payload_is_block_environment,
+    prepare_rich_text_content,
+    render_images,
+    resolve_code_engine,
+)
 from texsmith_template_exam.exam.utils import (
     choice_label,
     expand_lines_value,
     extract_dash_attrs_prefix,
-    is_empty_title,
-    is_truthy_attribute,
-    matches_empty_title_pattern,
     normalize_answer_text,
     normalize_box_dim,
-    normalize_points,
     normalize_style_choice,
     parse_heading_attrs,
 )
@@ -199,7 +190,7 @@ def _attach_answerline_after_question(
 
 def _should_defer_answerline_for_heading_text(text: str) -> bool:
     normalized = text.strip()
-    return normalized in {"-", "–", "—"}
+    return normalized in {"-", "\N{EN DASH}", "\N{EM DASH}"}
 
 
 def _heading_latex(

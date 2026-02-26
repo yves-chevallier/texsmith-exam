@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
-import warnings
 from typing import Any
+import warnings
 
 
 _GIT_VERSION: str | None = None
@@ -41,7 +41,8 @@ def get_git_version() -> str:
     if repo_root is None:
         warnings.warn(
             "version=git requested but no git repository was found; "
-            "cannot resolve git version."
+            "cannot resolve git version.",
+            stacklevel=2,
         )
         return ""
 
@@ -55,7 +56,7 @@ def get_git_version() -> str:
         _GIT_VERSION = short
         return short
 
-    warnings.warn("version=git requested but git metadata could not be read.")
+    warnings.warn("version=git requested but git metadata could not be read.", stacklevel=2)
     return ""
 
 
