@@ -10,11 +10,11 @@ MAIN := $(basename $(firstword $(SOURCES)))
 all: exam solution
 
 exam:
-	$(TEXSMITH) -o$(BUILD_DIR)/exam -t$(TEMPLATE) $(SOURCES) --build
+	$(TEXSMITH) -o$(BUILD_DIR)/exam -t$(TEMPLATE) config.yml $(SOURCES) --build
 	mv $(BUILD_DIR)/exam/$(MAIN).pdf $(BUILD_DIR)/exam/exam.pdf
 
 solution:
-	$(TEXSMITH) -o$(BUILD_DIR)/solution -t$(TEMPLATE) $(SOURCES) --build -a solution=true
+	$(TEXSMITH) -o$(BUILD_DIR)/solution -t$(TEMPLATE) config.yml $(SOURCES) --build -a solution=true
 	mv $(BUILD_DIR)/solution/$(MAIN).pdf $(BUILD_DIR)/solution/solution.pdf
 
 clean:

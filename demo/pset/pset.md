@@ -9,17 +9,6 @@ next_page_advice: false
 language: en
 course: MATH 401
 titlepage: minimal
-points: false
-version: git
-rules:
-  - Write your **last name** and **first name** on the first page.
-  - Write **legibly**, using a pen or a soft pencil.
-  - Answer the questions in the appropriate spaces.
-  - Review all your answers before handing in your work.
-  - Turn in all pages of this written assignment.
-  - Answers on scratch paper **are not accepted**.
-  - No means of communication are allowed.
-
 ---
 
 ## -
