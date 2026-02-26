@@ -623,10 +623,8 @@
 \author{\VAR{author_rendered}}
 
 \BLOCK{ set date_display = date_formatted if date_formatted else "\\today" }
-\BLOCK{ if version_trim and date_formatted }
+\BLOCK{ if version_trim }
   \BLOCK{ set date_display = date_display ~ ", " ~ version_trim }
-\BLOCK{ elif version_trim }
-  \BLOCK{ set date_display = date_display ~ " " ~ version_trim }
 \BLOCK{ endif }
 \def\thedate{\VAR{date_display}}
 \def\department{\VAR{department}}
