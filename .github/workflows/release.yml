@@ -38,6 +38,34 @@ jobs:
         with:
           path: ./site
 
+  deploy-mike:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync docs dependencies
+        run: uv sync --group docs
+
+      - name: Deploy docs with mike
+        run: |
+          uv run mike deploy --push --update-aliases "${GITHUB_REF_NAME}" latest
+          uv run mike set-default --push latest
+
   deploy-pages:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build-docs
