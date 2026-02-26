@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 
 from texsmith.core.context import RenderContext
@@ -29,6 +30,41 @@ def _coerce_bool(value: object, *, default: bool) -> bool:
         if normalized in {"0", "false", "no", "off"}:
             return False
     return default
+
+
+def _nested_lookup(payload: object, dotted_key: str) -> object | None:
+    if payload is None:
+        return None
+    cursor: object = payload
+    for part in dotted_key.split("."):
+        if isinstance(cursor, Mapping):
+            cursor = cursor.get(part)
+            continue
+        if hasattr(cursor, part):
+            cursor = getattr(cursor, part)
+            continue
+        return None
+    return cursor
+
+
+def _runtime_override_value(context: RenderContext, keys: tuple[str, ...]) -> object | None:
+    overrides = context.runtime.get("template_overrides")
+    if not isinstance(overrides, dict):
+        return None
+    for key in keys:
+        value = _nested_lookup(overrides, key)
+        if value is not None:
+            return value
+    return None
+
+
+def _config_value(context: RenderContext, keys: tuple[str, ...]) -> object | None:
+    config = getattr(context, "config", None)
+    for key in keys:
+        value = _nested_lookup(config, key)
+        if value is not None:
+            return value
+    return None
 
 
 def front_matter_flag(context: RenderContext, keys: tuple[str, ...]) -> object:
@@ -119,15 +155,17 @@ def in_compact_mode(context: RenderContext) -> bool:
 
 
 def points_enabled(context: RenderContext) -> bool:
-    overrides = context.runtime.get("template_overrides")
-    if isinstance(overrides, dict):
-        if "points" in overrides:
-            return _coerce_bool(overrides.get("points"), default=True)
-        exam = overrides.get("exam")
-        if isinstance(exam, dict) and "points" in exam:
-            return _coerce_bool(exam.get("points"), default=True)
+    override_value = _runtime_override_value(context, ("points", "exam.points"))
+    if override_value is not None:
+        return _coerce_bool(override_value, default=True)
+
+    config_value = _config_value(context, ("points", "exam.points"))
+    if config_value is not None:
+        return _coerce_bool(config_value, default=True)
+
     if "points" in context.runtime:
         return _coerce_bool(context.runtime.get("points"), default=True)
+
     return _coerce_bool(front_matter_flag(context, ("points", "exam.points")), default=True)
 
 
