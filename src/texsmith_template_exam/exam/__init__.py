@@ -20,6 +20,49 @@ from texsmith_template_exam.markdown import exam_markdown_extensions
 
 __init__ = _sys.modules[__name__]
 
+_RUNTIME_BRIDGE_PATCHED = False
+
+
+def _ensure_runtime_template_overrides_bridge() -> None:
+    """Expose template overrides to renderer runtime before conversion starts."""
+    global _RUNTIME_BRIDGE_PATCHED
+    if _RUNTIME_BRIDGE_PATCHED:
+        return
+
+    try:
+        from texsmith.core.conversion import core as conversion_core
+    except Exception:
+        return
+
+    original = getattr(conversion_core, "_build_runtime_common", None)
+    if not callable(original):
+        return
+    if getattr(original, "__texsmith_exam_runtime_bridge__", False):
+        _RUNTIME_BRIDGE_PATCHED = True
+        return
+
+    def _wrapped_build_runtime_common(*, binding, binder_context, document, strategy, diagrams_backend, emitter, http_user_agent):  # type: ignore[no-untyped-def]
+        runtime_common = original(
+            binding=binding,
+            binder_context=binder_context,
+            document=document,
+            strategy=strategy,
+            diagrams_backend=diagrams_backend,
+            emitter=emitter,
+            http_user_agent=http_user_agent,
+        )
+        overrides = getattr(binder_context, "template_overrides", None)
+        if isinstance(overrides, Mapping):
+            runtime_common.setdefault("template_overrides", dict(overrides))
+        return runtime_common
+
+    setattr(_wrapped_build_runtime_common, "__texsmith_exam_runtime_bridge__", True)
+    setattr(conversion_core, "_build_runtime_common", _wrapped_build_runtime_common)
+    _RUNTIME_BRIDGE_PATCHED = True
+
+
+_ensure_runtime_template_overrides_bridge()
+
 
 def _markdown_to_latex(value: Any) -> str:
     if value is None:

@@ -64,7 +64,6 @@ _in_solution_mode = in_solution_mode
 _in_compact_mode = in_compact_mode
 _prepare_rich_text_content = prepare_rich_text_content
 
-
 def _flag(context: RenderContext, key: str) -> bool:
     return bool(context.state.counters.get(key, 0))
 

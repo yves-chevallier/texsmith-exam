@@ -9,48 +9,32 @@ class _DummyContext:
         self.config = config
 
 
-def test_in_solution_mode_from_overrides_and_path_fallback() -> None:
+def test_in_solution_mode_from_overrides_and_runtime() -> None:
     assert mode.in_solution_mode(_DummyContext({"template_overrides": {"solution": True}}))
     assert mode.in_solution_mode(_DummyContext({"solution": "true"}))
-    assert mode.in_solution_mode(
-        _DummyContext({"document_path": "/tmp/build/series/20/solution/series-20.md"})
-    )
     assert not mode.in_solution_mode(_DummyContext())
 
 
-def test_in_compact_mode_from_overrides_and_path_fallback() -> None:
+def test_in_compact_mode_from_overrides_and_runtime() -> None:
     assert mode.in_compact_mode(_DummyContext({"template_overrides": {"compact": True}}))
     assert mode.in_compact_mode(_DummyContext({"compact": "yes"}))
-    assert mode.in_compact_mode(
-        _DummyContext({"document_path": "/tmp/build/series/20/light-src/series-20.md"})
-    )
     assert not mode.in_compact_mode(_DummyContext())
 
 
-def test_in_solution_mode_reads_source_config_file(tmp_path) -> None:
-    source_dir = tmp_path / "series"
-    source_dir.mkdir()
-    (source_dir / "common.yml").write_text("exam:\n  solution: true\n", encoding="utf-8")
-    assert mode.in_solution_mode(_DummyContext({"source_dir": str(source_dir)}))
+def test_in_solution_mode_reads_front_matter_runtime_fallback() -> None:
+    assert mode.in_solution_mode(_DummyContext({"front_matter": {"exam": {"solution": True}}}))
 
 
-def test_in_compact_mode_reads_source_config_file(tmp_path) -> None:
-    source_dir = tmp_path / "series"
-    source_dir.mkdir()
-    (source_dir / "config.yml").write_text("exam:\n  compact: true\n", encoding="utf-8")
-    assert mode.in_compact_mode(_DummyContext({"source_dir": str(source_dir)}))
+def test_in_compact_mode_reads_front_matter_runtime_fallback() -> None:
+    assert mode.in_compact_mode(_DummyContext({"front_matter": {"exam": {"compact": True}}}))
 
 
-def test_points_enabled_precedence_runtime_over_config_and_front_matter(tmp_path) -> None:
-    doc = tmp_path / "doc.md"
-    doc.write_text("---\nexam:\n  points: false\n---\n# Title\n", encoding="utf-8")
-
+def test_points_enabled_precedence_runtime_over_config_and_front_matter() -> None:
     # 1) Runtime overrides have highest precedence.
     assert mode.points_enabled(
         _DummyContext(
             runtime={
                 "template_overrides": {"exam": {"points": "false"}},
-                "document_path": str(doc),
             },
             config={"exam": {"points": True}},
         )
@@ -60,19 +44,16 @@ def test_points_enabled_precedence_runtime_over_config_and_front_matter(tmp_path
         _DummyContext(
             runtime={
                 "template_overrides": {"points": True},
-                "document_path": str(doc),
             },
             config={"exam": {"points": False}},
         )
     ) is True
 
     # 2) Config-level value is used when no runtime override is present.
-    assert mode.points_enabled(
-        _DummyContext(runtime={"document_path": str(doc)}, config={"exam": {"points": False}})
-    ) is False
+    assert mode.points_enabled(_DummyContext(config={"exam": {"points": False}})) is False
 
-    # 3) Front matter is fallback when neither runtime nor config provides value.
-    assert mode.points_enabled(_DummyContext(runtime={"document_path": str(doc)})) is False
+    # 3) Front matter runtime fallback is used when neither runtime overrides nor config provides value.
+    assert mode.points_enabled(_DummyContext(runtime={"front_matter": {"exam": {"points": False}}})) is False
 
     # 4) Default is true when nothing is provided.
     assert mode.points_enabled(_DummyContext()) is True
@@ -85,8 +66,5 @@ def test_points_enabled_reads_attribute_style_config() -> None:
     assert mode.points_enabled(_DummyContext(config=_Config())) is False
 
 
-def test_points_enabled_reads_source_config_file(tmp_path) -> None:
-    source_dir = tmp_path / "series"
-    source_dir.mkdir()
-    (source_dir / "config.yml").write_text("exam:\n  points: false\n", encoding="utf-8")
-    assert mode.points_enabled(_DummyContext(runtime={"source_dir": str(source_dir)})) is False
+def test_points_enabled_reads_front_matter_runtime_fallback() -> None:
+    assert mode.points_enabled(_DummyContext(runtime={"front_matter": {"exam": {"points": False}}})) is False

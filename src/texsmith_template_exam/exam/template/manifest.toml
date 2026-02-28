@@ -133,6 +133,13 @@ allow_empty = false
 sources = ["exam.compact", "compact"]
 description = "Enable compact rendering mode for the exam renderer."
 
+[latex.template.attributes.next_page_advice]
+default = true
+type = "boolean"
+allow_empty = false
+sources = ["exam.next-page-advice", "exam.next_page_advice", "next-page-advice", "next_page_advice"]
+description = "Display a footer hint asking readers to continue to the next page."
+
 [latex.template.attributes.duration]
 default = ""
 type = "any"

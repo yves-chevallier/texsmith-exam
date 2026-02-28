@@ -27,10 +27,7 @@ def test_build_fillin_latex_solution_mode_drops_width() -> None:
     assert latex == r"\fillin[42]"
 
 
-def test_fillin_scale_reads_source_config_file(tmp_path) -> None:
-    source_dir = tmp_path / "series"
-    source_dir.mkdir()
-    (source_dir / "common.yml").write_text("fillin:\n  char-width-scale: 4.0\n", encoding="utf-8")
-    ctx = _DummyContext(runtime={"source_dir": str(source_dir)})
+def test_fillin_scale_reads_front_matter_runtime_fallback() -> None:
+    ctx = _DummyContext(runtime={"front_matter": {"fillin": {"char-width-scale": 4.0}}})
     width = fillin.compute_fillin_width(answer_raw="AB", attrs="", context=ctx)
     assert width == "8mm"

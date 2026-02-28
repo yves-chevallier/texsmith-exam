@@ -85,21 +85,15 @@ def test_solution_env_fill_mode_switches_by_text_style() -> None:
     assert r"\makeemptybox{\stretch{1}}" in end
 
 
-def test_in_solution_mode_from_overrides_and_path_fallback() -> None:
+def test_in_solution_mode_from_overrides_and_runtime() -> None:
     assert er._in_solution_mode(_DummyContext({"template_overrides": {"solution": True}}))
     assert er._in_solution_mode(_DummyContext({"solution": "true"}))
-    assert er._in_solution_mode(
-        _DummyContext({"document_path": "/tmp/build/series/20/solution/series-20.md"})
-    )
     assert not er._in_solution_mode(_DummyContext())
 
 
-def test_in_compact_mode_from_overrides_and_path_fallback() -> None:
+def test_in_compact_mode_from_overrides_and_runtime() -> None:
     assert er._in_compact_mode(_DummyContext({"template_overrides": {"compact": True}}))
     assert er._in_compact_mode(_DummyContext({"compact": "yes"}))
-    assert er._in_compact_mode(
-        _DummyContext({"document_path": "/tmp/build/series/20/light-src/series-20.md"})
-    )
     assert not er._in_compact_mode(_DummyContext())
 
 
@@ -177,4 +171,3 @@ def test_register_registers_all_handlers() -> None:
     assert "render_exam_headings" in registered
     assert "close_open_parts" in registered
     assert "render_pending_answerline_paragraph" in registered
-

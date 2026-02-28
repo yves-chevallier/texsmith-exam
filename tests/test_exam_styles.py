@@ -19,10 +19,7 @@ def test_text_style_defaults_and_aliases() -> None:
     assert styles.text_style(ctx) == "lines"
 
 
-def test_style_reads_source_config_file(tmp_path) -> None:
-    source_dir = tmp_path / "series"
-    source_dir.mkdir()
-    (source_dir / "config.yml").write_text("style:\n  choices: checkboxes\n  text: line\n", encoding="utf-8")
-    ctx = _DummyContext(runtime={"source_dir": str(source_dir)})
+def test_style_reads_front_matter_runtime_fallback() -> None:
+    ctx = _DummyContext(runtime={"front_matter": {"style": {"choices": "checkboxes", "text": "line"}}})
     assert styles.choice_style(ctx) == "checkbox"
     assert styles.text_style(ctx) == "lines"

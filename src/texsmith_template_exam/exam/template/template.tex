@@ -116,7 +116,7 @@
 \BLOCK{ set combined_docclass_options = base_docclass_options[1:-1] if base_docclass_options else '' }
 \BLOCK{ set option_parts = [] }
 \BLOCK{ if combined_docclass_options }\BLOCK{ set option_parts = option_parts + [combined_docclass_options] }\BLOCK{ endif }
-\BLOCK{ set option_parts = option_parts + ['addpoints'] }
+\BLOCK{ if points_enabled }\BLOCK{ set option_parts = option_parts + ['addpoints'] }\BLOCK{ endif }
 \BLOCK{ set effective_documentclass_options = '[' ~ option_parts|join(',') ~ ']' if option_parts else '' }
 \documentclass\VAR{effective_documentclass_options}{exam}
 \BLOCK{ if points_enabled }
@@ -124,6 +124,12 @@
 \BLOCK{ endif }
 \BLOCK{ if solution }
 \printanswers
+\BLOCK{ endif }
+\BLOCK{ if not points_enabled }
+\noaddpoints
+\nopointsinmargin
+\pointformat{}
+\bonuspointformat{}
 \BLOCK{ endif }
 
 \usepackage[svgnames,dvipsnames,x11names]{xcolor}
