@@ -1,0 +1,998 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Minimal documentation for the TeXSmith exam template.">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../syntax/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Configuration - TeXSmith Exam Template</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+3:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Source Sans 3";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/brand.css">
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+      <link rel="stylesheet" href="../css/drawio-darkmode.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="brown" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TeXSmith Exam Template" class="md-header__button md-logo" aria-label="TeXSmith Exam Template" data-md-component="logo">
+      
+  <img src="../assets/ts-anvil.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TeXSmith Exam Template
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="brown" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  TeXSmith Exam Template
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../syntax/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Template syntax
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TeXSmith Exam Template" class="md-nav__button md-logo" aria-label="TeXSmith Exam Template" data-md-component="logo">
+      
+  <img src="../assets/ts-anvil.svg" alt="logo">
+
+    </a>
+    TeXSmith Exam Template
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TeXSmith Exam Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-template-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core template options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-supported-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional supported options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renderer-style-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renderer style overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete example
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../syntax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template syntax
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-template-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core template options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-supported-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional supported options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renderer-style-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renderer style overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete example
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
+<p>This page documents all template configuration options supported by the <code>exam</code>
+template.</p>
+<p>You can set options in document front matter, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Midterm</span>
+<span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-02-23</span>
+<span class="nt">exam</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">titlepage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cover</span>
+<span class="w">  </span><span class="nt">course</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Algorithms</span>
+<span class="w">  </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">No phones.</span>
+</code></pre></div>
+<p>You can also override values at render time with TeXSmith template overrides
+(for example <code>-a solution=true</code>).</p>
+<h2 id="core-template-options">Core template options<a class="headerlink" href="#core-template-options" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Accepted values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string</td>
+<td>Exam title (from metadata or promoted heading).</td>
+</tr>
+<tr>
+<td><code>author</code> / <code>authors</code></td>
+<td>string, mapping, or list</td>
+<td><code>""</code></td>
+<td>string or structured author data</td>
+<td>Author or instructor name(s).</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>ISO date/time or free text</td>
+<td>Exam date shown on title page/header.</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string or <code>git</code></td>
+<td>Version label appended to the date (use <code>git</code> for git describe / short commit).</td>
+</tr>
+<tr>
+<td><code>exam.titlepage</code> / <code>titlepage</code></td>
+<td>string</td>
+<td><code>"cover"</code></td>
+<td><code>cover</code>, <code>minimal</code></td>
+<td>Selects full cover page or minimal inline title block.</td>
+</tr>
+<tr>
+<td><code>exam.type</code> / <code>type</code></td>
+<td>string</td>
+<td><code>"exam"</code></td>
+<td>any string</td>
+<td>Exam type label (for example <code>TE</code>, <code>Exam</code>).</td>
+</tr>
+<tr>
+<td><code>exam.department</code> / <code>department</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string</td>
+<td>Department code or name.</td>
+</tr>
+<tr>
+<td><code>exam.school</code> / <code>school</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string</td>
+<td>School or institution name.</td>
+</tr>
+<tr>
+<td><code>exam.course</code> / <code>course</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string</td>
+<td>Course name or course code.</td>
+</tr>
+<tr>
+<td><code>exam.problem-label</code> / <code>exam.problem_label</code> / <code>problem-label</code> / <code>problem_label</code></td>
+<td>string</td>
+<td>language-dependent default (<code>Problem</code>, <code>Problème</code>, etc.)</td>
+<td>any string</td>
+<td>Overrides the question label used in headers and question titles.</td>
+</tr>
+<tr>
+<td><code>exam.points</code> / <code>points</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td>Enables/disables point display and the cover-page grade table.</td>
+</tr>
+<tr>
+<td><code>exam.fillin-style</code> / <code>exam.fillin_style</code> / <code>fillin-style</code> / <code>fillin_style</code></td>
+<td>string</td>
+<td><code>"line"</code></td>
+<td><code>line</code>, <code>dotted</code></td>
+<td>Controls the visual style of <code>\fillin</code> blanks on the student copy.</td>
+</tr>
+<tr>
+<td><code>exam.compact</code> / <code>compact</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td>Enables compact rendering mode (for example removes some answer lines in multiple-choice blocks).</td>
+</tr>
+<tr>
+<td><code>exam.duration</code> / <code>duration</code></td>
+<td>any</td>
+<td><code>""</code></td>
+<td>number or string</td>
+<td>Exam duration, displayed on the cover page rules box.</td>
+</tr>
+<tr>
+<td><code>exam.rules</code> / <code>rules</code></td>
+<td>list</td>
+<td><code>[]</code></td>
+<td>list of strings/Markdown fragments</td>
+<td>Rules shown on the cover page.</td>
+</tr>
+<tr>
+<td><code>exam.solution</code> / <code>solution</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td>Enables solution mode (<code>\printanswers</code>).</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>string</td>
+<td><code>"english"</code></td>
+<td>Babel language names/aliases</td>
+<td>Document language passed to Babel (normalized by TeXSmith).</td>
+</tr>
+<tr>
+<td><code>press.paper</code> / <code>paper</code></td>
+<td>mapping</td>
+<td><code>{ format: a4, margin: { top: 10mm, left: 2.5cm, right: 2.5cm, bottom: 2.5cm } }</code></td>
+<td>TeXSmith paper mapping</td>
+<td>Page format and margin defaults.</td>
+</tr>
+<tr>
+<td><code>press.geometry</code> / <code>geometry</code></td>
+<td>mapping</td>
+<td><code>{ headheight: 0mm, headsep: 0mm, includeheadfoot: true }</code></td>
+<td>TeXSmith geometry mapping</td>
+<td>Extra geometry options forwarded to <code>ts-geometry</code>.</td>
+</tr>
+<tr>
+<td><code>hyperref_options</code> / <code>ts_extra_hyperref_options</code></td>
+<td>string</td>
+<td><code>"hidelinks"</code></td>
+<td>any hyperref option string</td>
+<td>Options passed to <code>hyperref</code> through <code>ts-extra</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="additional-supported-options">Additional supported options<a class="headerlink" href="#additional-supported-options" title="Permanent link">&para;</a></h2>
+<p>These options are implemented by the template/renderer and are supported, even
+if they are not currently declared in <code>manifest.toml</code> as first-class
+attributes.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Accepted values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>subtitle</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>any string</td>
+<td>Subtitle shown on title page (cover and minimal modes).</td>
+</tr>
+<tr>
+<td><code>next_page_advice</code></td>
+<td>boolean-like</td>
+<td><code>true</code></td>
+<td><code>true</code>/<code>false</code> (or truthy strings)</td>
+<td>Controls footer hint text on non-final pages (<code>Go to the next page...</code>).</td>
+</tr>
+<tr>
+<td><code>exam.fillin_solution_underline</code> / <code>exam.fillin-solution-underline</code> / <code>fillin_solution_underline</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td>In solution mode, keeps an underline under fill-in answers instead of answer text only.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="renderer-style-overrides">Renderer style overrides<a class="headerlink" href="#renderer-style-overrides" title="Permanent link">&para;</a></h2>
+<p>The renderer accepts style overrides through template overrides (for example via
+<code>-a</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Accepted values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>style.choices</code></td>
+<td>string</td>
+<td><code>"alpha"</code></td>
+<td><code>alpha</code>, <code>checkbox</code> (<code>checkboxes</code>, <code>check</code> are aliases)</td>
+<td>Multiple-choice rendering style (<code>choices</code> vs <code>checkboxes</code>).</td>
+</tr>
+<tr>
+<td><code>style.text</code></td>
+<td>string</td>
+<td><code>"dotted"</code></td>
+<td><code>dotted</code>, <code>lines</code>, <code>box</code> (<code>dots</code>, <code>line</code>, <code>dottedlines</code> are aliases)</td>
+<td>Default solution-space style for <code>!!! solution { lines=... }</code>.</td>
+</tr>
+<tr>
+<td><code>char-width-scale</code></td>
+<td>float</td>
+<td><code>2.5</code></td>
+<td>positive number</td>
+<td>Global scale for automatic width of <code>[answer]{...}</code> fill-ins when width is omitted.</td>
+</tr>
+<tr>
+<td><code>fillin_char_width_scale</code></td>
+<td>float</td>
+<td><code>2.5</code></td>
+<td>positive number</td>
+<td>Alias of <code>char-width-scale</code>.</td>
+</tr>
+<tr>
+<td><code>style.char-width-scale</code></td>
+<td>float</td>
+<td><code>2.5</code></td>
+<td>positive number</td>
+<td>Scoped alternative for fill-in auto-width scale.</td>
+</tr>
+<tr>
+<td><code>fillin.char-width-scale</code></td>
+<td>float</td>
+<td><code>2.5</code></td>
+<td>positive number</td>
+<td>Scoped alternative for fill-in auto-width scale.</td>
+</tr>
+</tbody>
+</table>
+<p>Compatibility note: <code>press.solution</code> and <code>press.compact</code> are also recognized by
+the renderer as fallback locations for <code>solution</code> and <code>compact</code>.</p>
+<h2 id="complete-example">Complete example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Demo Exam</span>
+<span class="nt">subtitle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Various questions</span>
+<span class="nt">author</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dr. Emmett L. Brown</span>
+<span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-02-23</span>
+<span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">en</span>
+
+<span class="nt">press</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">paper</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a4</span>
+<span class="w">    </span><span class="nt">margin</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12mm</span>
+<span class="w">      </span><span class="nt">left</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.4cm</span>
+<span class="w">      </span><span class="nt">right</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.4cm</span>
+<span class="w">      </span><span class="nt">bottom</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.4cm</span>
+<span class="w">  </span><span class="nt">geometry</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">includeheadfoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">exam</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">titlepage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cover</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TE</span>
+<span class="w">  </span><span class="nt">department</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TIN</span>
+<span class="w">  </span><span class="nt">school</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEIG-VD</span>
+<span class="w">  </span><span class="nt">course</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">General Knowledge</span>
+<span class="w">  </span><span class="nt">problem-label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Question</span>
+<span class="w">  </span><span class="nt">fillin-style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dotted</span>
+<span class="w">  </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Write your name on each page.</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">No communication devices allowed.</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: TeXSmith Exam Template">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                TeXSmith Exam Template
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../syntax/" class="md-footer__link md-footer__link--next" aria-label="Next: Template syntax">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Template syntax
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["search", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.indexes", "navigation.tracking", "navigation.expand", "navigation.sections", "navigation.footer", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../js/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+      
+        <script src="../assets/drawio-viewer.js"></script>
+      
+        <script src="../js/drawio-mkdocs.js"></script>
+      
+    
+  </body>
+</html>
