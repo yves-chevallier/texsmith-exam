@@ -694,15 +694,17 @@
   }%
   \vskip 0.4em%
   \BLOCK{ endif }
+  \vskip 0.5em%
+  \hrule
+  \vskip -0.5em%
   {\large \noindent\makebox[\linewidth]{\course\hfill\thedate}\par}%
-  \vskip 0.2em%
   \BLOCK{ set department_trim = department|default('')|trim }
   \BLOCK{ if school_trim or department_trim }
   \vskip 0.3em%
   {\itshape\school~--~\department\par}%
   \BLOCK{ endif }
   \endgroup
-  \vskip 0.6em%
+  \vskip 0.4em%
   \hrule
   \vskip 1em%
 }
