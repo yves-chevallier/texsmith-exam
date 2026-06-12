@@ -58,6 +58,52 @@ rendered with TeXSmith's standard `\section`, `\subsection`, etc.
 ### Variables
 ```
 
+## Points and answer lines
+
+Attach an attribute block in braces to a heading to set the points awarded for a
+question or part and, optionally, a short expected answer:
+
+```md
+## Capitals { points=2 answer="Bern" }
+
+What is the capital of Switzerland?
+```
+
+- `points=` sets the marks for the question or part. Point display is controlled
+  globally by the `exam.points` setting; per-question values are only shown when
+  it is enabled.
+- `answer=` provides a short answer. It is rendered as an answer line on the
+  student copy and filled in on the answer key.
+
+The attribute block works on any heading level, so questions, parts, and
+subparts can all carry points and answers. It combines with the `-` empty title:
+
+```md
+### - { points=2 answer="42" }
+
+What is the answer to the ultimate question?
+```
+
+Any text after the closing brace becomes the heading title:
+
+```md
+### - { points=2 } Warm-up
+
+A short introductory question.
+```
+
+Answer values may be wrapped in straight quotes, single quotes, French
+guillemets `«…»`, curly quotes, or backticks; the surrounding pair is stripped.
+Quotes are only required when the value contains spaces — `answer="Mont Blanc"`,
+`answer='Bern'`, `answer=«oui»`, and `answer=42` are all valid.
+
+!!! info
+
+    Surrounding whitespace and quotes are trimmed. An empty answer
+    (`answer=""` or whitespace only) produces no answer line, whereas
+    `answer="0"` shows `0`. Unrecognized attributes are ignored silently, so
+    watch for typos such as `ponts=`.
+
 ## Multiple choice
 
 Markdown (and TeXSmith) supports task lists like `- [ ]`. With this template,
@@ -119,6 +165,10 @@ replaced by the solution text.
     Solution text...
 ```
 
+Use `lines=fill` instead of a number to stretch the answer space to the bottom
+of the page. The line style (dotted, lined, or boxed) follows the `style.text`
+setting.
+
 Sometimes you need a grid instead of dotted lines.
 
 ```md
@@ -146,3 +196,6 @@ Draw a sheep:
 
     The result should resemble a sheep with wool and four legs.
 ```
+
+A single value makes a square box; use `box=WxH` (for example `box=8cmx4cm`) to
+reserve a rectangle.
