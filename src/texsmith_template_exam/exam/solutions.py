@@ -350,6 +350,15 @@ def render_solution_callouts(element: Tag, context: RenderContext) -> None:
     for img in list(element.find_all("img")):
         render_images(img, context)
 
+    # Pre-render nested tables before the wrapper div is unwrapped. Unwrapping
+    # re-parents the table out of the DOM visitor's (already-copied) child list,
+    # so the POST-phase ``tables`` rule would otherwise never visit it and the
+    # table would be flattened to raw cell text by the final get_text().
+    from texsmith.adapters.handlers.blocks import render_tables as _render_tables
+
+    for table in list(element.find_all("table")):
+        _render_tables(table, context)
+
     begin_env, end_env = _solution_env(
         lines_value,
         grid_value,

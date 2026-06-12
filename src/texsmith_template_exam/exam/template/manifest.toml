@@ -33,6 +33,10 @@ fragments = [
     "ts-code",
     "ts-frame",
 ]
+markdown_extensions = [
+    "texsmith_template_exam.heading_attr_list_md:HeadingAttrListExtension",
+    "texsmith_template_exam.solution_md:SolutionAdmonitionExtension",
+]
 
 [latex.template.attributes.title]
 default = ""

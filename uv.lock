@@ -1261,7 +1261,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "texsmith", specifier = ">=0.2.2,<1.0" }]
+requires-dist = [{ name = "texsmith", specifier = ">=0.2.2.dev0,<1.0" }]
 
 [package.metadata.requires-dev]
 dev = [
