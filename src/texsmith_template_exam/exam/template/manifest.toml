@@ -154,9 +154,10 @@ description = "Exam duration in minutes."
 
 [latex.template.attributes.rules]
 default = []
-type = "list"
+type = "any"
+normaliser = "texsmith_template_exam.rules:resolve_attribute"
 sources = ["exam.rules", "rules"]
-description = "List of rules to display on the cover page."
+description = "Rules shown on the cover page. Accepts a list of sentences or rule tokens, or a mapping {preset, standard, prepend, append} resolved against the built-in rules library (see rules.yml)."
 
 [latex.template.attributes.logo]
 default = ""

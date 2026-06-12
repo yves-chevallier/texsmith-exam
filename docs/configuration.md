@@ -37,7 +37,7 @@ You can also override values at render time with TeXSmith template overrides
 | `exam.fillin-style` / `exam.fillin_style` / `fillin-style` / `fillin_style` | string | `"line"` | `line`, `dotted` | Controls the visual style of `\fillin` blanks on the student copy. |
 | `exam.compact` / `compact` | boolean | `false` | `true`, `false` | Enables compact rendering mode (for example removes some answer lines in multiple-choice blocks). |
 | `exam.duration` / `duration` | any | `""` | number or string | Exam duration, displayed on the cover page rules box. |
-| `exam.rules` / `rules` | list | `[]` | list of strings/Markdown fragments | Rules shown on the cover page. |
+| `exam.rules` / `rules` | list or mapping | `[]` | list of sentences/tokens, or a `{preset, standard, prepend, append}` mapping | Rules shown on the cover page. See [Rule presets](#rule-presets). |
 | `exam.solution` / `solution` | boolean | `false` | `true`, `false` | Enables solution mode (`\printanswers`). |
 | `language` | string | `"english"` | Babel language names/aliases | Document language passed to Babel (normalized by TeXSmith). |
 | `press.paper` / `paper` | mapping | `{ format: a4, margin: { top: 10mm, left: 2.5cm, right: 2.5cm, bottom: 2.5cm } }` | TeXSmith paper mapping | Page format and margin defaults. |
@@ -72,6 +72,66 @@ The renderer accepts style overrides through template overrides (for example via
 
 Compatibility note: `press.solution` and `press.compact` are also recognized by
 the renderer as fallback locations for `solution` and `compact`.
+
+## Rule presets
+
+To avoid repeating the same cover-page rules in every exam, `exam.rules` can
+reference a **built-in library of rule sentences** (`exam/rules.yml` in the
+template package) instead of spelling each sentence out. Each sentence is defined
+once; an exam references it by **token**.
+
+`exam.rules` accepts three forms:
+
+1. **A mapping** — a named preset plus an optional standard line:
+
+    ```yaml
+    exam:
+      rules:
+        preset: te        # a named sequence of tokens
+        standard: c17     # appended after the preset
+        # prepend: [replace-te1]   # optional tokens before the preset
+        # append:  [no-docs]       # optional tokens after the standard
+    ```
+
+2. **A list of tokens** — full control over the order:
+
+    ```yaml
+    exam:
+      rules: [name, legible, spaces, reread, handin-te, draft-no, no-comm, c17]
+    ```
+
+3. **A list of literal sentences** — the historical behaviour. Any item that is
+   not a known token is emitted verbatim, so plain sentences (and pre-expanded
+   lists) keep working, and ad-hoc rules can be mixed with tokens.
+
+Resolution happens inside the template when the `rules` attribute is computed —
+no project-side preprocessing is required.
+
+### Built-in presets
+
+| Preset | Token sequence |
+| --- | --- |
+| `te` | name → legible → spaces → reread → handin-te → draft-no → no-comm |
+| `exam` | name → legible → spaces → reread → handin-exam → draft-no → no-comm |
+| `info1` | name → name-all → points → spaces → no-block → yellow |
+| `poo` | name-each → legible → spaces → reread → check-page → handin-prob → handin-draft → draft-noco → no-comm |
+
+### Standard lines
+
+A `standard:` token expands to a canonical "language and standard" sentence:
+
+| Token | Sentence |
+| --- | --- |
+| `c90` / `c99` / `c11` / `c17` | « …le langage C et son standard ISO/IEC 9899:1990 / 1999 / 2011 / 2018. » |
+| `cpp17` / `cpp20` / `cpp23` | « …le langage C++ et son standard ISO/IEC 14882:2017 / 2020 / 2023. » |
+
+### Consigne tokens
+
+The remaining tokens are the individual instruction sentences (`name`, `legible`,
+`spaces`, `reread`, `handin-te`, `handin-exam`, `handin-prob`, `draft-no`,
+`draft-noco`, `no-comm`, `yellow`, `points`, `no-block`, …). The authoritative
+list and wording live in `exam/rules.yml`; edit a sentence there and every exam
+referencing it follows.
 
 ## Complete example
 
