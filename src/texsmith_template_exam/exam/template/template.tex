@@ -154,9 +154,6 @@
 \setlength{\parskip}{1.2em}
 \setlength{\parindent}{0pt}
 \BLOCK{ endif }
-\BLOCK{ if not logo_disabled and logo_builtin == 'heig-vd' }
-\usepackage{heiglogo}
-\BLOCK{ endif }
 \usepackage{xparse}
 
 \newcommand{\ExamLogoCustom}[4]{%
@@ -659,12 +656,8 @@
 \makeatletter
 \BLOCK{ if titlepage_minimal }
 \def\@maketitle{%
-  \BLOCK{ if not logo_disabled }
-    \BLOCK{ if logo_builtin == 'heig-vd' }
-  \logo[top=\VAR{logo_top},left=\VAR{logo_left},height=\VAR{logo_height}]
-    \BLOCK{ elif logo_file }
+  \BLOCK{ if logo_file }
   \ExamLogoCustom{\VAR{logo_file}}{\VAR{logo_left}}{\VAR{logo_top}}{\VAR{logo_height}}
-    \BLOCK{ endif }
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }
@@ -711,12 +704,8 @@
 \BLOCK{ else }
 \def\@maketitle{%
   \newpage
-  \BLOCK{ if not logo_disabled }
-    \BLOCK{ if logo_builtin == 'heig-vd' }
-  \logo[top=\VAR{logo_top},left=\VAR{logo_left},height=\VAR{logo_height}]
-    \BLOCK{ elif logo_file }
+  \BLOCK{ if logo_file }
   \ExamLogoCustom{\VAR{logo_file}}{\VAR{logo_left}}{\VAR{logo_top}}{\VAR{logo_height}}
-    \BLOCK{ endif }
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }

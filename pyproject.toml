@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "texsmith>=0.3.1,<1.0",  # import-reference attribute normaliser
+    "texsmith-fragment-heig-logo>=0.1.0",  # year-aware HEIG-VD cover logo
 ]
 
 [project.urls]

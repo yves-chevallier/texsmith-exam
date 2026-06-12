@@ -32,6 +32,7 @@ fragments = [
     "ts-callouts",
     "ts-code",
     "ts-frame",
+    "heiglogo",
 ]
 markdown_extensions = [
     "texsmith_template_exam.heading_attr_list_md:HeadingAttrListExtension",
@@ -205,5 +206,4 @@ depth = "section"
 description = "Main exam content."
 
 [latex.template.assets]
-"heiglogo.sty" = { source = "template/heiglogo.sty" }
 "columen.sty" = { source = "../columen/columen.sty" }

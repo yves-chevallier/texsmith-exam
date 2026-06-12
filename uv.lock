@@ -1241,6 +1241,7 @@ name = "texsmith-exam"
 source = { editable = "." }
 dependencies = [
     { name = "texsmith" },
+    { name = "texsmith-fragment-heig-logo" },
 ]
 
 [package.dev-dependencies]
@@ -1261,7 +1262,10 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "texsmith", specifier = ">=0.3.1,<1.0" }]
+requires-dist = [
+    { name = "texsmith", specifier = ">=0.3.1,<1.0" },
+    { name = "texsmith-fragment-heig-logo", specifier = ">=0.1.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1278,6 +1282,18 @@ docs = [
     { name = "mkdocs-material-extensions", specifier = ">=1.3.1" },
     { name = "mkdocs-pills", specifier = ">=0.1.0" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.21.2" },
+]
+
+[[package]]
+name = "texsmith-fragment-heig-logo"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "texsmith" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/69/10/fd8c604830822ff0da390fe0f5c43f646fab8d84d312cbfbf5d8eab3e090/texsmith_fragment_heig_logo-0.1.0.tar.gz", hash = "sha256:8eb5cbf220bff3e7be9a28b83121355a6c8c0a3561af97f6d83c6ad8e9b12405", size = 20209, upload-time = "2026-06-12T17:59:02.017Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8a/6d/5d6ae976694bcb00db82fb44fbd088d3349864554df071ff6f37f3906328/texsmith_fragment_heig_logo-0.1.0-py3-none-any.whl", hash = "sha256:d556a1f2acde7cf0d2e06eb3ef06127dd4ec27e14a33d9f8c0113e556f8f912b", size = 19350, upload-time = "2026-06-12T17:59:00.574Z" },
 ]
 
 [[package]]
