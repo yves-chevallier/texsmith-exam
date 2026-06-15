@@ -112,6 +112,14 @@
 \BLOCK{ endif }
 \BLOCK{ set label_problem = label_problem_override|default(label_problem_default, true)|trim }
 \BLOCK{ set next_page_advice = next_page_advice|default(true) }
+\BLOCK{ set recto_name_raw = recto_name|default(false) }
+\BLOCK{ if exam is defined and exam }
+  \BLOCK{ set recto_name_raw = exam.get('recto-name', exam.get('recto_name', recto_name_raw)) }
+\BLOCK{ endif }
+\BLOCK{ set recto_name_enabled = recto_name_raw }
+\BLOCK{ if recto_name_raw is string }
+  \BLOCK{ set recto_name_enabled = recto_name_raw|lower|trim in ['1', 'true', 'yes', 'on'] }
+\BLOCK{ endif }
 \BLOCK{ set base_docclass_options = documentclass_options|default('', true) }
 \BLOCK{ set combined_docclass_options = base_docclass_options[1:-1] if base_docclass_options else '' }
 \BLOCK{ set option_parts = [] }
@@ -165,6 +173,30 @@
   \vspace*{-\baselineskip}%
 }
 \newcommand{\ExamLogoSpacer}{\vspace*{-\baselineskip}}
+
+% Name-entry field reused on the cover and (optionally) on recto pages.
+\newlength{\examnameboxheight}
+\setlength{\examnameboxheight}{0.5cm}
+\newlength{\examnameboxwidth}
+\setlength{\examnameboxwidth}{6.5cm}
+\newlength{\examnameboxraise}
+\setlength{\examnameboxraise}{1.25cm}
+\newcommand{\ExamNameField}{%
+  \begingroup
+  \setlength{\fboxsep}{3pt}%
+  \bfseries \VAR{label_name}~:\hspace{0.5em}%
+  \fbox{\rule{0pt}{\examnameboxheight}\rule{\examnameboxwidth}{0pt}}%
+  \endgroup
+}
+% Place the name field at the top-right of the text block, just above the
+% header (i.e. above the problem number on running pages).
+\newcommand{\ExamNameBoxTop}{%
+  \AtTextUpperLeft{%
+    \put(0pt,\examnameboxraise){%
+      \makebox[\textwidth][r]{\ExamNameField}%
+    }%
+  }%
+}
 
 % Increase table row height only when a row contains at least one \fillin.
 \newcount\texsmithtabledepth
@@ -709,18 +741,7 @@
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }
-  \AddToShipoutPictureFG*{%
-    \AtPageUpperLeft{%
-      \put(1cm,-2.8cm){%
-        \begin{minipage}[t]{\dimexpr\paperwidth-2.5cm\relax}
-          \hfill
-          \begin{minipage}[t]{5cm}\raggedleft\bfseries \VAR{label_name}~:\end{minipage}%
-          \hspace{0.5em}%
-          \begin{minipage}[t]{7cm}\fbox{\makebox[\linewidth][l]{\rule{0pt}{0.8cm}}}\end{minipage}%
-        \end{minipage}%
-      }%
-    }%
-  }
+  \AddToShipoutPictureFG*{\ExamNameBoxTop}
   \null
   \vskip 1cm%
   \vfil%
@@ -762,6 +783,18 @@
 \setlength{\headheight}{14pt}
 \setlength{\headsep}{1.5em}
 \makeatother
+
+\BLOCK{ if recto_name_enabled and not solution }
+% Repeat the name field on the recto of each sheet, i.e. on even physical
+% pages (2, 4, 6, ...). A dedicated counter is used because exam.cls resets
+% \value{page} after the cover, making its parity unreliable.
+\newcount\examphyspage
+\examphyspage=0
+\AddToShipoutPictureFG{%
+  \global\advance\examphyspage by 1\relax
+  \ifodd\examphyspage\else\ExamNameBoxTop\fi
+}
+\BLOCK{ endif }
 
 \begin{document}
 \BLOCK{ if titlepage_minimal }
