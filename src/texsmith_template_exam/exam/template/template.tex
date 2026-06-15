@@ -741,7 +741,18 @@
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }
-  \AddToShipoutPictureFG*{\ExamNameBoxTop}
+  \AddToShipoutPictureFG*{%
+    \AtPageUpperLeft{%
+      \put(1cm,-2.8cm){%
+        \begin{minipage}[t]{\dimexpr\paperwidth-2.5cm\relax}
+          \hfill
+          \begin{minipage}[t]{5cm}\raggedleft\bfseries \VAR{label_name}~:\end{minipage}%
+          \hspace{0.5em}%
+          \begin{minipage}[t]{7cm}\fbox{\makebox[\linewidth][l]{\rule{0pt}{0.8cm}}}\end{minipage}%
+        \end{minipage}%
+      }%
+    }%
+  }
   \null
   \vskip 1cm%
   \vfil%
