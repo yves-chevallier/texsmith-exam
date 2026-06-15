@@ -24,6 +24,7 @@ from typing import Any
 
 import yaml
 
+
 _LIBRARY_PATH = Path(__file__).resolve().parent / "exam" / "rules.yml"
 
 
@@ -36,8 +37,7 @@ def _library() -> tuple[dict[str, str], dict[str, list[str]]]:
         for key, value in (data.get(section) or {}).items():
             tokens[str(key)] = str(value)
     presets = {
-        str(name): [str(tok) for tok in seq]
-        for name, seq in (data.get("presets") or {}).items()
+        str(name): [str(tok) for tok in seq] for name, seq in (data.get("presets") or {}).items()
     }
     return tokens, presets
 

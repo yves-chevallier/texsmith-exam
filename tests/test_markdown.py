@@ -50,10 +50,10 @@ def test_heading_attrs_double_quoted_value_with_spaces() -> None:
 
 
 def test_heading_attrs_double_quoted_value_with_apostrophe() -> None:
-    html = _render("## Title { points=1 answer=\"l'index\" }")
+    html = _render('## Title { points=1 answer="l\'index" }')
 
     assert 'points="1"' in html
-    assert "answer=\"l'index\"" in html
+    assert 'answer="l\'index"' in html
 
 
 def test_heading_attrs_unquoted_value_still_works() -> None:
@@ -67,7 +67,7 @@ def test_heading_attrs_preserve_id_and_class() -> None:
     html = _render("## Ref { #myid .myclass points=3 }")
 
     assert 'id="myid"' in html
-    assert 'myclass' in html
+    assert "myclass" in html
     assert 'points="3"' in html
 
 

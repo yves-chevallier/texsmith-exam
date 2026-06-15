@@ -9,9 +9,7 @@ from texsmith.adapters.markdown import (
 
 
 SOLUTION_EXTENSION = "texsmith_template_exam.solution_md:SolutionAdmonitionExtension"
-HEADING_ATTR_LIST_EXTENSION = (
-    "texsmith_template_exam.heading_attr_list_md:HeadingAttrListExtension"
-)
+HEADING_ATTR_LIST_EXTENSION = "texsmith_template_exam.heading_attr_list_md:HeadingAttrListExtension"
 
 
 def exam_markdown_extensions() -> list[str]:
