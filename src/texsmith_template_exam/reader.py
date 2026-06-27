@@ -19,6 +19,8 @@ from texsmith.ir import nodes as ir
 from texsmith.readers.html._helpers import attrs_tuple, classes, coerce_attr
 from texsmith.readers.html.registry import NotHandled, ReadLevel, reads
 
+from texsmith_template_exam.exam.utils import is_truthy_attribute
+
 
 if TYPE_CHECKING:
     from bs4 import Tag
@@ -117,4 +119,38 @@ def read_exam_fillin(tag: Tag, ctx: ReadContext) -> ir.Span | object:
     )
 
 
-__all__ = ["read_exam_choices", "read_exam_fillin"]
+# -- headings (questions / parts) ------------------------------------------
+
+
+@reads("h1", "h2", "h3", "h4", "h5", "h6", level=ReadLevel.BLOCK, priority=100, name="exam_heading")
+def read_exam_heading(tag: Tag, ctx: ReadContext) -> ir.Div:
+    """Capture a heading (plus its exam attributes) for the writer pre-pass.
+
+    Lowered to a ``Div(role=exam-heading)`` carrying the heading level and the
+    ``points`` / ``answer`` / ``heading`` / id attributes, because the core
+    ``Header`` node intentionally drops arbitrary attributes. The writer's
+    pre-pass turns these into ``exam.cls`` questions/parts (or, for plain
+    headings, back into a core ``Header``).
+    """
+    # Drop heading anchors (``<a>`` permalinks) before lowering the title.
+    for anchor in tag.find_all("a"):
+        anchor.unwrap()
+    level = (tag.name or "h1")[1:]
+    # ``heading`` is an HTML boolean-ish attribute (present ⇒ plain heading); an
+    # absent attribute must read as false, so compute the flag here rather than
+    # storing "" (which ``is_truthy_attribute`` would treat as true).
+    heading_present = tag.has_attr("heading") or tag.has_attr("data-heading")
+    heading_value = coerce_attr(tag.get("heading")) or coerce_attr(tag.get("data-heading"))
+    heading_flag = "true" if (heading_present and is_truthy_attribute(heading_value)) else "false"
+    attrs = {
+        "role": "exam-heading",
+        "level": level,
+        "points": coerce_attr(tag.get("points")) or coerce_attr(tag.get("data-points")) or "",
+        "answer": coerce_attr(tag.get("answer")) or coerce_attr(tag.get("data-answer")) or "",
+        "heading": heading_flag,
+        "identifier": coerce_attr(tag.get("id")) or "",
+    }
+    return ir.Div(content=ctx.lower_inline(tag.children), attrs=attrs_tuple(attrs))
+
+
+__all__ = ["read_exam_choices", "read_exam_fillin", "read_exam_heading"]
