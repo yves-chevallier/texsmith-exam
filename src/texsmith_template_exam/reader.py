@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from texsmith.ir import nodes as ir
-from texsmith.readers.html._helpers import attrs_tuple
+from texsmith.readers.html._helpers import attrs_tuple, classes, coerce_attr
 from texsmith.readers.html.registry import NotHandled, ReadLevel, reads
 
 
@@ -61,7 +61,7 @@ def _checkbox_state(li: Tag) -> tuple[bool, bool, list]:
 
 
 @reads("ul", level=ReadLevel.BLOCK, priority=100, name="exam_choices")
-def read_exam_choices(tag: Tag, ctx: ReadContext):
+def read_exam_choices(tag: Tag, ctx: ReadContext) -> ir.Div | object:
     """Lower a task-list ``<ul>`` into an exam choices block.
 
     Returns ``NotHandled`` for ordinary lists (no task markers) and for nested
@@ -82,7 +82,9 @@ def read_exam_choices(tag: Tag, ctx: ReadContext):
         choices.append(
             ir.Div(
                 content=ctx.lower_inline(content),
-                attrs=attrs_tuple({"role": "exam-choice", "checked": "true" if checked else "false"}),
+                attrs=attrs_tuple(
+                    {"role": "exam-choice", "checked": "true" if checked else "false"}
+                ),
             )
         )
 
@@ -92,4 +94,27 @@ def read_exam_choices(tag: Tag, ctx: ReadContext):
     return ir.Div(content=tuple(choices), attrs=attrs_tuple({"role": "exam-choices"}))
 
 
-__all__ = ["read_exam_choices"]
+# -- fill-in blanks --------------------------------------------------------
+
+
+@reads("span", level=ReadLevel.INLINE, priority=100, name="exam_fillin")
+def read_exam_fillin(tag: Tag, ctx: ReadContext) -> ir.Span | object:
+    """Lower ``<span class="texsmith-fillin">`` into an exam fill-in inline."""
+    if "texsmith-fillin" not in classes(tag.get("class")):
+        return NotHandled
+    fillin_attrs = coerce_attr(tag.get("data-attrs")) or ""
+    if not fillin_attrs:
+        # Authored spans may carry width/scale as discrete data attributes.
+        width = coerce_attr(tag.get("data-width"))
+        scale = coerce_attr(tag.get("data-scale"))
+        if width:
+            fillin_attrs = f"w={width}"
+        elif scale:
+            fillin_attrs = f"char-width-scale={scale}"
+    return ir.Span(
+        content=ctx.lower_inline(tag.children),
+        attrs=attrs_tuple({"role": "exam-fillin", "fillin_attrs": fillin_attrs}),
+    )
+
+
+__all__ = ["read_exam_choices", "read_exam_fillin"]

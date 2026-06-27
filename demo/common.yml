@@ -1,0 +1,22 @@
+language: fr
+typesetting:
+  paragraph:
+    indent: none
+    spacing: 1.1em
+press:
+  paper:
+    margin:
+      top: 12mm
+      left: 2.4cm
+      right: 2.4cm
+      bottom: 2.4cm
+    marks: false
+exam:
+  logo: heig-vd
+  titlepage: minimal
+  next-page-advice: false
+  problem-label: Exercice
+  fillin-style: dotted
+  version: git
+  points: false
+  compact: true
