@@ -53,6 +53,22 @@ def test_real_link_is_not_a_fillin() -> None:
     assert "href" in latex
 
 
+def test_code_fillin_answer_is_fully_escaped() -> None:
+    # A code answer carrying both a backslash and a percent must be fully
+    # escaped; an unescaped % would comment out the \fillin closing bracket and
+    # abort compilation ("Paragraph ended before \fillin was complete").
+    latex = _render('Y [`printf("%.2lf\\n")`]{w=2cm}')
+    assert '\\fillin[printf("\\%.2lf\\textbackslash{}n")][2cm]' in latex
+    assert "%.2lf" not in latex.replace("\\%.2lf", "")  # no bare % survives
+
+
+def test_plain_text_fillin_answer_keeps_raw_latex() -> None:
+    # A plain-text answer containing a backslash is treated as raw LaTeX (the
+    # heuristic), so authors can still write a command in a fill-in answer.
+    latex = _render("W [\\textbf{x}]{w=2cm}")
+    assert "\\fillin[\\textbf{x}][2cm]" in latex
+
+
 # -- headings -> questions / parts -----------------------------------------
 
 

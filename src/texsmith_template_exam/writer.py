@@ -226,6 +226,17 @@ def _inline_text(nodes: tuple) -> str:
     return "".join(parts)
 
 
+def _contains_code(nodes: tuple) -> bool:
+    """True if the inline run contains a code node (literal, must be escaped)."""
+    for node in nodes:
+        if isinstance(node, ir.Code):
+            return True
+        content = getattr(node, "content", None)
+        if isinstance(content, tuple) and _contains_code(content):
+            return True
+    return False
+
+
 class ExamLaTeXWriter(LaTeXWriter):
     """LaTeX writer adding exam.cls emitters for the exam template."""
 
@@ -263,12 +274,17 @@ class ExamLaTeXWriter(LaTeXWriter):
     def _exam_fillin(self, node: ir.Span) -> str:
         raw = _inline_text(node.content)
         attrs = _attr(node, "fillin_attrs") or ""
+        # A code answer (e.g. `printf("%.2lf\n")`) carries literal % / # / & / \
+        # that must always be escaped — matching the old table-cell escape=True
+        # path. Only a plain-text answer may opt out of escaping (heuristic) so an
+        # author can still write raw LaTeX in a fill-in answer.
+        escape = True if _contains_code(node.content) else ("\\" not in raw)
         answer_latex = (
             render_moving_text(
                 raw,
                 self.state,
                 legacy_accents=self.state.legacy_accents,
-                escape="\\" not in raw,
+                escape=escape,
             )
             or ""
         )
