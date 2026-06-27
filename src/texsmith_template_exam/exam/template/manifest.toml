@@ -1,5 +1,5 @@
 [compat]
-texsmith = ">=0.2.1,<1.0"
+texsmith = ">=0.4.1,<1.0"
 
 [latex.template]
 name = "exam"
@@ -7,6 +7,10 @@ version = "0.1.0"
 entrypoint = "template/template.tex"
 engine = "lualatex"
 shell_escape = false
+# Template-scoped render extensions (texsmith v0.4.1+): custom HTML→IR lowerings
+# and the matching IR→LaTeX emitters that turn exam constructs into exam.cls.
+readers = ["texsmith_template_exam.reader"]
+writer = "texsmith_template_exam.writer:ExamLaTeXWriter"
 texlive_year = 2023
 tlmgr_packages = [
     "babel",

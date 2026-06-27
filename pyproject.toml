@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: LaTeX",
 ]
 dependencies = [
-    "texsmith>=0.2.2,<1.0",
+    "texsmith>=0.4.1,<1.0",
 ]
 
 [project.urls]
@@ -28,9 +28,6 @@ Documentation = "https://yves-chevallier.github.io/texsmith-exam/"
 
 [project.entry-points."texsmith.templates"]
 exam = "texsmith_template_exam:template"
-
-[project.entry-points."texsmith.renderers"]
-exam = "texsmith_template_exam.exam_renderer:register"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

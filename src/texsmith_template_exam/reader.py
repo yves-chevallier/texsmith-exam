@@ -1,0 +1,95 @@
+"""Exam HTML→IR lowerings (``@reads``) layered on top of the bundled registry.
+
+Each lowering claims a tag at a high priority, returning :data:`NotHandled` when
+the element is not an exam construct so the bundled core lowering runs instead.
+Exam constructs are encoded as generic :class:`~texsmith.ir.nodes.Div` /
+:class:`~texsmith.ir.nodes.Span` nodes carrying a ``role`` (and a few string
+attrs); the matching :class:`~texsmith_template_exam.writer.ExamLaTeXWriter`
+emitters turn those roles into ``exam.cls`` markup.
+
+This module is discovered via the template manifest's ``readers`` key (texsmith
+v0.4.1+), so the lowerings apply only when the exam template renders.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from texsmith.ir import nodes as ir
+from texsmith.readers.html._helpers import attrs_tuple
+from texsmith.readers.html.registry import NotHandled, ReadLevel, reads
+
+
+if TYPE_CHECKING:
+    from bs4 import Tag
+    from texsmith.readers.html.context import ReadContext
+
+
+# -- multiple-choice / checkbox lists --------------------------------------
+
+
+def _checkbox_state(li: Tag) -> tuple[bool, bool, list]:
+    """Return ``(is_task_item, checked, content_children)`` for a list item.
+
+    ``content_children`` are the BeautifulSoup children to lower as the choice
+    body, with the task marker (an ``<input type=checkbox>`` or a leading
+    ``[ ]`` / ``[x]`` text token) removed.
+    """
+    checkbox = li.find("input", attrs={"type": "checkbox"}, recursive=True)
+    if checkbox is not None:
+        checked = checkbox.has_attr("checked")
+        checkbox.extract()
+        return True, checked, list(li.children)
+
+    # Plain-text task marker: the first textual content starts with [ ] / [x].
+    children = list(li.children)
+    from bs4.element import NavigableString
+
+    for index, child in enumerate(children):
+        if isinstance(child, NavigableString):
+            text = str(child)
+            stripped = text.lstrip()
+            if stripped.startswith(("[ ]", "[x]", "[X]")):
+                checked = stripped[1] in {"x", "X"}
+                remainder = stripped[3:].lstrip()
+                children[index] = NavigableString(remainder)
+                return True, checked, children
+            if text.strip():
+                # Non-marker text first: not a task item.
+                return False, False, children
+    return False, False, children
+
+
+@reads("ul", level=ReadLevel.BLOCK, priority=100, name="exam_choices")
+def read_exam_choices(tag: Tag, ctx: ReadContext):
+    """Lower a task-list ``<ul>`` into an exam choices block.
+
+    Returns ``NotHandled`` for ordinary lists (no task markers) and for nested
+    lists, so the bundled bullet-list lowering handles them.
+    """
+    items = tag.find_all("li", recursive=False)
+    if not items:
+        return NotHandled
+
+    choices: list[ir.Div] = []
+    saw_task_item = False
+    for li in items:
+        if li.find(["ul", "ol"], recursive=False) is not None:
+            return NotHandled  # nested lists are not exam choices
+        is_task, checked, content = _checkbox_state(li)
+        if is_task:
+            saw_task_item = True
+        choices.append(
+            ir.Div(
+                content=ctx.lower_inline(content),
+                attrs=attrs_tuple({"role": "exam-choice", "checked": "true" if checked else "false"}),
+            )
+        )
+
+    if not saw_task_item:
+        return NotHandled
+
+    return ir.Div(content=tuple(choices), attrs=attrs_tuple({"role": "exam-choices"}))
+
+
+__all__ = ["read_exam_choices"]
