@@ -11,6 +11,12 @@ shell_escape = false
 # and the matching IR→LaTeX emitters that turn exam constructs into exam.cls.
 readers = ["texsmith_template_exam.reader"]
 writer = "texsmith_template_exam.writer:ExamLaTeXWriter"
+# Exam-specific Markdown extensions layered on top of the built-in defaults:
+# `!!! solution {…}` solution blocks and `[answer]{w=…}` fill-in blanks.
+markdown_extensions = [
+    "texsmith_template_exam.solution_md:SolutionAdmonitionExtension",
+    "texsmith_template_exam.fillin_md:FillinExtension",
+]
 texlive_year = 2023
 tlmgr_packages = [
     "babel",

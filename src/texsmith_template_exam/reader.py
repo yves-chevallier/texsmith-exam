@@ -153,4 +153,40 @@ def read_exam_heading(tag: Tag, ctx: ReadContext) -> ir.Div:
     return ir.Div(content=ctx.lower_inline(tag.children), attrs=attrs_tuple(attrs))
 
 
-__all__ = ["read_exam_choices", "read_exam_fillin", "read_exam_heading"]
+# -- solution blocks -------------------------------------------------------
+
+
+@reads("div", level=ReadLevel.BLOCK, priority=110, name="exam_solution")
+def read_exam_solution(tag: Tag, ctx: ReadContext) -> ir.Div | object:
+    """Lower ``<div class="texsmith-solution">`` into an exam solution block.
+
+    Produced by the ``solution_md`` Markdown extension from ``!!! solution
+    {lines/grid/box}``. The leading title paragraph is dropped; the remaining
+    blocks become the solution body the writer wraps in an exam.cls environment.
+    """
+    if "texsmith-solution" not in classes(tag.get("class")):
+        return NotHandled
+    body_children = [
+        child
+        for child in tag.children
+        if not (
+            getattr(child, "name", None) == "p"
+            and "texsmith-solution-title"
+            in classes(getattr(child, "get", lambda _k: None)("class"))
+        )
+    ]
+    attrs = {
+        "role": "exam-solution",
+        "lines": coerce_attr(tag.get("lines")) or "",
+        "grid": coerce_attr(tag.get("grid")) or "",
+        "box": coerce_attr(tag.get("box")) or "",
+    }
+    return ir.Div(content=ctx.lower_blocks(body_children), attrs=attrs_tuple(attrs))
+
+
+__all__ = [
+    "read_exam_choices",
+    "read_exam_fillin",
+    "read_exam_heading",
+    "read_exam_solution",
+]

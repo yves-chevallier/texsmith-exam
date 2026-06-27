@@ -21,16 +21,113 @@ from texsmith.writers.latex import LaTeXWriter, writes
 
 from texsmith_template_exam.exam.fillin import build_fillin_latex
 from texsmith_template_exam.exam.mode import in_compact_mode, in_solution_mode, points_enabled
-from texsmith_template_exam.exam.styles import choice_style
+from texsmith_template_exam.exam.styles import choice_style, text_style
 from texsmith_template_exam.exam.utils import (
     choice_label,
+    expand_lines_value,
     is_empty_title,
     normalize_answer_text,
+    normalize_box_dim,
     normalize_points,
 )
 
 
 _DASH_TITLES = {"-", "\N{EN DASH}", "\N{EM DASH}"}
+
+
+def _parse_box_value(value: str) -> tuple[str, str] | None:
+    raw = value.strip()
+    if not raw:
+        return None
+    if "x" in raw:
+        width_raw, height_raw = raw.split("x", 1)
+        width = normalize_box_dim(width_raw)
+        height = normalize_box_dim(height_raw)
+        return (width, height) if (width and height) else None
+    return (normalize_box_dim(raw), "")
+
+
+def _solution_env(
+    lines_value: str | None,
+    grid_value: str | None,
+    box_value: str | None,
+    *,
+    style: str,
+    compact_mode: bool,
+    solution_mode: bool,
+) -> tuple[str, str]:
+    """Return the ``(begin, end)`` exam.cls solution environment wrappers."""
+
+    def _wrap(begin_env: str, end_env: str) -> tuple[str, str]:
+        if solution_mode:
+            return "\\par\\smallskip\n" + begin_env, end_env + "\\par\\smallskip\n"
+        return begin_env, end_env
+
+    if compact_mode and not solution_mode:
+        return _wrap(
+            "\\ifprintanswers\n\\begin{solution}\n", "\\leavevmode\n\\end{solution}\n\\fi\n"
+        )
+    if lines_value:
+        lines_value = lines_value.strip()
+    if grid_value:
+        grid_value = grid_value.strip()
+    if box_value:
+        parsed = _parse_box_value(box_value.strip())
+        if parsed:
+            width, height = parsed
+            if height:
+                center = width == height
+                prefix = "\\noindent\\hfill" if center else "\\noindent"
+                suffix = "\\hfill" if center else ""
+                return _wrap(
+                    "\\ifprintanswers\n\\begin{solution}\n",
+                    "\\leavevmode\n\\end{solution}\n\\else\n"
+                    "\\par\n\\penalty 0\n\\vspace{1em}%\n"
+                    f"{prefix}\\fbox{{\\parbox[c][{height}][c]{{{width}}}{{\\rule{{0pt}}{{{height}}}}}}}{suffix}%\n"
+                    "\\vspace{1em}%\n\\fi\n",
+                )
+            if width:
+                return _wrap(
+                    f"\\begin{{solutionorbox}}[{width}]\n", "\\leavevmode\n\\end{solutionorbox}\n"
+                )
+
+    if grid_value and grid_value.isdigit():
+        grid_value = f"{grid_value}\\linefillheight"
+    if grid_value:
+        return _wrap(
+            f"\\begin{{solutionorgrid}}[{grid_value}]\n", "\\leavevmode\n\\end{solutionorgrid}\n"
+        )
+    if not lines_value:
+        return _wrap(
+            "\\ifprintanswers\n\\begin{solution}\n", "\\leavevmode\n\\end{solution}\n\\fi\n"
+        )
+
+    if lines_value.lower() == "fill":
+        filler = {
+            "lines": "\\fillwithlines{\\stretch{1}}",
+            "box": "\\makeemptybox{\\stretch{1}}",
+        }.get(style, "\\fillwithdottedlines{\\stretch{1}}")
+        return _wrap(
+            "\\ifprintanswers\n\\begin{solution}\n",
+            f"\\leavevmode\n\\end{{solution}}\n\\else\n{filler}\n\\fi\n",
+        )
+
+    if style == "lines":
+        height = expand_lines_value(lines_value, unit_macro="linefillheight")
+        return _wrap(
+            f"\\begin{{solutionorlines}}[{height}]\n", "\\leavevmode\n\\end{solutionorlines}\n"
+        )
+    if style == "box":
+        height = expand_lines_value(lines_value, unit_macro="linefillheight")
+        return _wrap(
+            f"\\begin{{solutionorbox}}[{height}]\n", "\\leavevmode\n\\end{solutionorbox}\n"
+        )
+
+    height = expand_lines_value(lines_value, unit_macro="dottedlinefillheight")
+    return _wrap(
+        f"\\begin{{solutionordottedlines}}[{height}]\n",
+        "\\leavevmode\n\\end{solutionordottedlines}\n",
+    )
 
 
 class _PartsState:
@@ -139,7 +236,21 @@ class ExamLaTeXWriter(LaTeXWriter):
         role = _attr(node, "role")
         if role == "exam-choices":
             return self._exam_choices(node)
+        if role == "exam-solution":
+            return self._exam_solution(node)
         return super()._div(node)
+
+    def _exam_solution(self, node: ir.Div) -> str:
+        attrs = dict(node.attrs)
+        begin, end = _solution_env(
+            attrs.get("lines") or None,
+            attrs.get("grid") or None,
+            attrs.get("box") or None,
+            style=text_style(self.state),
+            compact_mode=in_compact_mode(self.state),
+            solution_mode=in_solution_mode(self.state),
+        )
+        return begin + self._blocks(node.content) + end
 
     # -- fill-in blanks ----------------------------------------------------
 
