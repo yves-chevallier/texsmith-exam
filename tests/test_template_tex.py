@@ -30,12 +30,33 @@ def test_template_supports_fillin_solution_underline_option() -> None:
     assert r"\newif\iftexsmithfillinsolutionunderline" in text
 
 
-def test_template_contains_code_spacing_tuning() -> None:
+def test_template_restyles_the_tscode_contract() -> None:
+    # texsmith 0.8: the writer emits ``tscode``, not the old ``code`` box.
     text = _template_text()
+    assert r"\tcbset{/ts/code/.append style={" in text
     assert "before skip=-0.95\\baselineskip" in text
     assert "after skip=0.4\\baselineskip" in text
-    assert r"\if@inlabel\else\vspace{0.5em}\fi" in text
-    assert r"\needspace{6\baselineskip}" in text
+    assert r"\BeforeBeginEnvironment{tscode}" in text
+    assert r"\AfterEndEnvironment{tscode}{\par}" in text
+    assert r"{code}" not in text.split("Contract macros")[1]
+
+
+def test_template_defines_the_divider_as_a_page_break() -> None:
+    assert r"\providecommand{\tsdivider}{\clearpage}" in _template_text()
+
+
+def test_template_keeps_the_name_field_for_recto_pages() -> None:
+    text = _template_text()
+    assert r"\newcommand{\ExamNameField}" in text
+    assert "recto_name_enabled" in text
+
+
+def test_template_leaves_the_heig_logo_to_its_fragment() -> None:
+    # The logo is the ``heiglogo`` fragment's; the template only places a
+    # custom image file of its own.
+    text = _template_text()
+    assert r"\usepackage{heiglogo}" not in text
+    assert r"\ExamLogoCustom" in text
 
 
 def test_template_supports_version_display() -> None:
