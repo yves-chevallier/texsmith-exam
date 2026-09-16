@@ -17,7 +17,8 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: LaTeX",
 ]
 dependencies = [
-    "texsmith>=0.4.1,<1.0",
+    "texsmith>=0.8,<1.0",
+    "pyyaml>=6.0",
 ]
 
 [project.urls]

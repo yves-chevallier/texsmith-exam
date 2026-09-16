@@ -1038,18 +1038,6 @@ wheels = [
 ]
 
 [[package]]
-name = "python-markdown-math"
-version = "0.9"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "markdown" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4c/68/fbea05ec6fb318bdcf56ea47596605614554f51d77bfd14f6fb481139ad8/python_markdown_math-0.9.tar.gz", hash = "sha256:567395553dc4941e79b3789a1096dcabb3fda9539d150d558ef3507948b264a3", size = 8680, upload-time = "2025-04-10T10:10:31.84Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/68/ecf3535c40845de2efd8ac2d092dd5fca0868219fa3684d9e58ef7abeece/python_markdown_math-0.9-py3-none-any.whl", hash = "sha256:ac9932df517a5c0f6d01c56e7a44d065eca4a420893ac45f7a6937c67cb41e86", size = 6046, upload-time = "2025-04-10T10:10:30.318Z" },
-]
-
-[[package]]
 name = "python-slugify"
 version = "8.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1204,14 +1192,15 @@ wheels = [
 
 [[package]]
 name = "texsmith"
-version = "0.4.1"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "cairosvg" },
     { name = "emoji" },
     { name = "jinja2" },
-    { name = "markdown" },
+    { name = "natsort" },
+    { name = "pathspec" },
     { name = "pillow" },
     { name = "pint" },
     { name = "playwright" },
@@ -1219,27 +1208,27 @@ dependencies = [
     { name = "pydantic" },
     { name = "pygments" },
     { name = "pylatexenc" },
-    { name = "pymdown-extensions" },
     { name = "pymupdf" },
     { name = "pypdf" },
-    { name = "python-markdown-math" },
     { name = "python-slugify" },
     { name = "pyxindy" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "rich" },
+    { name = "tmark-core" },
     { name = "typer" },
-    { name = "unicodeblocks" },
+    { name = "wcmatch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/d8/cf7d94fd53ff56290b55030af0936f350c5b751c7c16f6ecbd23b9752193/texsmith-0.4.1.tar.gz", hash = "sha256:f9fa3584ba109ac59c6b45e2fc1711020dc898bf0e225cf4f4e534a9b9ce0854", size = 6574183, upload-time = "2026-06-27T19:04:13.117Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/01/b000f73650c048dfd63dc7c8af661426044241b77241ffd426a32ba28f4d/texsmith-0.8.0.tar.gz", hash = "sha256:07c73fda2f06e61253b3c14453f9573fe7adae6a383beb83aeb643a09c299d04", size = 7825845, upload-time = "2026-09-16T16:20:03.147Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/5d/78f292472c12cd7575fb1397050d43447f3f653de4b390cd68051423ca6c/texsmith-0.4.1-py3-none-any.whl", hash = "sha256:a9a57e9b3a0e1e139acf0952e557f8229285bd3e0d22aa526a62962438eaa10f", size = 629234, upload-time = "2026-06-27T19:04:11.304Z" },
+    { url = "https://files.pythonhosted.org/packages/0a/3e/9ff90d40a0978b6b57385ff4122885978a35838f7f211b42881bad5adf4c/texsmith-0.8.0-py3-none-any.whl", hash = "sha256:cbc2c1185fde1c1e86a2f27770c9de85e267c0cd72c31961b3dd949654f58992", size = 655134, upload-time = "2026-09-16T16:20:01.305Z" },
 ]
 
 [[package]]
 name = "texsmith-exam"
 source = { editable = "." }
 dependencies = [
+    { name = "pyyaml" },
     { name = "texsmith" },
 ]
 
@@ -1261,7 +1250,10 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "texsmith", specifier = ">=0.4.1,<1.0" }]
+requires-dist = [
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "texsmith", specifier = ">=0.8,<1.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1302,6 +1294,18 @@ wheels = [
 ]
 
 [[package]]
+name = "tmark-core"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8c/45/f9c838eea417081cda172b8a3417d93b31437d63e3ea5ed0a6b477b6846d/tmark_core-0.2.0.tar.gz", hash = "sha256:bc4c58c447e2fa6b46cbab39654fb19233e2ca4a33f12b3d25dc752e1f317311", size = 762937, upload-time = "2026-09-16T12:21:03.778Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/8f/da6a351ee3e757f11c3edcc93d2e1ebdbfbece639bddabaa8b4846a11e1b/tmark_core-0.2.0-cp310-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:add18f0e2b19c129243d8c44c098b0def7312f31e680b932da2eb35c3f174492", size = 5001449, upload-time = "2026-09-16T12:20:55.893Z" },
+    { url = "https://files.pythonhosted.org/packages/24/07/093abd7468a9b4e22f9f341912c2b78a73d5f26498d4a68946e140e3f9c6/tmark_core-0.2.0-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:27e1f97d4d85ed15d3c8587c130504e14bf183598ca043b2de8f385b2d21fce2", size = 2758736, upload-time = "2026-09-16T12:20:58.277Z" },
+    { url = "https://files.pythonhosted.org/packages/00/91/e28fb609d69d055036d105d7bc497680a8a08afb51d4c99fd9a9dc627f26/tmark_core-0.2.0-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:12566859b0f61df0314c31eecd287a10c5aa6243296708b90ff88e5f550ecdd9", size = 2756943, upload-time = "2026-09-16T12:21:00.09Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/af/b6f29690c5d13429c47f5b9904e49c7afb3287b9ce787d4bddcf83461ec1/tmark_core-0.2.0-cp310-abi3-win_amd64.whl", hash = "sha256:c7f16bbb89f298db6d2a11194f4cccd1ff4e26a591811eda47287445e8ec1cbb", size = 2507629, upload-time = "2026-09-16T12:21:02.091Z" },
+]
+
+[[package]]
 name = "typer"
 version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1336,12 +1340,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7", size = 14611, upload-time = "2025-10-01T02:14:40.154Z" },
 ]
-
-[[package]]
-name = "unicodeblocks"
-version = "0.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/92/f3/34dbe5fe4a50821528bc0b90260a3d56d2ab8da3ecc8a7de1b213d18bc72/unicodeblocks-0.3.tar.gz", hash = "sha256:7df9aa934a364068ab302bb2c55c3f46db1910bcc6b1f4b32bfb7c0eb3df44e2", size = 6896, upload-time = "2014-06-17T16:12:24.099Z" }
 
 [[package]]
 name = "urllib3"
