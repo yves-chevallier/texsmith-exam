@@ -1,0 +1,76 @@
+# Built-in library of exam rules (consignes) for the TeXSmith exam template.
+#
+# An exam's front matter references these by token instead of repeating the full
+# sentences, e.g.:
+#
+#   exam:
+#     rules:
+#       preset: te
+#       standard: c17
+#
+# or as an explicit ordered list of tokens (and/or literal sentences):
+#
+#   exam:
+#     rules: [name, legible, spaces, reread, handin-te, draft-no, no-comm, c17]
+#
+# A token that is not defined below is emitted verbatim, so ad-hoc sentences and
+# pre-expanded lists keep working. Markup (**bold**, ^^highlight^^) is passed
+# through to LaTeX. One canonical wording per rule.
+
+consignes:
+  # — Identité / en-tête —
+  name:           Écrire votre **nom** et votre **prénom** sur la première page.
+  name-each:      Écrire votre **nom** et votre **prénom** lisiblement sur chaque page.
+  name-all:       Ne pas oublier de faire figurer votre nom sur toutes les feuilles.
+  name-all-draft: Inscrire votre nom sur toutes les feuilles de brouillon.
+
+  # — Lisibilité —
+  legible:        Écrire **lisiblement**, au stylo ou au crayon à papier gras.
+  illegible:      Une réponse illisible sera considérée comme fausse.
+
+  # — Où répondre —
+  spaces:         Répondre aux questions dans les espaces appropriés.
+  write-on-exam:  Rédiger les programmes directement sur les feuilles de l'examen.
+
+  # — Avant de rendre —
+  reread:         Relire toutes vos réponses avant de rendre votre travail.
+  check-page:     Vérifier que vous n'avez pas oublié de compléter une page de l'examen.
+  points:         Le nombre de points par exercice figure à côté de chaque problème.
+  no-block:       Ne restez pas bloqué sur un point, passez au suivant et revenez-y plus tard.
+
+  # — Que rendre —
+  handin-te:          Rendre toutes les feuilles de ce travail écrit.
+  handin-exam:        Rendre toutes les feuilles de cet examen.
+  handin-prob:        Rendre toutes les feuilles, une feuille par problème.
+  handin-draft:       Rendre toutes les feuilles de brouillon.
+  handin-draft-cover: Rendre toutes les feuilles de brouillon ainsi que la page de couverture.
+
+  # — Brouillons —
+  draft-no:       Les réponses données sur les feuilles de brouillon **ne sont pas acceptées**.
+  draft-noco:     Les réponses données sur les feuilles de brouillon **ne sont ni acceptées ni corrigées**.
+
+  # — Moyens autorisés —
+  no-comm:        Aucun moyen de communication autorisé.
+  yellow:         Aucun document ni calculatrice autorisés, mise à part la feuille de référence jaune.
+  device-yellow:  Aucun document ni dispositif électronique autorisés, mise à part la feuille de référence jaune.
+  no-docs:        Aucune consultation de documents autorisée autre que ceux fournis.
+
+  # — Divers —
+  replace-te1:    Si vous rendez votre travail, il sera ^^évalué et comptera^^ en remplacement du TE1.
+
+# Canonical standard lines — one per language standard.
+standards:
+  c90:   Toutes les réponses concernent le langage C et son standard ISO/IEC 9899:1990.
+  c99:   Toutes les réponses concernent le langage C et son standard ISO/IEC 9899:1999.
+  c11:   Toutes les réponses concernent le langage C et son standard ISO/IEC 9899:2011.
+  c17:   Toutes les réponses concernent le langage C et son standard ISO/IEC 9899:2018.
+  cpp17: Toutes les réponses concernent le langage C++ et son standard ISO/IEC 14882:2017.
+  cpp20: Toutes les réponses concernent le langage C++ et son standard ISO/IEC 14882:2020.
+  cpp23: Toutes les réponses concernent le langage C++ et son standard ISO/IEC 14882:2023.
+
+# Named sequences of tokens. `standard:` (when given) is appended after the preset.
+presets:
+  te:     [name, legible, spaces, reread, handin-te, draft-no, no-comm]
+  exam:   [name, legible, spaces, reread, handin-exam, draft-no, no-comm]
+  info1:  [name, name-all, points, spaces, no-block, yellow]
+  poo:    [name-each, legible, spaces, reread, check-page, handin-prob, handin-draft, draft-noco, no-comm]
