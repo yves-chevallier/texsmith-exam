@@ -1,5 +1,5 @@
 [compat]
-texsmith = ">=0.4.1,<1.0"
+texsmith = ">=0.8,<1.0"
 
 [latex.template]
 name = "exam"
@@ -7,16 +7,11 @@ version = "0.1.0"
 entrypoint = "template/template.tex"
 engine = "lualatex"
 shell_escape = false
-# Template-scoped render extensions (texsmith v0.4.1+): custom HTML→IR lowerings
-# and the matching IR→LaTeX emitters that turn exam constructs into exam.cls.
-readers = ["texsmith_template_exam.reader"]
-writer = "texsmith_template_exam.writer:ExamLaTeXWriter"
-# Exam-specific Markdown extensions layered on top of the built-in defaults:
-# `!!! solution {…}` solution blocks and `[answer]{w=…}` fill-in blanks.
-markdown_extensions = [
-    "texsmith_template_exam.solution_md:SolutionAdmonitionExtension",
-    "texsmith_template_exam.fillin_md:FillinExtension",
-]
+# The exam constructs are an IR pass (texsmith 0.8): questions and parts,
+# multiple choice, fill-in blanks and solution blocks are read from the tmark
+# IR and emitted as exam.cls markup. Declared here, so it runs only while this
+# template renders.
+passes = ["texsmith_template_exam.passes.exam:run"]
 texlive_year = 2023
 tlmgr_packages = [
     "babel",
@@ -42,6 +37,8 @@ fragments = [
     "ts-callouts",
     "ts-code",
     "ts-frame",
+    "ts-todolist",
+    "heiglogo",
 ]
 
 [latex.template.attributes.title]
@@ -66,6 +63,7 @@ escape = "latex"
 allow_empty = true
 sources = ["date"]
 description = "Exam date (ISO or free-form)."
+format = "raw"
 
 [latex.template.attributes.version]
 default = ""
@@ -74,6 +72,7 @@ escape = "latex"
 allow_empty = true
 sources = ["version", "exam.version"]
 description = "Exam version string (or 'git' to use git describe/commit)."
+format = "raw"
 
 [latex.template.attributes.titlepage]
 default = "cover"
@@ -89,6 +88,7 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.type", "type"]
 description = "Exam type (e.g., TE or Exam)."
+format = "raw"
 
 [latex.template.attributes.department]
 default = ""
@@ -97,6 +97,7 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.department", "department"]
 description = "Department code."
+format = "raw"
 
 [latex.template.attributes.school]
 default = ""
@@ -105,6 +106,7 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.school", "school"]
 description = "School name."
+format = "raw"
 
 [latex.template.attributes.course]
 default = ""
@@ -113,6 +115,7 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.course", "course"]
 description = "Course name or code."
+format = "raw"
 
 [latex.template.attributes.problem_label]
 default = ""
@@ -121,6 +124,7 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.problem-label", "exam.problem_label", "problem-label", "problem_label"]
 description = "Label for each question block (defaults to language-specific 'Problem')."
+format = "raw"
 
 [latex.template.attributes.points]
 default = true
@@ -135,6 +139,13 @@ type = "string"
 allow_empty = false
 sources = ["exam.fillin-style", "exam.fillin_style", "fillin-style", "fillin_style"]
 description = "Style for \\fillin placeholders: 'line' (default) or 'dotted'."
+
+[latex.template.attributes.fillin_bare]
+default = true
+type = "boolean"
+allow_empty = false
+sources = ["exam.fillin-bare", "exam.fillin_bare", "fillin-bare", "fillin_bare"]
+description = "Read a bare [answer] in prose as a fill-in blank (the explicit spelling is [answer]{.fillin})."
 
 [latex.template.attributes.compact]
 default = false
@@ -157,12 +168,14 @@ escape = "latex"
 allow_empty = true
 sources = ["exam.duration", "duration"]
 description = "Exam duration in minutes."
+format = "raw"
 
 [latex.template.attributes.rules]
 default = []
-type = "list"
+type = "any"
+normaliser = "texsmith_template_exam.rules:resolve_attribute"
 sources = ["exam.rules", "rules"]
-description = "List of rules to display on the cover page."
+description = "Rules shown on the cover page. Accepts a list of sentences or rule tokens, or a mapping {preset, standard, prepend, append} resolved against the built-in rules library (see rules.yml)."
 
 [latex.template.attributes.logo]
 default = ""
@@ -210,5 +223,4 @@ depth = "section"
 description = "Main exam content."
 
 [latex.template.assets]
-"heiglogo.sty" = { source = "template/heiglogo.sty" }
 "columen.sty" = { source = "../columen/columen.sty" }

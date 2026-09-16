@@ -1,110 +1,99 @@
-"""Custom template hooks for the exam template."""
+"""The exam template: cover-page context and the Jinja filters template.tex uses."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime, timezone
-from functools import lru_cache
 from pathlib import Path
 import re
-import sys as _sys
 from typing import Any
 
-from texsmith.adapters.latex.renderer import LaTeXRenderer
-from texsmith.adapters.markdown import render_markdown
-from texsmith.core.templates.base import WrappableTemplate
+from texsmith.core.templates import WrappableTemplate
+from texsmith.templates.common import TemplateContextHelpers
 
 from texsmith_template_exam.exam import version as exam_version
-from texsmith_template_exam.markdown import exam_markdown_extensions
 
 
-__init__ = _sys.modules[__name__]
+_WEEKDAYS = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
+_MONTHS = (
+    "janvier",
+    "fevrier",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "aout",
+    "septembre",
+    "octobre",
+    "novembre",
+    "decembre",
+)
+_FRENCH = {"fr", "french", "francais", "français"}
 
 
-def _markdown_to_latex(value: Any) -> str:
+def markdown_to_latex(value: Any) -> str:
+    """A line or two of Markdown as LaTeX — the 0.8 way: tmark parses, tmark writes.
+
+    ``format = "markdown"`` does this for a template *attribute*, but a cover
+    page rule is one item of a list, so the filter renders it here through the
+    same parser and writer (``manifest._render_attribute_markdown``).
+    """
     if value is None:
         return ""
     text = str(value)
     if not text.strip():
         return text
-    html = render_markdown(text, exam_markdown_extensions()).html
-    return _get_renderer().render(html).strip()
+
+    from texsmith.readers.tmark import parse_payload
+    import tmark
+
+    payload = parse_payload(text, name="<exam template attribute>")
+    return str(tmark.write(payload, "latex", {}).get("text") or "").strip()
 
 
-@lru_cache(maxsize=1)
-def _get_renderer() -> LaTeXRenderer:
-    return LaTeXRenderer(copy_assets=False, convert_assets=False)
-
-
-def _format_exam_date(value: Any, lang: str = "fr") -> str:
+def format_exam_date(value: Any, lang: str = "fr") -> str:
+    """An ISO date as the long French form the cover page prints."""
     if value is None:
         return ""
     text = str(value).strip()
     if not text:
         return ""
-    if lang.lower() not in {"fr", "french", "francais", "français"}:
+    if lang.lower() not in _FRENCH:
         return text
 
-    has_time = bool(re.search(r"[t\\s]\\d{2}:\\d{2}", text, re.IGNORECASE))
-    candidate = text
-    if candidate.endswith("Z"):
-        candidate = candidate[:-1] + "+00:00"
+    has_time = bool(re.search(r"[t\s]\d{2}:\d{2}", text, re.IGNORECASE))
+    candidate = text[:-1] + "+00:00" if text.endswith("Z") else text
     try:
-        dt = datetime.fromisoformat(candidate)
+        moment = datetime.fromisoformat(candidate)
     except ValueError:
         try:
-            dt = datetime.strptime(candidate, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            moment = datetime.strptime(candidate, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except ValueError:
             return text
 
-    weekdays = [
-        "lundi",
-        "mardi",
-        "mercredi",
-        "jeudi",
-        "vendredi",
-        "samedi",
-        "dimanche",
-    ]
-    months = [
-        "janvier",
-        "fevrier",
-        "mars",
-        "avril",
-        "mai",
-        "juin",
-        "juillet",
-        "aout",
-        "septembre",
-        "octobre",
-        "novembre",
-        "decembre",
-    ]
-    weekday = weekdays[dt.weekday()]
-    month = months[dt.month - 1]
-    date_part = f"{weekday.capitalize()} {dt.day} {month} {dt.year}"
-
+    date_part = (
+        f"{_WEEKDAYS[moment.weekday()].capitalize()} {moment.day} "
+        f"{_MONTHS[moment.month - 1]} {moment.year}"
+    )
     if not has_time:
         return date_part
-
-    hour = dt.hour
-    minute = dt.minute
-    time_part = f"{hour}h{minute:02d}"
-    return f"{date_part} à {time_part}"
+    return f"{date_part} à {moment.hour}h{moment.minute:02d}"
 
 
-def _format_exam_version(value: Any) -> str:
+def format_exam_version(value: Any) -> str:
+    """``version: git`` resolved through ``git describe``, anything else verbatim."""
     return exam_version.format_exam_version(value)
 
 
-class Template(WrappableTemplate):
-    """Exam template with extra Jinja filters."""
+class Template(TemplateContextHelpers, WrappableTemplate):
+    """Exam template with the extra Jinja filters ``template.tex`` uses."""
 
     def __init__(self) -> None:
         super().__init__(Path(__file__).resolve().parent)
-        self.environment.filters.setdefault("markdown_to_latex", _markdown_to_latex)
-        self.environment.filters.setdefault("exam_date", _format_exam_date)
-        self.environment.filters.setdefault("exam_version", _format_exam_version)
+        self.environment.filters.setdefault("markdown_to_latex", markdown_to_latex)
+        self.environment.filters.setdefault("exam_date", format_exam_date)
+        self.environment.filters.setdefault("exam_version", format_exam_version)
 
     def prepare_context(  # type: ignore[override]
         self,
@@ -116,6 +105,7 @@ class Template(WrappableTemplate):
         return super().prepare_context(latex_body, overrides=overrides)
 
     def _ensure_paper_format(self, overrides: Mapping[str, Any] | None) -> None:
+        """A ``paper`` mapping without a ``format`` keeps the template's own default."""
         if not isinstance(overrides, dict):
             return
         default_paper = self.info.get_attribute_default("paper", {})
@@ -136,7 +126,8 @@ class Template(WrappableTemplate):
     def _inject_paper_format(target: Any, default_format: str) -> None:
         if not isinstance(target, dict):
             return
-        has_format = bool(target.get("format"))
-        has_paper_alias = bool(target.get("paper"))
-        if not has_format and not has_paper_alias:
+        if not target.get("format") and not target.get("paper"):
             target["format"] = default_format
+
+
+__all__ = ["Template", "format_exam_date", "format_exam_version", "markdown_to_latex"]

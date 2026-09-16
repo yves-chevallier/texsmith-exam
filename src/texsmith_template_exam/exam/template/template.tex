@@ -112,6 +112,14 @@
 \BLOCK{ endif }
 \BLOCK{ set label_problem = label_problem_override|default(label_problem_default, true)|trim }
 \BLOCK{ set next_page_advice = next_page_advice|default(true) }
+\BLOCK{ set recto_name_raw = recto_name|default(false) }
+\BLOCK{ if exam is defined and exam }
+  \BLOCK{ set recto_name_raw = exam.get('recto-name', exam.get('recto_name', recto_name_raw)) }
+\BLOCK{ endif }
+\BLOCK{ set recto_name_enabled = recto_name_raw }
+\BLOCK{ if recto_name_raw is string }
+  \BLOCK{ set recto_name_enabled = recto_name_raw|lower|trim in ['1', 'true', 'yes', 'on'] }
+\BLOCK{ endif }
 \BLOCK{ set base_docclass_options = documentclass_options|default('', true) }
 \BLOCK{ set combined_docclass_options = base_docclass_options[1:-1] if base_docclass_options else '' }
 \BLOCK{ set option_parts = [] }
@@ -154,9 +162,6 @@
 \setlength{\parskip}{1.2em}
 \setlength{\parindent}{0pt}
 \BLOCK{ endif }
-\BLOCK{ if not logo_disabled and logo_builtin == 'heig-vd' }
-\usepackage{heiglogo}
-\BLOCK{ endif }
 \usepackage{xparse}
 
 \newcommand{\ExamLogoCustom}[4]{%
@@ -168,6 +173,30 @@
   \vspace*{-\baselineskip}%
 }
 \newcommand{\ExamLogoSpacer}{\vspace*{-\baselineskip}}
+
+% Name-entry field reused on the cover and (optionally) on recto pages.
+\newlength{\examnameboxheight}
+\setlength{\examnameboxheight}{0.5cm}
+\newlength{\examnameboxwidth}
+\setlength{\examnameboxwidth}{6.5cm}
+\newlength{\examnameboxraise}
+\setlength{\examnameboxraise}{1.25cm}
+\newcommand{\ExamNameField}{%
+  \begingroup
+  \setlength{\fboxsep}{3pt}%
+  \bfseries \VAR{label_name}~:\hspace{0.5em}%
+  \fbox{\rule{0pt}{\examnameboxheight}\rule{\examnameboxwidth}{0pt}}%
+  \endgroup
+}
+% Place the name field at the top-right of the text block, just above the
+% header (i.e. above the problem number on running pages).
+\newcommand{\ExamNameBoxTop}{%
+  \AtTextUpperLeft{%
+    \put(0pt,\examnameboxraise){%
+      \makebox[\textwidth][r]{\ExamNameField}%
+    }%
+  }%
+}
 
 % Increase table row height only when a row contains at least one \fillin.
 \newcount\texsmithtabledepth
@@ -319,20 +348,39 @@
   #1
 }
 
-% Keep part labels with the following code block and reduce vertical offset.
+% ---------------------------------------------------------------------------
+% Contract macros (texsmith 0.8). The writers name a macro per construct and a
+% fragment defines it; an exam restyles the ones it uses here, after the
+% extra_packages slot above has loaded the fragments.
+% ---------------------------------------------------------------------------
+
+% tscode (ts-code): the exam wants a thin framed listing that hugs the part
+% label above it, not a titled box floating in its own vertical space.
 \makeatletter
 \@ifpackageloaded{tcolorbox}{%
-  \tcbset{code/.append style={before skip=-0.95\baselineskip,after skip=0.4\baselineskip,top=0pt}}%
+  \tcbset{/ts/code/.append style={%
+    before skip=-0.95\baselineskip,
+    after skip=0.4\baselineskip,
+    top=0pt,
+  }}%
 }{}
 \makeatother
-\BeforeBeginEnvironment{code}{%
-  \nopagebreak\needspace{6\baselineskip}%
-  \makeatletter
-  \if@inlabel\else\vspace{0.5em}\fi
-  \makeatother
-  \noindent%
-}
-\AfterEndEnvironment{code}{\par}
+\ifcsname tscode\endcsname
+  \BeforeBeginEnvironment{tscode}{%
+    \nopagebreak\needspace{6\baselineskip}%
+    \makeatletter
+    \if@inlabel\else\vspace{0.5em}\fi
+    \makeatother
+    \noindent%
+  }
+  \AfterEndEnvironment{tscode}{\par}
+\fi
+
+% tsdivider (ts-typesetting): a thematic break (---) is a page break in an
+% exam. ts-typesetting already defines it that way, but the fragment is only
+% loaded when the document needs it, so the exam defines it unconditionally.
+\providecommand{\tsdivider}{\clearpage}
+
 \renewenvironment{solutionorgrid}[1][0pt]%
   {%
     \@insolutiontrue
@@ -659,12 +707,8 @@
 \makeatletter
 \BLOCK{ if titlepage_minimal }
 \def\@maketitle{%
-  \BLOCK{ if not logo_disabled }
-    \BLOCK{ if logo_builtin == 'heig-vd' }
-  \logo[top=\VAR{logo_top},left=\VAR{logo_left},height=\VAR{logo_height}]
-    \BLOCK{ elif logo_file }
+  \BLOCK{ if logo_file }
   \ExamLogoCustom{\VAR{logo_file}}{\VAR{logo_left}}{\VAR{logo_top}}{\VAR{logo_height}}
-    \BLOCK{ endif }
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }
@@ -711,12 +755,8 @@
 \BLOCK{ else }
 \def\@maketitle{%
   \newpage
-  \BLOCK{ if not logo_disabled }
-    \BLOCK{ if logo_builtin == 'heig-vd' }
-  \logo[top=\VAR{logo_top},left=\VAR{logo_left},height=\VAR{logo_height}]
-    \BLOCK{ elif logo_file }
+  \BLOCK{ if logo_file }
   \ExamLogoCustom{\VAR{logo_file}}{\VAR{logo_left}}{\VAR{logo_top}}{\VAR{logo_height}}
-    \BLOCK{ endif }
   \BLOCK{ else }
   \ExamLogoSpacer
   \BLOCK{ endif }
@@ -773,6 +813,18 @@
 \setlength{\headheight}{14pt}
 \setlength{\headsep}{1.5em}
 \makeatother
+
+\BLOCK{ if recto_name_enabled and not solution }
+% Repeat the name field on the recto of each sheet, i.e. on even physical
+% pages (2, 4, 6, ...). A dedicated counter is used because exam.cls resets
+% \value{page} after the cover, making its parity unreliable.
+\newcount\examphyspage
+\examphyspage=0
+\AddToShipoutPictureFG{%
+  \global\advance\examphyspage by 1\relax
+  \ifodd\examphyspage\else\ExamNameBoxTop\fi
+}
+\BLOCK{ endif }
 
 \begin{document}
 \BLOCK{ if titlepage_minimal }
