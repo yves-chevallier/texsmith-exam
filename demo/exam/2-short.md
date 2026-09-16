@@ -20,13 +20,14 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    The constructor of `A` is called when `a` is created, printing `8`. Then `3` is printed. When `a` goes out of scope at the end of the `if` block, the destructor of `A` is called, printing `4`. Thus, the output is:
+The constructor of `A` is called when `a` is created, printing `8`. Then `3` is printed. When `a` goes out of scope at the end of the `if` block, the destructor of `A` is called, printing `4`. Thus, the output is:
 
-    ```plaintext
-    834
-    ```
+```plaintext
+834
+```
+:::
 
 ### -
 
@@ -36,9 +37,10 @@ Can you name the three primary colors in the RGB color model?
 2. [green]{w=50}
 3. [blue]{w=50}
 
-!!! solution
+::: solution
 
-    The three primary colors in the RGB color model are defined from human vision which is trichromatic. Technology used in screens and digital imaging is based on this model.
+The three primary colors in the RGB color model are defined from human vision which is trichromatic. Technology used in screens and digital imaging is based on this model.
+:::
 
 ### -
 

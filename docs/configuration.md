@@ -37,8 +37,9 @@ You can also override values at render time with TeXSmith template overrides
 | `exam.fillin-style` / `exam.fillin_style` / `fillin-style` / `fillin_style` | string | `"line"` | `line`, `dotted` | Controls the visual style of `\fillin` blanks on the student copy. |
 | `exam.compact` / `compact` | boolean | `false` | `true`, `false` | Enables compact rendering mode (for example removes some answer lines in multiple-choice blocks). |
 | `exam.duration` / `duration` | any | `""` | number or string | Exam duration, displayed on the cover page rules box. |
-| `exam.rules` / `rules` | list | `[]` | list of strings/Markdown fragments | Rules shown on the cover page. |
+| `exam.rules` / `rules` | list or mapping | `[]` | list of sentences or rule tokens, or `{preset, standard, prepend, append}` | Rules shown on the cover page; tokens and presets are resolved against the built-in library (`rules.yml`). |
 | `exam.solution` / `solution` | boolean | `false` | `true`, `false` | Enables solution mode (`\printanswers`). |
+| `exam.fillin-bare` / `exam.fillin_bare` | boolean | `true` | `true`, `false` | Reads a bare `[answer]` in prose as a fill-in blank. |
 | `language` | string | `"english"` | Babel language names/aliases | Document language passed to Babel (normalized by TeXSmith). |
 | `press.paper` / `paper` | mapping | `{ format: a4, margin: { top: 10mm, left: 2.5cm, right: 2.5cm, bottom: 2.5cm } }` | TeXSmith paper mapping | Page format and margin defaults. |
 | `press.geometry` / `geometry` | mapping | `{ headheight: 0mm, headsep: 0mm, includeheadfoot: true }` | TeXSmith geometry mapping | Extra geometry options forwarded to `ts-geometry`. |
@@ -54,6 +55,7 @@ attributes.
 | --- | --- | --- | --- | --- |
 | `subtitle` | string | `""` | any string | Subtitle shown on title page (cover and minimal modes). |
 | `next_page_advice` | boolean-like | `true` | `true`/`false` (or truthy strings) | Controls footer hint text on non-final pages (`Go to the next page...`). |
+| `exam.recto-name` / `exam.recto_name` | boolean | `false` | `true`, `false` | Repeats the name field at the top of every recto page. |
 | `exam.fillin_solution_underline` / `exam.fillin-solution-underline` / `fillin_solution_underline` | boolean | `false` | `true`, `false` | In solution mode, keeps an underline under fill-in answers instead of answer text only. |
 
 ## Renderer style overrides
@@ -64,7 +66,7 @@ The renderer accepts style overrides through template overrides (for example via
 | Option | Type | Default | Accepted values | Description |
 | --- | --- | --- | --- | --- |
 | `style.choices` | string | `"alpha"` | `alpha`, `checkbox` (`checkboxes`, `check` are aliases) | Multiple-choice rendering style (`choices` vs `checkboxes`). |
-| `style.text` | string | `"dotted"` | `dotted`, `lines`, `box` (`dots`, `line`, `dottedlines` are aliases) | Default solution-space style for `!!! solution { lines=... }`. |
+| `style.text` | string | `"dotted"` | `dotted`, `lines`, `box` (`dots`, `line`, `dottedlines` are aliases) | Default solution-space style for `::: solution {lines=…}`. |
 | `char-width-scale` | float | `2.5` | positive number | Global scale for automatic width of `[answer]{...}` fill-ins when width is omitted. |
 | `fillin_char_width_scale` | float | `2.5` | positive number | Alias of `char-width-scale`. |
 | `style.char-width-scale` | float | `2.5` | positive number | Scoped alternative for fill-in auto-width scale. |

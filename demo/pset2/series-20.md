@@ -16,15 +16,16 @@ exam:
 
 On souhaite développer un programme qui analyse un fichier de mesures passé sur l'entrée standard. Proposez une décomposition en sous-problèmes (raffinage successif) en listant 4 à 6 fonctions possibles, avec un nom clair pour chaque fonction.
 
-!!! solution { lines=6 }
+::: solution {lines=6}
 
-    Voici une proposition de décomposition en fonctions pour le programme d'analyse de mesures :
+Voici une proposition de décomposition en fonctions pour le programme d'analyse de mesures :
 
-    1. `read_input` : lire l'entrée standard et stocker les données dans une structure appropriée
-    2. `parse_measurement` : parser une ligne en structure de mesure
-    3. `compute_stats` : calculer min, max, moyenne
-    4. `print_report` : afficher le rapport
-    5. `save_csv` : exporter les résultats
+1. `read_input` : lire l'entrée standard et stocker les données dans une structure appropriée
+2. `parse_measurement` : parser une ligne en structure de mesure
+3. `compute_stats` : calculer min, max, moyenne
+4. `print_report` : afficher le rapport
+5. `save_csv` : exporter les résultats
+:::
 
 ## - { points=2 }
 
@@ -35,29 +36,31 @@ Pour chaque tâche ci-dessous, indiquez si elle doit être réalisée dans une f
 3. Calcul d'une distance euclidienne
 4. Écriture d'un rapport dans un fichier
 
-!!! solution { lines=6 }
+::: solution {lines=6}
 
-    1. Peut rester dans `main` (simple, spécifique au programme).
-    2. Fonction distincte (réutilisable et testable).
-    3. Fonction distincte (réutilisable, calcul pur).
-    4. Fonction distincte (sépare I/O et logique).
+1. Peut rester dans `main` (simple, spécifique au programme).
+2. Fonction distincte (réutilisable et testable).
+3. Fonction distincte (réutilisable, calcul pur).
+4. Fonction distincte (sépare I/O et logique).
+:::
 
 ## - { points=2 }
 
 Complétez le pseudo-code en détaillant le raffinage successif (2 niveaux) pour l'algorithme suivant : "compter le nombre de valeurs positives dans un tableau".
 
-!!! solution { lines=6 }
+::: solution {lines=6}
 
-    Niveau 1 :
+Niveau 1 :
 
-    - parcourir le tableau
-    - compter les valeurs positives
-    - retourner le compteur
+- parcourir le tableau
+- compter les valeurs positives
+- retourner le compteur
 
-    Niveau 2 (détail du parcours) :
+Niveau 2 (détail du parcours) :
 
-    - initialiser `count` à 0
-    - pour chaque élément `x`, si `x > 0` alors `count++`
+- initialiser `count` à 0
+- pour chaque élément `x`, si `x > 0` alors `count++`
+:::
 
 # Arithmétique et expressions { points=10 }
 
@@ -126,9 +129,10 @@ do
 while (x > 1.0);
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    Il manque les accolades autour du bloc `do..while`.
+Il manque les accolades autour du bloc `do..while`.
+:::
 
 ---
 
@@ -140,9 +144,10 @@ if (x = 0)
     printf("Erreur : la valeur 0 est interdite !\n");
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    Le test d'égalité utilise l'opérateur `==`. L'opérateur d'affectation `=` n'est pas valable.
+Le test d'égalité utilise l'opérateur `==`. L'opérateur d'affectation `=` n'est pas valable.
+:::
 
 ## - { points=2 }
 
@@ -157,9 +162,10 @@ switch (x) {
 }
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    L'instruction `switch` n'est pas applicable à un type à virgule flottante.
+L'instruction `switch` n'est pas applicable à un type à virgule flottante.
+:::
 
 ## - { points=2 }
 
@@ -170,9 +176,10 @@ for (int i = 0; i < 10; i++);
 }
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    Le point virgule à la fin de l'instruction termine cette dernière. Le bloc formé des accolades n'appartient pas à la boucle.
+Le point virgule à la fin de l'instruction termine cette dernière. Le bloc formé des accolades n'appartient pas à la boucle.
+:::
 
 ## - { points=2 }
 
@@ -184,9 +191,10 @@ while i < 100
 }
 ```
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    Il manque des parenthèses autour de la condition de l'instruction `while`.
+Il manque des parenthèses autour de la condition de l'instruction `while`.
+:::
 
 ---
 
@@ -213,9 +221,10 @@ int main() {
 }
 ```
 
-!!! solution { lines=1 }
+::: solution {lines=1}
 
-    00000 105 102 300 102
+00000 105 102 300 102
+:::
 
 # Programmation
 
@@ -223,35 +232,37 @@ int main() {
 
 Algorithme sur les tableaux : écrire une fonction qui reçoit en paramètre un tableau d'entiers et qui retourne la position de la première occurrence d'une valeur dans ce tableau, ou `-1` si la valeur n'est pas présente. Utiliser la syntaxe pointeur pour le paramètre tableau.
 
-!!! solution { lines=5 }
+::: solution {lines=5}
 
-    ```c
-    int index(int *array, size_t size, int value) {
-      for (int i = 0; i < size; i++)
-          if (array[i] == value)
-              return i;
-      return -1;
-    }
-    ```
+```c
+int index(int *array, size_t size, int value) {
+  for (int i = 0; i < size; i++)
+      if (array[i] == value)
+          return i;
+  return -1;
+}
+```
+:::
 
 ## - { points=5 }
 
 Écrire une fonction qui calcul la longueur totale des segments de droite dont les points sont reçus en paramètre. Les données sont un tableau composé de N par 2. Les indices du sous tableau sont les coordonnées X et Y des points.
 
-!!! solution { lines=9 }
+::: solution {lines=9}
 
-    ```c
-    double distance(double x1, double y1, double x2, double y2) {
-      return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-    }
+```c
+double distance(double x1, double y1, double x2, double y2) {
+  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
 
-    double length(double array[][2], size_t size) {
-      double length = 0;
-      for (int i = 0; i < size - 1; i++)
-          length += distance(
-              array[i][0], array[i][1],
-              array[i + 1][0], array[i + 1][1]
-          );
-      return length;
-    }
-    ```
+double length(double array[][2], size_t size) {
+  double length = 0;
+  for (int i = 0; i < size - 1; i++)
+      length += distance(
+          array[i][0], array[i][1],
+          array[i + 1][0], array[i + 1][1]
+      );
+  return length;
+}
+```
+:::

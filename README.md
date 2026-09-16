@@ -8,8 +8,8 @@
 `texsmith-exam` is an exam-focused template for [TeXSmith](https://github.com/yves-chevallier/texsmith).  
 It provides:
 
-- An exam LaTeX template and renderer integration.
-- Markdown helpers for question structures, multiple-choice answers, and fill-in blanks.
+- An exam LaTeX template and the IR pass that reads the exam constructs.
+- TMark spellings for question structures, multiple-choice answers, and fill-in blanks.
 - Solution-aware rendering to generate both student and answer-key PDFs from the same source.
 - Demo content and Makefiles to quickly produce sample exam/solution outputs.
 
@@ -20,11 +20,10 @@ The current template branding is oriented to HEIG-VD and can be adapted over tim
 This repository contains:
 
 - A TeXSmith template entry point: `exam`.
-- A custom renderer registration for exam-specific behavior.
-- Markdown extensions and rendering rules for:
+- An IR pass declared by the template manifest (texsmith 0.8), which reads:
   - Heading-to-question/part/subpart mapping.
   - Task-list-based multiple-choice blocks.
-  - Solution callouts (`!!! solution`) with lines/grid/box options.
+  - Solution containers (`::: solution`) with lines/grid/box options.
   - Fill-in-the-blank placeholders.
 - Documentation source under `docs/`.
 - Working demos under `demo/exam` and `demo/quiz`.

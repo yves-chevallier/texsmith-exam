@@ -78,9 +78,10 @@ Which sea is the most saline?
 
 Name each continent:
 
-!!! solution { lines=2 }
+::: solution {lines=2}
 
-    Africa, Antarctica, Asia, Europe, North America, Australia
+Africa, Antarctica, Asia, Europe, North America, Australia
+:::
 
 ## -
 

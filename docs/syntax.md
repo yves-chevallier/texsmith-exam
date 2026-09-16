@@ -92,32 +92,47 @@ Inline fill-ins turn into exam-style answer blanks:
 The capital of Switzerland is [Bern]{w=30}.
 ```
 
-The optional attribute block lets you specify the blank width. By default, the
-width is computed from the answer text. If you want to avoid revealing the
-expected length, set an explicit width (`w=1cm`, `w=1in`, or similar). Both
-`width` and `w` are accepted.
+The attribute block sets the blank width. Without it the width is computed from
+the answer text; if you want to avoid revealing the expected length, set an
+explicit width (`w=1cm`, `w=1in`, or similar). Both `width` and `w` are
+accepted, and a bare number is read as millimetres.
+
+For an auto-sized blank, mark the span with the `fillin` class — an attribute
+block is what makes TMark read `[…]` as a span at all:
+
+```md
+The capital of Switzerland is [Bern]{.fillin}.
+```
+
+A bare `[Bern]`, with no attribute block, is read as a blank too. TMark leaves
+it as literal text, and the template's pass picks it up; set
+`exam.fillin-bare: false` in the front matter if a document needs its brackets
+back.
 
 In the front matter you can configure `exam.char-width-scale` to scale the
 automatic width when no explicit size is provided.
 
 ## Solution blocks
 
-Use admonitions to provide solutions and mark answers.
+A solution is a container: the answer, and the space reserved for it on the
+student copy.
 
 ```md
-!!! solution
-
-    Solution content appears only in the answer key
+::: solution
+Solution content appears only in the answer key
+:::
 ```
 
-For short answers, you can request lined space. In the answer key the lines are
+For short answers, request lined space. In the answer key the lines are
 replaced by the solution text.
 
 ```md
-!!! solution { lines=3 }
-
-    Solution text...
+::: solution {lines=3}
+Solution text...
+:::
 ```
+
+`lines=fill` reserves the rest of the page rather than a fixed number of lines.
 
 Sometimes you need a grid instead of dotted lines.
 
@@ -126,9 +141,9 @@ Sometimes you need a grid instead of dotted lines.
 
 Draw an equilateral triangle
 
-!!! solution { grid=3cm }
-
-    ![Triangle]{triangle.svg}
+::: solution {grid=3cm}
+![Triangle](triangle.svg)
+:::
 ```
 
 Or you can reserve an empty box for drawings or other free-form answers.
@@ -138,11 +153,46 @@ Or you can reserve an empty box for drawings or other free-form answers.
 
 Draw a sheep:
 
-!!! solution { box=5cm }
+::: solution {box=5cm}
+Here is an example of the expected drawing:
 
-    Here is an example of the expected drawing:
+![Sheep](sheep.svg)
 
-    ![Sheep]{sheep.svg}
+The result should resemble a sheep with wool and four legs.
+:::
+```
 
-    The result should resemble a sheep with wool and four legs.
+An **empty** solution block reserves space and prints nothing in the answer
+key — the way to leave a blank page for rough work:
+
+```md
+::: solution {lines=fill newpage=true}
+:::
+```
+
+!!! info "Spelling"
+
+    `::: solution` is not one of TMark's container names, so the parser warns
+    (`container-unknown`) before any template is involved and renders the
+    content transparently. Two spellings avoid the warning and mean exactly the
+    same thing to this template: `::: div {.solution lines=3}`, and `::: solution`
+    with `solution` declared under `press.declare.admonitions` in the front matter.
+
+## Page breaks
+
+A thematic break starts a new page:
+
+```md
+Text of the last question.
+
+---
+
+# Next question
+```
+
+A `---` on the *first* line of a file opens the front matter instead, so a
+question that must start on a fresh page says so on its heading:
+
+```md
+# Functions { points=15 newpage=true }
 ```
