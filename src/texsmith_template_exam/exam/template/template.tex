@@ -348,6 +348,21 @@
   #1
 }
 
+% The built-in HEIG-VD letterhead is drawn by the heiglogo fragment, which
+% calls \logo without a size and therefore lands on the vintage default (18mm).
+% That is the cover size: on a `minimal' title page the logo then reaches below
+% the header rule and collides with the course line. The layout geometry this
+% template resolved above is the intended one, so hand it to the fragment as
+% the package default; \logo reads the defaults at shipout, so this holds
+% wherever the fragment injected its call.
+\BLOCK{ if logo_builtin and not logo_disabled and logo_height }
+\makeatletter
+\@ifpackageloaded{heiglogo}{%
+  \heiglogoSetup{height=\VAR{logo_height}}%
+}{}
+\makeatother
+\BLOCK{ endif }
+
 % ---------------------------------------------------------------------------
 % Contract macros (texsmith 0.8). The writers name a macro per construct and a
 % fragment defines it; an exam restyles the ones it uses here, after the

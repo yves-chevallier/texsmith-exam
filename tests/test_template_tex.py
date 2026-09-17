@@ -64,3 +64,17 @@ def test_template_supports_version_display() -> None:
     assert "version_value" in text
     assert "exam_version" in text
     assert "date_display" in text
+
+
+def test_the_builtin_logo_is_sized_by_the_title_page_layout() -> None:
+    # The heiglogo fragment calls \logo without a size, so it would draw at the
+    # vintage default (18mm, the cover size) even on a `minimal' title page,
+    # where the logo then runs into the header rule. The template hands the
+    # geometry it resolved to the package instead.
+    text = _template_text()
+    assert r"\heiglogoSetup{height=\VAR{logo_height}}" in text
+    setup = text.split(r"\heiglogoSetup")[0]
+    # \@ifpackageloaded needs the letter catcode, and the guard must not fire
+    # for a document that disabled the logo or brought a file of its own.
+    assert setup.rsplit(r"\makeatletter", 1)[1].count(r"\makeatother") == 0
+    assert r"\BLOCK{ if logo_builtin and not logo_disabled and logo_height }" in text

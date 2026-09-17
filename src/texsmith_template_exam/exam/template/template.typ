@@ -39,8 +39,12 @@
 #let exam-fillin-style = "{{ fillin_style | lower }}"
 #let exam-next-page-advice = {{ 'true' if next_page_advice else 'false' }}
 #let exam-recto-name = {{ 'true' if recto_name and not solution else 'false' }}
+// Room reserved above the text for the running head. Typst keeps the margin on
+// every page, but page 1 carries no running head, so the title block claws it
+// back — the negative skip `\@maketitle' uses on the LaTeX side.
+#let exam-head-room = 15mm
 #let exam-margin = (
-  top: {{ margin_top }} + 15mm,
+  top: {{ margin_top }} + exam-head-room,
   bottom: {{ margin_bottom }},
   left: {{ margin_left }},
   right: {{ margin_right }},
@@ -120,9 +124,15 @@
 #let exam-ssp = counter("exam-subsubpart")
 
 // An ISO date in the long form of the document language; anything else, and
-// any date that is not one, is printed as the author wrote it.
+// any date that is not one, is printed as the author wrote it. No date at all
+// falls back to the compile date, as `\today' does on the LaTeX side; it is
+// spelled without the weekday, the form `\today' itself prints.
 #let exam-long-date(raw) = {
   let written = raw.trim()
+  if written == "" {
+    let today = datetime.today()
+    return [#today.day() #exam-months.at(today.month() - 1) #today.year()]
+  }
   let parts = written.split("-")
   if parts.len() < 3 { return written }
   let day = parts.at(2).split("T").at(0).split(" ").at(0)
@@ -503,14 +513,18 @@
 // ---------------------------------------------------------------------------
 
 {% if not logo_off %}
+{# The same two sizes template.tex resolves: a `minimal' title page puts the
+   logo beside the title block, where the cover size would reach the header
+   rule, so it is the smaller of the two. #}
+#let exam-logo-height = {{ '14.5mm' if minimal else '18mm' }}
 {% if logo_file %}
-#let exam-logo = image("{{ asset(logo_file) }}", height: 16mm)
+#let exam-logo = image("{{ asset(logo_file) }}", height: exam-logo-height)
 {% else %}
 {% include "template/logos/heiglogo-" ~ vintage ~ ".typ" %}
 #let exam-logo = image(
   bytes({{ 'heig-logo-color' if logo_color else 'heig-logo-mono' }}),
   format: "svg",
-  height: 16mm,
+  height: exam-logo-height,
 )
 {% endif %}
 {% endif %}
@@ -570,6 +584,9 @@
 {% if not logo_off %}
 #place(top + left, dx: -exam-margin.left + 24mm, dy: -exam-margin.top + 10mm, exam-logo)
 {% endif %}
+{# Page 1 carries no running head: take back the room the margin reserves for
+   one, so the title starts at the top of the text block. #}
+#v(-exam-head-room)
 #align(center)[
 {% if solution %}
   #text(fill: red, weight: "bold")[Solution]
@@ -585,20 +602,21 @@
   {{ block }}
 {% endfor %}
 ]
-#v(0.6em)
-#line(length: 100%, stroke: 0.5pt + black)
-#v(0.1em)
-#grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
-  text(size: 1.05em)[{{ course | te }}],
-  text(size: 1.05em)[#exam-long-date("{{ exam_date }}"){% if version %}, {{ version | te }}{% endif %}],
-)
-#v(0.1em)
+{# The two rules, the course line and the school line are one unit. Block
+   spacing is set inside it, so the document's paragraph spacing does not prise
+   the rules apart; `above'/`below' alone hold it off the title and the body. #}
+#block(width: 100%, above: 0.7em, below: 0.9em)[
+  #set block(spacing: 0.3em)
+  #line(length: 100%, stroke: 0.5pt + black)
+  #grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
+    text(size: 1.05em)[{{ course | te }}],
+    text(size: 1.05em)[#exam-long-date("{{ exam_date }}"){% if version %}, {{ version | te }}{% endif %}],
+  )
 {% if school or department %}
-#align(center, emph[{{ school | te }}{% if school and department %} — {% endif %}{{ department | te }}])
-#v(0.2em)
+  #align(center, emph[{{ school | te }}{% if school and department %} — {% endif %}{{ department | te }}])
 {% endif %}
-#line(length: 100%, stroke: 0.5pt + black)
-#v(1em)
+  #line(length: 100%, stroke: 0.5pt + black)
+]
 {% else %}
 {# `titlepage: cover` — the LaTeX `coverpages`. #}
 {% if not logo_off %}

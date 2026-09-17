@@ -101,3 +101,39 @@ def test_the_typst_section_mirrors_the_latex_attributes() -> None:
     # What it leaves out: `date` (renamed), the author it takes from the
     # renderer's own author views, and the LaTeX-only engine knobs.
     assert latex - typst == {"author", "date", "geometry", "hyperref_options"}
+
+
+def test_page_one_takes_back_the_running_head_room() -> None:
+    # The margin reserves room for the running head on every page, but page 1
+    # carries none: without the negative skip the title block starts 15mm low
+    # and the whole header rides down with it.
+    text = _template_text()
+    assert "#let exam-head-room = 15mm" in text
+    assert "top: {{ margin_top }} + exam-head-room," in text
+    minimal = text.split("{% if minimal %}")[1].split("{% else %}")[0]
+    assert "#v(-exam-head-room)" in minimal
+
+
+def test_a_missing_date_falls_back_to_the_compile_date() -> None:
+    # `template.tex` falls back to \today; without this the Typst header prints
+    # a bare ", <version>" for a document whose front matter carries no date.
+    text = _template_text()
+    body = text.split("#let exam-long-date(raw) = {")[1]
+    assert 'if written == "" {' in body
+    assert "datetime.today()" in body
+
+
+def test_the_logo_takes_the_size_of_the_title_page_layout() -> None:
+    # The two sizes `template.tex` resolves for the same two layouts.
+    text = _template_text()
+    assert "#let exam-logo-height = {{ '14.5mm' if minimal else '18mm' }}" in text
+    assert "height: 16mm" not in text
+
+
+def test_the_minimal_header_is_one_block_with_its_own_spacing() -> None:
+    # The document's paragraph spacing applies between blocks, so the rules,
+    # the course line and the school line have to set their own or the header
+    # opens up by an em per gap.
+    minimal = _template_text().split("{% if minimal %}")[1].split("{% else %}")[0]
+    assert "#block(width: 100%, above: 0.7em, below: 0.9em)[" in minimal
+    assert "#set block(spacing: 0.3em)" in minimal
