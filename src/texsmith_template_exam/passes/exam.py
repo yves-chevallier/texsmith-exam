@@ -54,8 +54,9 @@ from texsmith_template_exam.exam.utils import (
     normalize_fillin_width,
     normalize_points,
 )
-from texsmith_template_exam.passes import latex as latex_backend
+from texsmith_template_exam.passes import latex as latex_backend, typst as typst_backend
 from texsmith_template_exam.passes.model import (
+    LEVELS,
     Choice,
     ChoiceGroup,
     Emitter,
@@ -78,8 +79,11 @@ _SCALE_KEYS = ("char-width-scale", "char_width_scale", "scale")
 _FILLIN_CLASSES = frozenset({"fillin", "blank"})
 #: A bare ``[answer]`` left in the text by the parser.
 _BARE_FILLIN = re.compile(r"\[([^\]\n]+)\]")
-#: The emitters, by backend. A Typst twin registers itself here.
-_EMITTERS = {"latex": latex_backend.LatexEmitter}
+#: The emitters, by backend.
+_EMITTERS = {
+    "latex": latex_backend.LatexEmitter,
+    "typst": typst_backend.TypstEmitter,
+}
 
 
 def _kv(attrs: model.Attrs, key: str) -> str | None:
@@ -184,7 +188,7 @@ def _as_solution(node: model.Block) -> Solution | None:
 
 
 class _Structure:
-    """Which ``exam.cls`` list environments are open, and what a depth change costs."""
+    """Which nesting levels are open under the current question, and what a depth change costs."""
 
     __slots__ = ("open",)
 
@@ -198,7 +202,7 @@ class _Structure:
         A question (depth 1) closes everything; a part needs ``parts`` open and
         nothing deeper; a subpart needs ``parts`` and ``subparts``.
         """
-        wanted = latex_backend.LEVEL_ENVIRONMENTS[: max(0, depth - 1)]
+        wanted = LEVELS[: max(0, depth - 1)]
         closed = tuple(reversed(self.open[len(wanted) :]))
         del self.open[len(wanted) :]
         opened = tuple(wanted[len(self.open) :])
