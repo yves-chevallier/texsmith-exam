@@ -122,6 +122,13 @@ class Emitter(Protocol):
     ) -> tuple[str, str]:
         """The markup around a question's title, levels to close and open included."""
 
+    def detached(self, question: Question) -> str:
+        """What closes a question's opening when no prose follows it to be glued to.
+
+        A figure, a listing, a list, a table: the backend may need the title
+        typeset where it stands rather than deferred to the next paragraph.
+        """
+
     def close_levels(self, closed: tuple[str, ...]) -> str:
         """The markup closing the still-open levels at the end of a document."""
 

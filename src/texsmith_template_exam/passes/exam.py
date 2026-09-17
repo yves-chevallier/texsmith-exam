@@ -346,6 +346,8 @@ class _Rewriter:
         #: ``\part`` and its question must share a paragraph, or the blank line
         #: between two blocks opens an empty one under the label.
         pending_label: tuple[model.Inline, ...] = ()
+        #: What closes ``pending_label`` if no prose takes it in.
+        pending_detached: str = ""
         pending_answerline: tuple[model.Inline, ...] = ()
         plain_mode_level: int | None = None
 
@@ -358,7 +360,7 @@ class _Rewriter:
                 # between ``\titledquestion`` and ``\begin{parts}`` makes
                 # exam.cls hang the ``(a)`` on the title line.
                 carry, pending_label = pending_label, ()
-                pending_label, pending_answerline = self._header(
+                pending_label, pending_answerline, pending_detached = self._header(
                     block, base, structure, out, plain_mode_level, carry
                 )
                 plain_mode_level = self._plain_mode(block, base, plain_mode_level)
@@ -373,7 +375,9 @@ class _Rewriter:
                 else:
                     out.append(
                         model.Plain(
-                            content=pending_label, id=self.ctx.ids.next(), span=block.span
+                            content=self._detached(pending_label, pending_detached, block.span),
+                            id=self.ctx.ids.next(),
+                            span=block.span,
                         )
                     )
                 pending_label = ()
@@ -390,6 +394,8 @@ class _Rewriter:
             out.extend(rewritten)
 
         span = blocks[-1].span if blocks else _NO_SPAN
+        if pending_label:
+            pending_label = self._detached(pending_label, pending_detached, span)
         for leftover in (pending_label, pending_answerline):
             if leftover:
                 out.append(
@@ -457,6 +463,14 @@ class _Rewriter:
             return None
         return current
 
+    def _detached(
+        self, label: tuple[model.Inline, ...], marker: str, span: model.Span
+    ) -> tuple[model.Inline, ...]:
+        """``label`` closed off because nothing followed it that it could open."""
+        if not marker:
+            return label
+        return (*label, self.raw_inline(marker, span))
+
     def _carried(
         self, carry: tuple[model.Inline, ...], nodes: tuple[model.Inline, ...], span: model.Span
     ) -> tuple[model.Inline, ...]:
@@ -473,11 +487,13 @@ class _Rewriter:
         out: list[model.Block],
         plain_mode_level: int | None,
         carry: tuple[model.Inline, ...] = (),
-    ) -> tuple[tuple[model.Inline, ...], tuple[model.Inline, ...]]:
-        """Emit one heading; return ``(label to glue, answer line to defer)``.
+    ) -> tuple[tuple[model.Inline, ...], tuple[model.Inline, ...], str]:
+        """Emit one heading; return ``(label to glue, answer line to defer, detached tail)``.
 
         ``carry`` is the label of the heading just before, which found no text
-        to be glued to; it opens the block this heading emits.
+        to be glued to; it opens the block this heading emits. The *detached
+        tail* is what closes this heading's label if nothing follows that it
+        can open either.
         """
         depth = header.level - base + 1
         title = plain_text(header.content)
@@ -512,7 +528,7 @@ class _Rewriter:
                 out.append(
                     model.Plain(content=answerline, id=self.ctx.ids.next(), span=header.span)
                 )
-            return (), ()
+            return (), (), ""
 
         opened, closed = structure.enter(depth)
         question = Question(
@@ -527,15 +543,16 @@ class _Rewriter:
         frame = self.emitter.question(question, opened, closed)
         content = () if anonymous else header.content
         label = self._carried(carry, self.framed(frame, content, header.span), header.span)
+        detached = self.emitter.detached(question)
         if not answerline:
-            return label, ()
+            return label, (), detached
         if title.strip() in _DASH_TITLES:
             # An anonymous question: the answer line belongs after the text that
             # follows it, not squeezed between the label and the question.
-            return label, answerline
+            return label, answerline, detached
         out.append(model.Plain(content=label, id=self.ctx.ids.next(), span=header.span))
         out.append(model.Plain(content=answerline, id=self.ctx.ids.next(), span=header.span))
-        return (), ()
+        return (), (), ""
 
     @staticmethod
     def _is_text(block: model.Block) -> bool:

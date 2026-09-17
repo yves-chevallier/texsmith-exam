@@ -96,6 +96,19 @@ class LatexEmitter:
             return rf"\{command}{points}{label}", ""
         return rf"\{command}{points} ", label
 
+    def detached(self, question: Question) -> str:
+        r"""``\leavevmode`` when a question's title has no paragraph to open.
+
+        ``\question`` and ``\titledquestion`` are list items, and ``\qformat``
+        is their label: LaTeX holds a pending label until the next horizontal
+        material, so a question followed by a figure — or by a listing, a table,
+        a list — has its ``Problème N`` line typeset not above that block but
+        above whichever later paragraph happens to start one. ``\leavevmode``
+        starts the paragraph on the spot. Parts keep the pending label: the
+        template's ``tscode`` hook reads ``\if@inlabel`` to hug them.
+        """
+        return r"\leavevmode" if question.depth == 1 else ""
+
     def answerline_frame(self) -> tuple[str, str]:
         """The markup around the expected answer of an answer line."""
         return r"\ifprintanswers\answerline[", r"]\else\answerline\fi"

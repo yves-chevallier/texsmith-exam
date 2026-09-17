@@ -26,6 +26,29 @@ def test_a_dash_heading_is_an_anonymous_part_inside_parts() -> None:
     assert r"\label" not in body.split(r"\begin{parts}")[1]
 
 
+def test_a_question_before_a_figure_starts_its_own_paragraph() -> None:
+    # exam.cls holds the `Problème N` label until the next horizontal material;
+    # with a figure next it would be typeset above some later paragraph.
+    body = latex("# Q { points=5 }\n\n![x](a.png)\n\nText.\n")
+
+    assert r"\titledquestion{Q}[5]\label{q}\leavevmode" in body
+
+
+def test_a_question_before_a_paragraph_keeps_its_pending_label() -> None:
+    body = latex("# Q { points=5 }\n\nText.\n")
+
+    assert r"\leavevmode" not in body
+    assert r"\titledquestion{Q}[5]\label{q}" + "\nText." in body
+
+
+def test_a_part_before_a_listing_keeps_its_pending_label() -> None:
+    # The template's ``tscode`` hook reads ``\if@inlabel`` to hug a part label;
+    # only a question needs its paragraph started on the spot.
+    body = latex("# Q\n\n## -\n\n```c\nint x;\n```\n")
+
+    assert r"\leavevmode" not in body
+
+
 def test_a_part_opens_in_the_question_s_own_block() -> None:
     # A question heading followed straight by its first part: the two labels
     # are one block, so no \par separates them. With one, exam.cls hangs the
