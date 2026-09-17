@@ -248,6 +248,15 @@ def test_an_empty_solution_only_reserves_space() -> None:
     assert r"\begin{solution}" not in body
 
 
+def test_an_empty_solution_without_attributes_reserves_nothing() -> None:
+    # "the answer goes on a separate sheet": no space to reserve, nothing to print.
+    body = latex("# Q\n\nText.\n\n::: solution\n:::\n")
+
+    assert r"\fillwithdottedlines" not in body
+    assert r"\ifprintanswers" in body
+    assert r"\begin{solution}" in body
+
+
 def test_solution_mode_surrounds_the_answer_with_skips() -> None:
     body = latex("# Q\n\n::: solution {lines=3}\nAnswer.\n:::\n", solution=True)
 

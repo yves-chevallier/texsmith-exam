@@ -137,7 +137,7 @@ class LatexEmitter:
 
     def solution(self, solution: Solution) -> tuple[str, str]:
         """The ``(open, close)`` markup around a solution body."""
-        if solution.empty:
+        if solution.empty and solution.reserves_space:
             return self._reserved_space(solution), ""
         begin, end = self._environment(solution)
         if self.options.solution:
@@ -145,7 +145,7 @@ class LatexEmitter:
         return begin, end
 
     def _reserved_space(self, solution: Solution) -> str:
-        """An empty solution block: reserve the space in exam mode, print nothing otherwise."""
+        """A solution block that is space and nothing else: no answer to print."""
         body = [r"\clearpage"] if solution.newpage else []
         body.append(self._filler(solution))
         return "\\ifprintanswers\\else\n" + "\n".join(body) + "\n\\fi\n"

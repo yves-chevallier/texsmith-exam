@@ -92,6 +92,16 @@ class Solution:
     def empty(self) -> bool:
         return not self.content
 
+    @property
+    def reserves_space(self) -> bool:
+        """Whether the author asked for space: ``lines``, ``grid`` or ``box``.
+
+        Without one of them there is nothing to reserve, so an empty block is
+        an answer given elsewhere (on a separate sheet) rather than a blank to
+        fill in — it prints nothing on either copy.
+        """
+        return bool(self.lines or self.grid or self.box)
+
 
 class Emitter(Protocol):
     """What :mod:`~texsmith_template_exam.passes.exam` needs from a backend.
