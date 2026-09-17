@@ -144,8 +144,8 @@
 #set page(
   paper: "{{ (paper.get('format', 'a4') if paper is mapping else paper) or 'a4' }}",
   margin: exam-margin,
-  header-ascent: 45%,
-  footer-descent: 35%,
+  header-ascent: 5.8mm,  // the running head 17.7 mm from the top, where exam.cls puts it
+  footer-descent: 17mm,  // the foot 289 mm from the top, as in the LaTeX exam
   numbering: none,
   header: context {
     // The cover carries none, and a running head names the last question the
@@ -155,7 +155,7 @@
     // LaTeX template counts them at shipout — so a sheet handed in alone
     // still carries a name.
     if exam-recto-name and calc.even(here().page()) {
-      place(top + right, dy: 4mm)[
+      place(top + right, dy: 5mm)[
         #strong[#exam-name-label :] #h(0.6em)
         #box(width: 62mm, height: 8mm, stroke: 0.5pt + black)
       ]
@@ -271,6 +271,21 @@
   )
 })
 
+// The questions, each with the points of everything inside it — the sum
+// \pointsofquestion reports and \gradetable prints.
+#let exam-question-scores() = {
+  let questions = ()
+  for entry in query(<exam-entry>).map(it => it.value) {
+    let score = if entry.points == none { 0.0 } else { float(entry.points) }
+    if entry.kind == "question" {
+      questions.push((title: entry.title, score: score))
+    } else if questions.len() > 0 {
+      questions.last().score += score
+    }
+  }
+  questions
+}
+
 #let exam-question(points: none, id: none, body) = {
   exam-q.step()
   exam-p.update(0)
@@ -280,10 +295,18 @@
   [#metadata((kind: "question", points: points, title: body)) <exam-entry>]
   if id != none [#metadata(none) #label(id)]
   block(width: 100%, above: 1.8em, below: 0.9em, context {
+    // A question without points of its own is worth its parts, as
+    // \pointsofquestion sums them for \titledquestion's own line.
+    let index = exam-q.get().first()
+    let shown = if points != none { points } else {
+      let scores = exam-question-scores()
+      let total = if index <= scores.len() { scores.at(index - 1).score } else { 0.0 }
+      if total == 0 { none } else if calc.fract(total) == 0 { str(int(total)) } else { str(total) }
+    }
     grid(
       columns: (1fr, auto), column-gutter: 1em, align: (left + bottom, right + bottom),
-      strong[#exam-problem-label #exam-q.get().first()#if body != [] [ : #body]],
-      if exam-points-enabled and points != none { exam-points-note(points) } else { [] },
+      strong[#exam-problem-label #index#if body != [] [ : #body]],
+      if exam-points-enabled and shown != none { exam-points-note(shown) } else { [] },
     )
   })
 }
@@ -498,20 +521,6 @@
   #box(width: 62mm, height: 8mm, stroke: 0.5pt + black)
 ]
 
-// The questions, each with the points of everything inside it — the sum
-// \pointsofquestion reports and \gradetable prints.
-#let exam-question-scores() = {
-  let questions = ()
-  for entry in query(<exam-entry>).map(it => it.value) {
-    let score = if entry.points == none { 0.0 } else { float(entry.points) }
-    if entry.kind == "question" {
-      questions.push((title: entry.title, score: score))
-    } else if questions.len() > 0 {
-      questions.last().score += score
-    }
-  }
-  questions
-}
 
 #let exam-grade-table() = context {
   let questions = exam-question-scores()
