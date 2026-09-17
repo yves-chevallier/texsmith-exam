@@ -9,6 +9,8 @@ pass runs, its fragments are resolved and ``template.tex`` is rendered.
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
+import subprocess
 from typing import Any
 
 import pytest
@@ -156,3 +158,94 @@ def test_the_template_declares_its_pass_and_its_fragments() -> None:
     assert "heiglogo" in info.fragments
     assert "ts-todolist" in info.fragments
     assert info.engine == "lualatex"
+
+
+# -- the Typst backend -----------------------------------------------------
+
+
+def _typst(sources: tuple[Path, list[Path]], render_dir: Path, **options: Any) -> str:
+    """The same two-file exam through the Typst path, as ``--format typst`` drives it."""
+    from texsmith.core.conversion.typst import render_typst_documents
+
+    config, documents = sources
+    request = ConversionRequest(
+        documents=documents,
+        bibliography_files=[],
+        front_matter=yaml.safe_load(config.read_text(encoding="utf-8")),
+        front_matter_paths=[config],
+        template="exam",
+        render_dir=render_dir,
+        template_options=options,
+    )
+    service = ConversionService()
+    prepared = service.prepare_documents(request)
+    return render_typst_documents(prepared.documents, request, output_dir=render_dir)
+
+
+def test_the_typst_exam_mode_reserves_the_answer_space(
+    exam_sources: tuple[Path, list[Path]], tmp_path: Path
+) -> None:
+    source = _typst(exam_sources, tmp_path / "typst-exam")
+
+    # The scaffolding, then the pass's calls into it.
+    assert "#let exam-solution-mode = false" in source
+    assert '#let exam-problem-label = "Problème"' in source
+    assert '#exam-question(points: "10", id: "syntaxe")[Syntaxe]' in source
+    assert "#exam-solution(lines: 3)[" in source
+    assert "#exam-fillin(width: 3cm)[virtual]" in source
+    assert "#exam-choices(correct: (1, 2, ))[" in source
+    # The cover page: the grade table and the rules preset, expanded.
+    assert "#exam-grade-table()" in source
+    assert "Rendre toutes les feuilles de ce travail écrit." in source
+    assert "ISO/IEC 14882:2017" in source
+    # The contract overrides sit between the prelude and the body: a `#let`
+    # only reaches the calls below it, and the prelude defines the same names.
+    overrides = source.index("#set raw(theme: none)")
+    assert overrides > source.index("#let ts-callout-style")
+    assert overrides < source.index("#exam-question(")
+    assert source.rindex("#let ts-divider()") == source.rindex(
+        "#let ts-divider() = pagebreak(weak: true)"
+    )
+    assert source.rindex("#let ts-divider()") > source.index("#let ts-callout-style")
+
+
+def test_the_typst_solution_mode_prints_the_answers(
+    exam_sources: tuple[Path, list[Path]], tmp_path: Path
+) -> None:
+    source = _typst(exam_sources, tmp_path / "typst-solution", solution=True)
+
+    assert "#let exam-solution-mode = true" in source
+    # The same call: the scaffolding prints the body instead of the space.
+    assert "#exam-solution(lines: 3)[" in source
+    assert "#exam-fillin()[virtual]" in source
+
+
+def test_the_typst_source_compiles(
+    exam_sources: tuple[Path, list[Path]], tmp_path: Path
+) -> None:
+    typst = shutil.which("typst")
+    if typst is None:  # pragma: no cover - depends on the machine
+        pytest.skip("the typst binary is not on PATH")
+
+    render_dir = tmp_path / "typst-build"
+    render_dir.mkdir(parents=True, exist_ok=True)
+    for mode in ({}, {"solution": True}):
+        source = _typst(exam_sources, render_dir, **mode)
+        target = render_dir / "main.typ"
+        target.write_text(source, encoding="utf-8")
+        result = subprocess.run(
+            [typst, "compile", str(target), str(render_dir / "main.pdf")],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+
+
+def test_the_template_declares_the_same_pass_for_both_backends() -> None:
+    from texsmith.core.templates.typst import load_typst_template
+
+    info = load_typst_template("exam").info
+
+    assert [item.name for item in info.pass_specs()] == ["exam"]
+    assert info.containers == ["solution"]
+    assert info.entrypoint == "template/template.typ"
