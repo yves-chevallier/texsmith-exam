@@ -26,6 +26,29 @@ def test_a_dash_heading_is_an_anonymous_part_inside_parts() -> None:
     assert r"\label" not in body.split(r"\begin{parts}")[1]
 
 
+def test_a_part_opens_in_the_question_s_own_block() -> None:
+    # A question heading followed straight by its first part: the two labels
+    # are one block, so no \par separates them. With one, exam.cls hangs the
+    # ``(a)`` on the ``Problème N`` title line.
+    body = latex("# Q { points=10 }\n\n## -\n\nText.\n")
+
+    assert "\\label{q}\n\\ExamQuestionsBegin\n\\begin{parts}" in body
+    assert "\\label{q}\n\n" not in body
+
+
+def test_a_subpart_opens_in_the_part_s_own_block() -> None:
+    body = latex("# Q\n\n## -\n\n### -\n\nDeep.\n")
+
+    assert "\\part\n\\ExamQuestionsBegin\n\\begin{subparts}" in body
+
+
+def test_an_intro_paragraph_still_closes_the_question_label() -> None:
+    # Nothing is carried when the question has text of its own to be glued to.
+    body = latex("# Q\n\nIntro.\n\n## -\n\nText.\n")
+
+    assert "\\label{q}\nIntro.\n\n\\ExamQuestionsBegin" in body
+
+
 def test_points_reach_the_part() -> None:
     assert r"\part[3]" in latex("# Q\n\n## - { points=3 }\n\nText.\n")
 

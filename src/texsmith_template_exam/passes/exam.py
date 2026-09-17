@@ -351,12 +351,15 @@ class _Rewriter:
 
         for block in blocks:
             if top_level and isinstance(block, model.Header):
-                if pending_label:
-                    out.append(model.Plain(content=pending_label, id=self.ctx.ids.next(),
-                                           span=block.span))
-                    pending_label = ()
+                # A label with no text of its own — a question heading followed
+                # straight by its first part — is carried into the next
+                # heading's block rather than closed into one of its own: two
+                # blocks in a row are separated by a blank line, and a ``\par``
+                # between ``\titledquestion`` and ``\begin{parts}`` makes
+                # exam.cls hang the ``(a)`` on the title line.
+                carry, pending_label = pending_label, ()
                 pending_label, pending_answerline = self._header(
-                    block, base, structure, out, plain_mode_level
+                    block, base, structure, out, plain_mode_level, carry
                 )
                 plain_mode_level = self._plain_mode(block, base, plain_mode_level)
                 continue
@@ -454,6 +457,14 @@ class _Rewriter:
             return None
         return current
 
+    def _carried(
+        self, carry: tuple[model.Inline, ...], nodes: tuple[model.Inline, ...], span: model.Span
+    ) -> tuple[model.Inline, ...]:
+        r"""``carry`` and ``nodes`` in one block, one line apart — never a ``\par``."""
+        if not carry:
+            return nodes
+        return (*carry, self.raw_inline("\n", span), *nodes)
+
     def _header(
         self,
         header: model.Header,
@@ -461,8 +472,13 @@ class _Rewriter:
         structure: _Structure,
         out: list[model.Block],
         plain_mode_level: int | None,
+        carry: tuple[model.Inline, ...] = (),
     ) -> tuple[tuple[model.Inline, ...], tuple[model.Inline, ...]]:
-        """Emit one heading; return ``(label to glue, answer line to defer)``."""
+        """Emit one heading; return ``(label to glue, answer line to defer)``.
+
+        ``carry`` is the label of the heading just before, which found no text
+        to be glued to; it opens the block this heading emits.
+        """
         depth = header.level - base + 1
         title = plain_text(header.content)
         anonymous = is_empty_title(title)
@@ -478,7 +494,19 @@ class _Rewriter:
 
         if explicit_plain or nested_plain or not (1 <= depth <= 4):
             closed = structure.close_all()
-            out.append(self.raw_block(self.emitter.plain_heading(closed), header.span))
+            leaving = self.emitter.plain_heading(closed)
+            if carry:
+                out.append(
+                    model.Plain(
+                        content=self._carried(
+                            carry, (self.raw_inline(leaving, header.span),), header.span
+                        ),
+                        id=self.ctx.ids.next(),
+                        span=header.span,
+                    )
+                )
+            else:
+                out.append(self.raw_block(leaving, header.span))
             out.append(replace(header, level=min(max(depth, 1), 6)))
             if answerline:
                 out.append(
@@ -498,7 +526,7 @@ class _Rewriter:
         )
         frame = self.emitter.question(question, opened, closed)
         content = () if anonymous else header.content
-        label = self.framed(frame, content, header.span)
+        label = self._carried(carry, self.framed(frame, content, header.span), header.span)
         if not answerline:
             return label, ()
         if title.strip() in _DASH_TITLES:
