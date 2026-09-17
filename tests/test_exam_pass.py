@@ -128,6 +128,23 @@ def test_a_named_question_keeps_its_answer_line_under_the_label() -> None:
     assert body.index(r"\answerline[20]") < body.index("Text.")
 
 
+def test_a_quoted_answer_survives_a_code_heading() -> None:
+    # Regression, carried from the Python-Markdown reader: the smart-quote
+    # inline pass rewrote ``"20"`` into a <q> element before attr_list could
+    # read the block, and points/answer vanished. TMark parses the attribute
+    # block itself, so the quotes never reach an inline pass.
+    body = latex('# Q\n\n## `printf("%d ", a[1])` { points=1 answer="20" }\n\nText.\n')
+
+    assert r"\answerline[20]" in body
+    assert "{ points" not in body
+
+
+def test_an_answer_value_may_hold_an_apostrophe() -> None:
+    body = latex("# Q\n\n## - { points=1 answer=\"l\'index\" }\n\nText.\n")
+
+    assert r"\answerline[l'index]" in body
+
+
 # -- multiple choice -------------------------------------------------------
 
 
@@ -283,6 +300,23 @@ def test_a_grid_reserves_squared_paper() -> None:
     body = latex("# Q\n\n::: solution {grid=6}\nA.\n:::\n")
 
     assert r"\begin{solutionorgrid}[6\linefillheight]" in body
+
+
+def test_a_box_with_two_dimensions_reserves_a_rectangle() -> None:
+    body = latex("# Q\n\n::: solution {box=8cmx4cm}\nA.\n:::\n")
+
+    assert r"\fbox{\parbox[c][4cm][c]{8cm}" in body
+
+
+def test_a_table_in_a_solution_is_still_a_table() -> None:
+    # Regression, carried from the Python-Markdown renderer: unwrapping the
+    # solution wrapper used to re-parent the table out of the visitor's child
+    # list, and the answer key printed the cells as running text. The body
+    # stays IR here, so the table reaches the backend as one.
+    body = latex("# Q\n\n::: solution\n| a | b |\n| --- | --- |\n| 1 | 2 |\n:::\n")
+
+    assert r"\begin{tabularx}" in body
+    assert r"\end{tabularx}" in body
 
 
 def test_an_empty_solution_only_reserves_space() -> None:
