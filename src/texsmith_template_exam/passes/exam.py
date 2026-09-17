@@ -291,8 +291,12 @@ class _Rewriter:
                 span=node.span,
             )
 
-        rewritten = map_tree(root, visit)
-        return self.rewrite_bare_fillins(rewritten) if self.options.bare_fillin else rewritten
+        # The bare brackets go first, fenced off from the blanks that already
+        # carry an attribute group: an escaped ``[\[D\]]{w=6cm}`` answer is a
+        # literal pair of brackets, not a blank inside a blank.
+        if self.options.bare_fillin:
+            root = self.rewrite_bare_fillins(root)
+        return map_tree(root, visit)
 
     def rewrite_bare_fillins(self, root: model.Document) -> model.Document:
         """``[answer]`` in prose, with no attribute group, is a blank too.
@@ -301,8 +305,8 @@ class _Rewriter:
         span or a reference stays literal text — but it is how the corpus and
         the demo were written, so the pass splits the text nodes itself.
         Content that is not prose (code, math, a link target) never reaches a
-        ``Str``, and an explicit ``[answer]{.fillin}`` has been rewritten
-        already, so only the leftovers are seen here.
+        ``Str``, and a span that already carries an attribute group is fenced
+        off, so only the leftovers are seen here.
         """
 
         def split(node: model.Inline) -> model.Inline | tuple[model.Inline, ...]:
@@ -323,7 +327,10 @@ class _Rewriter:
                 parts.append(self._text(node.text[cursor:], node.span))
             return tuple(parts)
 
-        return map_inlines(root, split, skip=lambda node: isinstance(node, model.RawInline))
+        def is_blank(node: model.Node) -> bool:
+            return isinstance(node, model.SpanNode) and _as_fillin(node) is not None
+
+        return map_inlines(root, split, skip=is_blank)
 
     def _text(self, text: str, span: model.Span) -> model.Str:
         return model.Str(text=text, id=self.ctx.ids.next(), span=span)

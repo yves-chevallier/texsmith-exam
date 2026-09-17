@@ -165,6 +165,14 @@ def test_bare_fillins_can_be_turned_off() -> None:
     assert "[path]" in body
 
 
+def test_brackets_inside_an_explicit_blank_stay_literal() -> None:
+    # ``[\[D\]]{w=6cm}``: the answer *is* a bracketed pair, not a nested blank.
+    body = latex("# Q\n\nA [B puis \\[BROWN\\]]{w=6cm} b.\n")
+
+    assert body.count(r"\fillin") == 1
+    assert r"\fillin[B puis [BROWN]][6cm]" in body
+
+
 def test_a_link_is_never_a_fillin() -> None:
     body = latex("# Q\n\nSee [the docs](https://example.org).\n")
 
