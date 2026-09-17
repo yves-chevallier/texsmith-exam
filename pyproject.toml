@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: LaTeX",
 ]
 dependencies = [
-    "texsmith>=0.8,<1.0",
+    "texsmith>=0.9,<1.0",
     "texsmith-fragment-heig-logo>=0.1.0",  # year-aware HEIG-VD cover logo
     "pyyaml>=6.0",
 ]

@@ -21,7 +21,7 @@ The current template branding is oriented to HEIG-VD and can be adapted over tim
 This repository contains:
 
 - A TeXSmith template entry point: `exam`.
-- An IR pass declared by the template manifest (texsmith 0.8), which reads:
+- An IR pass declared by the template manifest (texsmith 0.9), which reads:
   - Heading-to-question/part/subpart mapping.
   - Task-list-based multiple-choice blocks.
   - Solution containers (`::: solution`) with lines/grid/box options.
@@ -32,8 +32,10 @@ This repository contains:
 ## Prerequisites
 
 - Python `>=3.13`
+- TeXSmith `>=0.9,<1.0` — the template's IR pass and both emitters need it
 - [uv](https://docs.astral.sh/uv/) installed
-- A LaTeX environment available for TeXSmith PDF builds
+- A LaTeX environment available for TeXSmith PDF builds, or `typst` for the
+  Typst backend
 
 ## Installation
 

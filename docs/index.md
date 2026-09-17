@@ -9,6 +9,9 @@ long-term goal is to offer a more generic version with configurable branding
 
 ## Installation
 
+The template needs TeXSmith `>=0.9,<1.0`: the exam constructs are an IR pass and
+two emitters, declared by the template manifest.
+
 Add the template as a dependency and install the required dependency groups:
 
 ```bash

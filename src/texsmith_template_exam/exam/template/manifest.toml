@@ -1,5 +1,5 @@
 [compat]
-texsmith = ">=0.8,<1.0"
+texsmith = ">=0.9,<1.0"
 
 [latex.template]
 name = "exam"
@@ -7,7 +7,7 @@ version = "0.1.0"
 entrypoint = "template/template.tex"
 engine = "lualatex"
 shell_escape = false
-# The exam constructs are an IR pass (texsmith 0.8): questions and parts,
+# The exam constructs are an IR pass (texsmith 0.9): questions and parts,
 # multiple choice, fill-in blanks and solution blocks are read from the tmark
 # IR and emitted as exam.cls markup. Declared here, so it runs only while this
 # template renders.
