@@ -12,6 +12,9 @@ shell_escape = false
 # IR and emitted as exam.cls markup. Declared here, so it runs only while this
 # template renders.
 passes = ["texsmith_template_exam.passes.exam:run"]
+# The container that pass reads: declared, so the parse does not report
+# `::: solution` as an unknown container once per block.
+containers = ["solution"]
 texlive_year = 2023
 tlmgr_packages = [
     "babel",
