@@ -8,7 +8,8 @@
 `texsmith-exam` is an exam-focused template for [TeXSmith](https://github.com/yves-chevallier/texsmith).  
 It provides:
 
-- An exam LaTeX template and the IR pass that reads the exam constructs.
+- An exam template for both backends — LaTeX (`exam.cls`) and Typst — and the
+  IR pass that reads the exam constructs for either.
 - TMark spellings for question structures, multiple-choice answers, and fill-in blanks.
 - Solution-aware rendering to generate both student and answer-key PDFs from the same source.
 - Demo content and Makefiles to quickly produce sample exam/solution outputs.
