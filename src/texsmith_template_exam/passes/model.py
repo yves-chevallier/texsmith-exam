@@ -16,6 +16,12 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from tmark.ir import model as ir
 
 
+#: The nesting levels under a question, outermost first. The LaTeX emitter
+#: reads them as ``exam.cls`` list environments to open and close; the Typst one
+#: only counts them. Either way the state machine of the pass names them.
+LEVELS: tuple[str, ...] = ("parts", "subparts", "subsubparts")
+
+
 @dataclass(frozen=True, slots=True)
 class Question:
     """A heading that opens a question, a part, a subpart or a subsubpart.
@@ -155,6 +161,7 @@ class Emitter(Protocol):
 
 
 __all__ = [
+    "LEVELS",
     "Choice",
     "ChoiceGroup",
     "Emitter",

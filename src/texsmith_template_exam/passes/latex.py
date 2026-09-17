@@ -18,39 +18,25 @@ package that defines its contract macro.
 from __future__ import annotations
 
 from dataclasses import dataclass
-import re
 
-from texsmith_template_exam.exam.utils import choice_label, expand_lines_value, normalize_box_dim
-from texsmith_template_exam.passes.model import Choice, ChoiceGroup, FillIn, Question, Solution
+from texsmith_template_exam.exam.utils import (
+    auto_fillin_width,
+    choice_label,
+    expand_lines_value,
+    parse_box,
+)
+from texsmith_template_exam.passes.model import (
+    Choice,
+    ChoiceGroup,
+    FillIn,
+    Question,
+    Solution,
+)
 from texsmith_template_exam.passes.options import ExamOptions
 
 
-#: exam.cls list environments, outermost first.
-LEVEL_ENVIRONMENTS: tuple[str, ...] = ("parts", "subparts", "subsubparts")
 #: The heading command of each exam depth (1-based).
 _HEADING_COMMANDS = ("question", "part", "subpart", "subsubpart")
-
-
-def _parse_box(value: str) -> tuple[str, str] | None:
-    """``box=`` as ``(width, height)``; the height is empty for a bare width."""
-    raw = value.strip()
-    if not raw:
-        return None
-    if "x" in raw:
-        width_raw, height_raw = raw.split("x", 1)
-        width = normalize_box_dim(width_raw)
-        height = normalize_box_dim(height_raw)
-        return (width, height) if (width and height) else None
-    return (normalize_box_dim(raw), "")
-
-
-def _auto_width(plain: str, scale: float) -> str:
-    """The width reserved for an answer of ``plain``'s length."""
-    visible = re.sub(r"\s+", "", plain or "")
-    width_mm = max(1, len(visible)) * scale
-    if float(width_mm).is_integer():
-        return f"{int(width_mm)}mm"
-    return f"{width_mm:.2f}".rstrip("0").rstrip(".") + "mm"
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,7 +129,9 @@ class LatexEmitter:
         """The markup around a blank's answer inlines."""
         if self.options.solution:
             return "\\fillin[", "]"
-        width = blank.width or _auto_width(blank.plain, blank.scale or self.options.fillin_scale)
+        width = blank.width or auto_fillin_width(
+            blank.plain, blank.scale or self.options.fillin_scale
+        )
         return "\\fillin[", f"][{width}]"
 
     # -- solution blocks ---------------------------------------------------
@@ -194,10 +182,10 @@ class LatexEmitter:
             )
 
         if solution.box:
-            parsed = _parse_box(solution.box)
+            parsed = parse_box(solution.box)
             if parsed:
                 width, height = parsed
-                if height:
+                if width:
                     centered = width == height
                     prefix = "\\noindent\\hfill" if centered else "\\noindent"
                     suffix = "\\hfill" if centered else ""
@@ -209,9 +197,9 @@ class LatexEmitter:
                         f"{{\\rule{{0pt}}{{{height}}}}}}}{suffix}%\n"
                         "\\vspace{1em}%\n\\fi\n",
                     )
-                if width:
+                if height:
                     return (
-                        f"\\begin{{solutionorbox}}[{width}]\n",
+                        f"\\begin{{solutionorbox}}[{height}]\n",
                         "\\leavevmode\n\\end{solutionorbox}\n",
                     )
 
@@ -250,4 +238,4 @@ class LatexEmitter:
         )
 
 
-__all__ = ["LEVEL_ENVIRONMENTS", "LatexEmitter"]
+__all__ = ["LatexEmitter"]

@@ -12,6 +12,7 @@ from texsmith.core.templates import WrappableTemplate
 from texsmith.templates.common import TemplateContextHelpers
 
 from texsmith_template_exam.exam import version as exam_version
+from texsmith_template_exam.exam.utils import markdown_to
 
 
 _WEEKDAYS = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
@@ -33,23 +34,8 @@ _FRENCH = {"fr", "french", "francais", "français"}
 
 
 def markdown_to_latex(value: Any) -> str:
-    """A line or two of Markdown as LaTeX — the 0.8 way: tmark parses, tmark writes.
-
-    ``format = "markdown"`` does this for a template *attribute*, but a cover
-    page rule is one item of a list, so the filter renders it here through the
-    same parser and writer (``manifest._render_attribute_markdown``).
-    """
-    if value is None:
-        return ""
-    text = str(value)
-    if not text.strip():
-        return text
-
-    from texsmith.readers.tmark import parse_payload
-    import tmark
-
-    payload = parse_payload(text, name="<exam template attribute>")
-    return str(tmark.write(payload, "latex", {}).get("text") or "").strip()
+    """A line or two of Markdown as LaTeX, for the ``markdown_to_latex`` filter."""
+    return markdown_to(value, "latex")
 
 
 def format_exam_date(value: Any, lang: str = "fr") -> str:

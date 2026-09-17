@@ -117,6 +117,53 @@ def normalize_box_dim(value: str) -> str:
     return normalized
 
 
+def markdown_to(value: object | None, backend: str) -> str:
+    """A line or two of Markdown as ``backend`` markup — tmark parses, tmark writes.
+
+    A template attribute declared ``format = "markdown"`` goes through the same
+    parser and writer; a cover-page rule is one item of a *list*, so the
+    attribute machinery never sees it on its own and the rendering happens
+    here instead.
+    """
+    if value is None:
+        return ""
+    text = str(value)
+    if not text.strip():
+        return text
+
+    from texsmith.readers.tmark import parse_payload
+    import tmark
+
+    payload = parse_payload(text, name="<exam template attribute>")
+    return str(tmark.write(payload, backend, {}).get("text") or "").strip()
+
+
+def parse_box(value: str) -> tuple[str, str] | None:
+    """``box=`` as ``(width, height)``; the width is empty for a bare height.
+
+    ``box=50`` reserves a full-width area 50mm high; ``box=6cmx4cm`` a box of
+    that width and that height.
+    """
+    raw = value.strip()
+    if not raw:
+        return None
+    if "x" in raw:
+        width_raw, height_raw = raw.split("x", 1)
+        width = normalize_box_dim(width_raw)
+        height = normalize_box_dim(height_raw)
+        return (width, height) if (width and height) else None
+    return ("", normalize_box_dim(raw))
+
+
+def auto_fillin_width(plain: str, scale: float) -> str:
+    """The width reserved for a blank whose answer is ``plain``, in millimetres."""
+    visible = re.sub(r"\s+", "", plain or "")
+    width_mm = max(1, len(visible)) * scale
+    if float(width_mm).is_integer():
+        return f"{int(width_mm)}mm"
+    return f"{width_mm:.2f}".rstrip("0").rstrip(".") + "mm"
+
+
 def expand_lines_value(value: str, *, unit_macro: str) -> str:
     trimmed = value.strip()
     if trimmed.isdigit():
@@ -158,16 +205,19 @@ def matches_empty_title_pattern(text: str) -> bool:
 
 
 __all__ = [
+    "auto_fillin_width",
     "choice_label",
     "expand_lines_value",
     "extract_dash_attrs_prefix",
     "is_empty_title",
     "is_truthy_attribute",
+    "markdown_to",
     "matches_empty_title_pattern",
     "normalize_answer_text",
     "normalize_box_dim",
     "normalize_fillin_width",
     "normalize_points",
     "normalize_style_choice",
+    "parse_box",
     "parse_heading_attrs",
 ]
