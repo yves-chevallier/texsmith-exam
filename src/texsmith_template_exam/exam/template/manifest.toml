@@ -157,6 +157,13 @@ allow_empty = false
 sources = ["exam.compact", "compact"]
 description = "Enable compact rendering mode for the exam renderer."
 
+[latex.template.attributes.recto_name]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.recto-name", "exam.recto_name", "recto-name", "recto_name"]
+description = "Repeat the name field at the top of every recto (even physical page) of the exam."
+
 [latex.template.attributes.next_page_advice]
 default = true
 type = "boolean"
@@ -348,6 +355,13 @@ type = "boolean"
 allow_empty = false
 sources = ["exam.compact", "compact"]
 description = "Enable compact rendering mode for the exam renderer."
+
+[typst.template.attributes.recto_name]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.recto-name", "exam.recto_name", "recto-name", "recto_name"]
+description = "Repeat the name field at the top of every recto (even physical page) of the exam."
 
 [typst.template.attributes.next_page_advice]
 default = true

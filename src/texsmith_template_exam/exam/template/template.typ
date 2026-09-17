@@ -38,6 +38,7 @@
 #let exam-choice-style = "{{ style_choices }}"
 #let exam-fillin-style = "{{ fillin_style | lower }}"
 #let exam-next-page-advice = {{ 'true' if next_page_advice else 'false' }}
+#let exam-recto-name = {{ 'true' if recto_name and not solution else 'false' }}
 #let exam-margin = (
   top: {{ margin_top }} + 15mm,
   bottom: {{ margin_bottom }},
@@ -150,6 +151,15 @@
     // The cover carries none, and a running head names the last question the
     // page reached — what \runningheader reads at shipout time.
     if here().page() == 1 { return }
+    // The name field again on every recto — the even physical pages, as the
+    // LaTeX template counts them at shipout — so a sheet handed in alone
+    // still carries a name.
+    if exam-recto-name and calc.even(here().page()) {
+      place(top + right, dy: 4mm)[
+        #strong[#exam-name-label :] #h(0.6em)
+        #box(width: 62mm, height: 8mm, stroke: 0.5pt + black)
+      ]
+    }
     let reached = query(<exam-entry>).filter(it => (
       it.value.kind == "question" and it.location().page() <= here().page()
     ))
