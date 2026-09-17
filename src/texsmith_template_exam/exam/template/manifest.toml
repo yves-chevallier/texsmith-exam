@@ -227,3 +227,216 @@ description = "Main exam content."
 
 [latex.template.assets]
 "columen.sty" = { source = "../columen/columen.sty" }
+
+# ---------------------------------------------------------------------------
+# The Typst half. The same exam, the same attributes; what exam.cls gives the
+# LaTeX side, `template/template.typ` writes out as `#exam-…` functions and
+# `passes/typst.py` calls them.
+# ---------------------------------------------------------------------------
+
+[typst.template]
+name = "exam"
+version = "0.1.0"
+entrypoint = "template/template.typ"
+passes = ["texsmith_template_exam.passes.exam:run"]
+containers = ["solution"]
+
+[typst.template.attributes.title]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["title"]
+description = "Exam title (from metadata or promoted heading)."
+
+[typst.template.attributes.subtitle]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["subtitle"]
+description = "Exam subtitle."
+
+[typst.template.attributes.exam_date]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["date"]
+description = "Exam date. An ISO date is printed in the long form of the document language; anything else is printed as written. Named `exam_date` because a `date` attribute would be re-formatted by the Typst renderer before the scaffolding sees it."
+
+[typst.template.attributes.version]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+normaliser = "texsmith_template_exam.exam.version:resolve_attribute"
+sources = ["version", "exam.version"]
+description = "Exam version string (or 'git' to use git describe/commit)."
+
+[typst.template.attributes.titlepage]
+default = "cover"
+type = "string"
+allow_empty = true
+sources = ["exam.titlepage", "titlepage"]
+description = "Title layout ('cover' or 'minimal')."
+
+[typst.template.attributes.type]
+default = "exam"
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.type", "type"]
+description = "Exam type (e.g., TE or Exam)."
+
+[typst.template.attributes.department]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.department", "department"]
+description = "Department code."
+
+[typst.template.attributes.school]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.school", "school"]
+description = "School name."
+
+[typst.template.attributes.course]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.course", "course"]
+description = "Course name or code."
+
+[typst.template.attributes.problem_label]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.problem-label", "exam.problem_label", "problem-label", "problem_label"]
+description = "Label for each question block (defaults to language-specific 'Problem')."
+
+[typst.template.attributes.points]
+default = true
+type = "boolean"
+allow_empty = false
+sources = ["exam.points", "points"]
+description = "Enable point display and cover-page grade table."
+
+[typst.template.attributes.fillin_style]
+default = "line"
+type = "string"
+allow_empty = false
+sources = ["exam.fillin-style", "exam.fillin_style", "fillin-style", "fillin_style"]
+description = "Style for fill-in placeholders: 'line' (default) or 'dotted'."
+
+[typst.template.attributes.fillin_bare]
+default = true
+type = "boolean"
+allow_empty = false
+sources = ["exam.fillin-bare", "exam.fillin_bare", "fillin-bare", "fillin_bare"]
+description = "Read a bare [answer] in prose as a fill-in blank."
+
+[typst.template.attributes.compact]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.compact", "compact"]
+description = "Enable compact rendering mode for the exam renderer."
+
+[typst.template.attributes.next_page_advice]
+default = true
+type = "boolean"
+allow_empty = false
+sources = ["exam.next-page-advice", "exam.next_page_advice", "next-page-advice", "next_page_advice"]
+description = "Display a footer hint asking readers to continue to the next page."
+
+[typst.template.attributes.duration]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+sources = ["exam.duration", "duration"]
+description = "Exam duration in minutes."
+
+[typst.template.attributes.rules]
+default = []
+type = "any"
+normaliser = "texsmith_template_exam.rules:resolve_attribute"
+sources = ["exam.rules", "rules"]
+description = "Rules shown on the cover page; tokens and presets are expanded against rules.yml and rendered as Typst markup."
+
+[typst.template.attributes.logo]
+default = ""
+type = "any"
+allow_empty = true
+sources = ["exam.logo", "logo"]
+description = "Logo configuration ('none' to disable, a mapping with 'file' for a document-relative image, anything else for the built-in HEIG-VD letterhead)."
+
+[typst.template.attributes.logo_color]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["heiglogo.color", "heiglogo_color", "exam.logo.color"]
+description = "Draw the HEIG-VD logo in its own colours rather than black."
+
+[typst.template.attributes.logo_year]
+default = "auto"
+type = "string"
+allow_empty = false
+sources = ["heiglogo.year", "heiglogo_year", "exam.logo.year"]
+description = "HEIG-VD logo vintage: 'auto' (from the document date), 1998, 2004, 2009 or 2020."
+
+[typst.template.attributes.logo_vintage]
+default = ""
+type = "string"
+format = "raw"
+allow_empty = true
+normaliser = "texsmith_template_exam.logo:resolve_attribute"
+sources = ["date"]
+description = "The logo vintage the document date puts in force; read when `logo_year` is 'auto'. Resolved by the same rule as the heiglogo fragment's."
+
+[typst.template.attributes.style_choices]
+default = "alpha"
+type = "string"
+allow_empty = false
+sources = ["exam.style.choices", "style.choices"]
+description = "Multiple-choice markers: 'alpha' (A. B. C.) or 'checkbox'."
+
+[typst.template.attributes.style_text]
+default = "dotted"
+type = "string"
+allow_empty = false
+sources = ["exam.style.text", "style.text"]
+description = "Reserved answer space: 'dotted', 'lines' or 'box'."
+
+[typst.template.attributes.solution]
+default = false
+type = "boolean"
+allow_empty = false
+sources = ["exam.solution", "solution"]
+description = "Enable answers/solutions mode."
+
+[typst.template.attributes.language]
+default = "en"
+type = "string"
+allow_empty = false
+normaliser = "bcp47_language"
+sources = ["language", "lang"]
+description = "Document language (BCP-47) for hyphenation, labels and the long date form."
+
+[typst.template.attributes.paper]
+default = { format = "a4", margin = { top = "10mm", left = "2.5cm", right = "2.5cm", bottom = "2.5cm" } }
+type = "mapping"
+sources = ["press.paper", "paper"]
+description = "Page geometry (can be overridden via press.paper)."
+
+[typst.template.slots.mainmatter]
+default = true
+depth = "section"
+description = "Main exam content."

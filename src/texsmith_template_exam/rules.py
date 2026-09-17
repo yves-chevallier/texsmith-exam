@@ -79,15 +79,26 @@ def resolve_rules(value: Any) -> list[str]:
     raise ValueError(f"Unsupported `exam.rules` value of type {type(value).__name__}.")
 
 
-def resolve_attribute(value: Any, _spec: Any = None, fallback: Any = None) -> Any:
+def resolve_attribute(value: Any, spec: Any = None, fallback: Any = None) -> Any:
     """TeXSmith attribute normaliser for the ``rules`` cover-page attribute.
 
     Referenced from ``manifest.toml`` as
     ``normaliser = "texsmith_template_exam.rules:resolve_attribute"``. TeXSmith
     imports and calls it with ``(value, spec, fallback)`` after coercing the
     attribute value; it expands presets/tokens into the final list of sentences.
+
+    A sentence is a line of Markdown — the presets bold a word or two — and the
+    attribute machinery renders only whole *string* attributes, never the items
+    of a list. ``template.tex`` renders them itself through the
+    ``markdown_to_latex`` filter its template class registers; the Typst loader
+    builds its own Jinja environment with no such filter, so a Typst render is
+    handed markup rather than Markdown.
     """
     resolved = resolve_rules(value)
     if not resolved and fallback:
         return fallback
+    if getattr(spec, "backend", "latex") == "typst":
+        from texsmith_template_exam.exam.utils import markdown_to
+
+        return [markdown_to(sentence, "typst") for sentence in resolved]
     return resolved

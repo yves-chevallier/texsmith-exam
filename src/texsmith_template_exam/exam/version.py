@@ -30,6 +30,17 @@ def format_exam_version(value: Any) -> str:
     return get_git_version()
 
 
+def resolve_attribute(value: Any, _spec: Any = None, _fallback: Any = None) -> str:
+    """TeXSmith attribute normaliser for ``version``.
+
+    ``template.tex`` reaches the same function through the ``exam_version``
+    Jinja filter its template class registers; the Typst loader builds its own
+    environment and has no such filter, so the resolution happens while the
+    attribute is resolved instead.
+    """
+    return format_exam_version(value)
+
+
 def get_git_version() -> str:
     global _GIT_VERSION_READY, _GIT_VERSION
     if _GIT_VERSION_READY:
@@ -83,6 +94,7 @@ __all__ = [
     "format_exam_version",
     "get_git_version",
     "reset_git_cache",
+    "resolve_attribute",
     "resolve_git_root",
     "run_git",
 ]
