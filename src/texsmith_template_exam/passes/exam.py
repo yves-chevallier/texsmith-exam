@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING
 
 from texsmith.passes import PassContext, spec
 from tmark.ir import model
-from tmark.ir.walk import map_inlines, map_tree
+from tmark.ir.walk import map_inlines, map_tree, plain_text
 
 from texsmith_template_exam.exam.utils import (
     is_empty_title,
@@ -64,7 +64,6 @@ from texsmith_template_exam.passes.model import (
     Solution,
 )
 from texsmith_template_exam.passes.options import ExamOptions, coerce_bool, coerce_scale
-from texsmith_template_exam.passes.render import plain_text
 
 
 if TYPE_CHECKING:  # pragma: no cover - typing only

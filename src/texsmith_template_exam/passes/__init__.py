@@ -11,8 +11,6 @@ runs only while the exam template renders.
 * :mod:`~texsmith_template_exam.passes.latex` — the ``exam.cls`` emitter.
 * :mod:`~texsmith_template_exam.passes.options` — the flags read from the
   ``PassContext`` (solution mode, compact mode, points, styles).
-* :mod:`~texsmith_template_exam.passes.render` — IR to markup through
-  ``tmark.write``, for the slices the emitters inline.
 """
 
 from __future__ import annotations
