@@ -137,3 +137,11 @@ def test_the_minimal_header_is_one_block_with_its_own_spacing() -> None:
     minimal = _template_text().split("{% if minimal %}")[1].split("{% else %}")[0]
     assert "#block(width: 100%, above: 0.7em, below: 0.9em)[" in minimal
     assert "#set block(spacing: 0.3em)" in minimal
+
+
+def test_the_choices_keep_their_distance_from_the_next_part() -> None:
+    # 0.4em snugs the choices against the answer line; a compact document has
+    # none, so the next part would sit right under the last choice.
+    text = _template_text()
+    block = text.split("#let exam-choices(")[1].split("#let exam-answerline")[0]
+    assert "below: if exam-compact { 1.05em } else { 0.4em }" in block

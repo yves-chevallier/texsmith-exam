@@ -410,9 +410,14 @@
       let index = calc.rem(cell, columns) * rows + calc.quo(cell, columns)
       if index < items.len() { entry(index, items.at(index)) } else { [] }
     })
-  block(width: 100%, above: 0.7em, below: 0.4em, pad(left: 1.2em, grid(
-    columns: (1fr,) * columns, column-gutter: 1em, row-gutter: 0.45em, ..cells,
-  )))
+  // 0.4em snugs the choices against the answer line that follows them; with
+  // no answer line to follow — a compact document drops it — the next part
+  // would butt straight up against the last choice, so the gap between two
+  // parts is restored instead.
+  block(width: 100%, above: 0.7em, below: if exam-compact { 1.05em } else { 0.4em },
+    pad(left: 1.2em, grid(
+      columns: (1fr,) * columns, column-gutter: 1em, row-gutter: 0.45em, ..cells,
+    )))
   exam-answerline(answer: if correct.len() > 0 {
     correct.map(exam-letter).join(", ")
   } else { none })
