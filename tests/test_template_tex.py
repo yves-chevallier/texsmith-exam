@@ -78,3 +78,11 @@ def test_the_builtin_logo_is_sized_by_the_title_page_layout() -> None:
     # for a document that disabled the logo or brought a file of its own.
     assert setup.rsplit(r"\makeatletter", 1)[1].count(r"\makeatother") == 0
     assert r"\BLOCK{ if logo_builtin and not logo_disabled and logo_height }" in text
+
+
+def test_the_title_block_clears_the_logo() -> None:
+    # The pull-up reclaims exactly what the running head reserves. Taking more
+    # than that put the header rule under the logo's bottom edge.
+    text = _template_text()
+    assert r"\vskip \dimexpr0pt-\headheight-\headsep-\topskip\relax" in text
+    assert r"-\topskip-3mm" not in text

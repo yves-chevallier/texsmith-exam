@@ -728,7 +728,11 @@
   \ExamLogoSpacer
   \BLOCK{ endif }
   \begingroup
-  \vskip \dimexpr0pt-\headheight-\headsep-\topskip-3mm\relax%
+  % The pull-up claws back the room the running head reserves. Taking 3mm
+  % more on top of that left the title block riding under the logo, whose
+  % bottom edge then all but touched the header rule; the Typst side clears
+  % it by 2.8mm, so stop at what the running head actually costs.
+  \vskip \dimexpr0pt-\headheight-\headsep-\topskip\relax%
   \noindent%
   \ifprintanswers
     \rlap{%
